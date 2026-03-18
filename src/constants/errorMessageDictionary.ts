@@ -1,0 +1,17 @@
+export const ErrorMessageDictionary: Record<string, string> = {
+  "EmailAndPasswordNotEmpty": "Vui lòng nhập đầy đủ Email và Mật khẩu.",
+  "EmailAndPasswordIncorrect": "Email hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại.",
+  "EmailNotExistOrInvalid": "Email không tồn tại hoặc không hợp lệ. Vui lòng kiểm tra lại.",
+  "AccountLockedOut": "Tài khoản đã bị khóa tạm thời do nhập sai quá nhiều lần. Vui lòng thử lại sau.",
+  "ConfirmPasswordNotMatch": "Mật khẩu xác nhận không khớp. Vui lòng kiểm tra và nhập lại.",
+  "RegisterFailed": "Quá trình đăng ký thất bại. Vui lòng thử lại sau giây lát.",
+  "Unauthorized": "Phiên làm việc đã hết hạn hoặc bạn không có quyền truy cập. Vui lòng đăng nhập lại.",
+  "OtpInvalid": "Mã xác thực (OTP) không hợp lệ hoặc đã hết hạn. Vui lòng kiểm tra lại hộp thư của bạn.",
+  "Required": "Trường thông tin này là bắt buộc và không được để trống.",
+  "MaxLength": "Nội dung bạn nhập đã vượt quá độ dài tối đa cho phép.",
+  "Min": "Giá trị bạn nhập chưa đạt mức tối thiểu theo yêu cầu.",
+  "DataNotExist": "Dữ liệu bạn tìm kiếm không tồn tại hoặc đã bị xóa khỏi hệ thống.",
+  "DataAlreadyExist": "Thông tin này đã tồn tại trong hệ thống. Vui lòng sử dụng thông tin khác.",
+  "ServerError": "Đã xảy ra lỗi kết nối đến máy chủ. Vui lòng thử lại sau giây lát.",
+  "VerifyPasswordFailed": "Khôi phục mật khẩu thất bại. Vui lòng kiểm tra lại thông tin và thử lại.",
+};
