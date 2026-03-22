@@ -14,4 +14,7 @@ export const ErrorMessageDictionary: Record<string, string> = {
   "DataAlreadyExist": "Thông tin này đã tồn tại trong hệ thống. Vui lòng sử dụng thông tin khác.",
   "ServerError": "Đã xảy ra lỗi kết nối đến máy chủ. Vui lòng thử lại sau giây lát.",
   "VerifyPasswordFailed": "Khôi phục mật khẩu thất bại. Vui lòng kiểm tra lại thông tin và thử lại.",
+  "ProfileSharedToThisUser": "Hồ sơ đã được chia sẻ với người dùng này. Vui lòng kiểm tra lại email hoặc chọn người dùng khác.",
+  "CannotShareToYourself": "Bạn không thể chia sẻ hồ sơ cho chính mình. Vui lòng chọn người dùng khác.",
+  "CancelSharedFailed": "Hủy chia sẻ hồ sơ thất bại. Vui lòng thử lại sau giây lát."
 };

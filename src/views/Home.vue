@@ -1,59 +1,12 @@
 <template>
     <div class="home-container">
-        <header class="header">
-            <div class="header-content container">
-                <div class="logo-area">
-                    <img src="https://storage.googleapis.com/bookingcare/%24RKY6O8O.png" alt="BookingCare"
-                        class="logo" />
-                </div>
-
-                <nav class="main-nav">
-                    <a href="#" class="nav-link active">Trang chủ</a>
-                    <a href="#" class="nav-link">Chuyên khoa</a>
-                    <a href="#" class="nav-link">Cơ sở y tế</a>
-                    <a href="#" class="nav-link">Bác sĩ</a>
-                    <a href="#" class="nav-link">Gói khám</a>
-                </nav>
-
-                <div class="user-actions">
-
-                    <template v-if="!isAuthenticated">
-                        <button class="btn-outline">Hỗ trợ</button>
-                        <router-link to="/login" class="btn-primary">Đăng nhập</router-link>
-                    </template>
-
-                    <template v-else>
-                        <router-link to="/booking" class="btn-primary-outline">Đặt lịch ngay</router-link>
-                        <router-link to="/history" class="nav-link history-link">Lịch sử đặt lịch</router-link>
-
-                        <div class="user-dropdown" @click="toggleMenu">
-                            <div class="avatar-circle">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="12" cy="7" r="4"></circle>
-                                </svg>
-                            </div>
-                            <span class="user-name">Tài khoản</span>
-
-                            <div class="dropdown-menu" v-show="isMenuOpen">
-                                <router-link to="/profile" class="dropdown-item">Quản lý tài khoản</router-link>
-                                <div class="divider"></div>
-                                <a href="#" @click.prevent="handleLogout" class="dropdown-item text-danger">Đăng
-                                    xuất</a>
-                            </div>
-                        </div>
-                    </template>
-
-                </div>
-            </div>
-        </header>
+        <AppHeader />
 
         <section class="hero-section">
             <div class="container hero-content slide-up-1">
                 <h1 class="hero-title">Nền tảng y tế<br /> <span class="highlight">Chăm sóc sức khỏe toàn diện</span>
                 </h1>
                 <p class="hero-subtitle">Đặt lịch khám bệnh nhanh chóng, an toàn và bảo mật.</p>
-
                 <div class="search-box">
                     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="11" cy="11" r="8"></circle>
@@ -84,9 +37,7 @@
                 </div>
                 <div class="item-grid">
                     <div class="item-card" v-for="(spec, index) in specialties" :key="index">
-                        <div class="card-img">
-                            <img :src="spec.image" :alt="spec.title" />
-                        </div>
+                        <div class="card-img"><img :src="spec.image" :alt="spec.title" /></div>
                         <h3 class="card-title">{{ spec.title }}</h3>
                     </div>
                 </div>
@@ -101,9 +52,7 @@
                 </div>
                 <div class="item-grid">
                     <div class="item-card hospital-card" v-for="(hospital, index) in hospitals" :key="index">
-                        <div class="card-img">
-                            <img :src="hospital.image" :alt="hospital.name" />
-                        </div>
+                        <div class="card-img"><img :src="hospital.image" :alt="hospital.name" /></div>
                         <h3 class="card-title">{{ hospital.name }}</h3>
                     </div>
                 </div>
@@ -120,24 +69,9 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/authStore'
+import AppHeader from '../component/AppHeader.vue'
 
-const authStore = useAuthStore()
-const isAuthenticated = authStore.isAuthenticated
-const router = useRouter()
 const searchQuery = ref('')
-const isMenuOpen = ref(false)
-
-const toggleMenu = () => {
-    isMenuOpen.value = !isMenuOpen.value
-}
-
-const handleLogout = () => {
-    authStore.logout()
-    isMenuOpen.value = false
-    router.push('/home')
-}
 
 const services = ref([
     { title: 'Khám chuyên khoa', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="#45C3D2" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>' },
@@ -183,188 +117,6 @@ const hospitals = ref([
     padding: 0 20px;
 }
 
-.header {
-    background-color: var(--bg-white);
-    border-bottom: 1px solid var(--border-color);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-}
-
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 70px;
-}
-
-.logo {
-    height: 35px;
-    cursor: pointer;
-}
-
-.main-nav {
-    display: flex;
-    gap: 30px;
-}
-
-.nav-link {
-    text-decoration: none;
-    color: var(--text-dark);
-    font-weight: 500;
-    font-size: 15px;
-    transition: color 0.2s;
-}
-
-.nav-link:hover,
-.nav-link.active {
-    color: var(--primary-color);
-}
-
-.user-actions {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.btn-outline {
-    background: transparent;
-    border: 1px solid var(--border-color);
-    color: var(--text-dark);
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-outline:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-}
-
-.btn-primary {
-    background-color: var(--primary-color);
-    color: #fff;
-    border: none;
-    padding: 8px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    transition: background 0.2s;
-}
-
-.btn-primary:hover {
-    background-color: var(--primary-hover);
-}
-
-.btn-primary-outline {
-    color: var(--primary-color);
-    border: 1.5px solid var(--primary-color);
-    background-color: transparent;
-    padding: 7px 18px;
-    border-radius: 8px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s;
-}
-
-.btn-primary-outline:hover {
-    background-color: var(--primary-color);
-    color: #fff;
-}
-
-.history-link {
-    font-size: 14.5px;
-    padding: 0 10px;
-}
-
-/* Kéo thả Menu Tài khoản (Dropdown) */
-.user-dropdown {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    padding: 5px 10px;
-    border-radius: 8px;
-    transition: background 0.2s;
-}
-
-.user-dropdown:hover {
-    background-color: var(--bg-light);
-}
-
-.avatar-circle {
-    width: 32px;
-    height: 32px;
-    background-color: #f3f4f6;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-gray);
-}
-
-.avatar-circle svg {
-    width: 18px;
-    height: 18px;
-}
-
-.user-name {
-    font-weight: 600;
-    font-size: 14.5px;
-    color: var(--text-dark);
-}
-
-.dropdown-menu {
-    position: absolute;
-    top: 110%;
-    right: 0;
-    width: 200px;
-    background: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    padding: 8px 0;
-    z-index: 200;
-}
-
-.dropdown-item {
-    padding: 12px 20px;
-    text-decoration: none;
-    color: var(--text-dark);
-    font-size: 14.5px;
-    font-weight: 500;
-    transition: background 0.2s;
-}
-
-.dropdown-item:hover {
-    background-color: var(--bg-light);
-    color: var(--primary-color);
-}
-
-.text-danger {
-    color: #ef4444;
-}
-
-.text-danger:hover {
-    background-color: #fef2f2;
-    color: #dc2626;
-}
-
-.divider {
-    height: 1px;
-    background-color: var(--border-color);
-    margin: 4px 0;
-}
-
-/* HERO BANNER */
 .hero-section {
     padding: 80px 0 60px;
     text-align: center;
@@ -439,7 +191,6 @@ const hospitals = ref([
     background-color: var(--primary-hover);
 }
 
-/* DỊCH VỤ NHANH */
 .services-section {
     padding: 20px 0 60px;
 }
@@ -489,7 +240,6 @@ const hospitals = ref([
     margin: 0;
 }
 
-/* CÁC SECTION DANH SÁCH */
 .highlight-section {
     padding: 60px 0;
 }
@@ -573,7 +323,6 @@ const hospitals = ref([
     text-align: center;
 }
 
-/* FOOTER */
 .footer {
     text-align: center;
     padding: 40px 0;
@@ -582,7 +331,6 @@ const hospitals = ref([
     font-size: 14px;
 }
 
-/* ANIMATIONS */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -620,10 +368,6 @@ const hospitals = ref([
     .service-grid,
     .item-grid {
         grid-template-columns: repeat(2, 1fr);
-    }
-
-    .main-nav {
-        display: none;
     }
 }
 </style>

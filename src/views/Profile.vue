@@ -1,32 +1,34 @@
 <template>
     <div class="profile-page">
-        <div class="container slide-up-1">
+        <AppHeader />
 
-            <div class="page-header">
+        <div class="container content-wrapper">
+            <div class="page-header slide-up-2">
                 <h1 class="page-title">Quản lý tài khoản</h1>
                 <p class="page-subtitle">Quản lý thông tin cá nhân và hồ sơ y tế của bạn</p>
             </div>
 
             <div class="profile-layout">
-
-                <aside class="profile-sidebar slide-up-2">
+                <aside class="profile-sidebar slide-up-3">
                     <div class="user-summary">
-                        <div class="avatar-circle">
-                            <span class="avatar-text">{{ getInitials(form.fullName) }}</span>
+                        <div class="avatar-circle-large">
+                            <span class="avatar-text">{{ getInitials(sidebarInfo.fullName) }}</span>
                         </div>
-                        <h3 class="user-name">{{ form.fullName || 'Người dùng' }}</h3>
-                        <span class="badge">{{ form.patientCode }}</span>
+                        <h3 class="sidebar-user-name">{{ sidebarInfo.fullName || 'Người dùng' }}</h3>
+                        <span class="badge">{{ sidebarInfo.patientCode }}</span>
                     </div>
 
                     <nav class="sidebar-nav">
-                        <a href="#" class="nav-item active">
+                        <a href="#" :class="['nav-item', { active: currentTab === 'personal' }]"
+                            @click.prevent="currentTab = 'personal'">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
                             Hồ sơ cá nhân
                         </a>
-                        <a href="#" class="nav-item">
+                        <a href="#" :class="['nav-item', { active: currentTab === 'family' }]"
+                            @click.prevent="currentTab = 'family'">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="9" cy="7" r="4"></circle>
@@ -34,6 +36,16 @@
                                 <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                             </svg>
                             Hồ sơ người thân
+                        </a>
+                        <a href="#" :class="['nav-item', { active: currentTab === 'sharing' }]"
+                            @click.prevent="currentTab = 'sharing'">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="8.5" cy="7" r="4"></circle>
+                                <line x1="20" y1="8" x2="20" y2="14"></line>
+                                <line x1="23" y1="11" x2="17" y2="11"></line>
+                            </svg>
+                            Quản lý chia sẻ
                         </a>
                         <a href="#" class="nav-item">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -54,87 +66,13 @@
                     </nav>
                 </aside>
 
-                <main class="profile-content slide-up-3">
-                    <div class="card-header">
-                        <h2>Thông tin cá nhân</h2>
-                        <button class="btn-primary" @click="saveProfile" :disabled="isLoading">
-                            <span v-if="isLoading" class="spinner"></span>
-                            <span v-else>Lưu thay đổi</span>
-                        </button>
-                    </div>
-
-                    <form @submit.prevent="saveProfile" class="profile-form">
-                        <div class="form-grid">
-
-                            <div class="form-group">
-                                <label>Mã bệnh nhân <span class="text-muted">(Chỉ đọc)</span></label>
-                                <input type="text" v-model="form.patientCode" disabled class="input-readonly" />
-                            </div>
-
-                            <div class="form-group">
-                                <label>Họ và tên *</label>
-                                <input type="text" v-model="form.fullName" required placeholder="Nhập họ và tên" />
-                            </div>
-
-                            <div class="form-group">
-                                <label>Ngày sinh *</label>
-                                <input type="date" v-model="form.dateOfBirth" required />
-                            </div>
-
-                            <div class="form-group">
-                                <label>Giới tính *</label>
-                                <select v-model="form.gender">
-                                    <option :value="0">Nam</option>
-                                    <option :value="1">Nữ</option>
-                                    <option :value="2">Khác</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Số CCCD / Hộ chiếu *</label>
-                                <input type="text" v-model="form.citizenId" required placeholder="Nhập số CCCD" />
-                            </div>
-
-                            <div class="form-group">
-                                <label>Số điện thoại *</label>
-                                <input type="tel" v-model="form.phoneNumber" required
-                                    placeholder="Nhập số điện thoại" />
-                            </div>
-
-                            <div class="form-group">
-                                <label>Mối quan hệ</label>
-                                <select v-model="form.relationship" disabled class="input-readonly">
-                                    <option :value="0">Bản thân</option>
-                                    <option :value="1">Vợ/Chồng</option>
-                                    <option :value="2">Con cái</option>
-                                    <option :value="3">Bố/Mẹ</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Nhóm máu</label>
-                                <select v-model="form.bloodType">
-                                    <option :value="0">Chưa xác định</option>
-                                    <option :value="1">A+</option>
-                                    <option :value="2">A-</option>
-                                    <option :value="3">B+</option>
-                                    <option :value="4">B-</option>
-                                    <option :value="5">AB+</option>
-                                    <option :value="6">AB-</option>
-                                    <option :value="7">O+</option>
-                                    <option :value="8">O-</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group mt-20">
-                            <label>Tiền sử bệnh (Dị ứng, bệnh mãn tính...)</label>
-                            <textarea v-model="form.medicalHistory" rows="4"
-                                placeholder="Cung cấp thông tin y tế để bác sĩ lưu ý..."></textarea>
-                        </div>
-                    </form>
+                <main class="profile-content slide-up-4">
+                    <transition name="fade-tab" mode="out-in">
+                        <PersonalProfileTab v-if="currentTab === 'personal'" />
+                        <FamilyProfilesTab v-else-if="currentTab === 'family'" />
+                        <SharedManagementTab v-else-if="currentTab === 'sharing'" />
+                    </transition>
                 </main>
-
             </div>
         </div>
     </div>
@@ -142,28 +80,27 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import AppHeader from '../component/AppHeader.vue'
 import { useProfileStore } from '../stores/profileStore'
+import PersonalProfileTab from '../component/PersonalProfileTab.vue'
+import FamilyProfilesTab from '../component/FamilyProfilesTab.vue'
+import SharedManagementTab from '../component/SharedManagementTab.vue'
 
-const isLoading = ref(false)
-const profileStore = useProfileStore();
-const form = ref({
-    patientCode: '',
+const profileStore = useProfileStore()
+const currentTab = ref('personal')
+
+const sidebarInfo = ref({
     fullName: '',
-    dateOfBirth: '',
-    gender: 0,
-    citizenId: '',
-    phoneNumber: '',
-    relationship: 0,
-    bloodType: 0,
-    medicalHistory: ''
+    patientCode: ''
 })
 
 onMounted(async () => {
-    const data = await profileStore.getUserProfile()
-    form.value = {
-        ...data,
-        dateOfBirth: data.dateOfBirth ? data.dateOfBirth.split('T')[0] : '',
-        medicalHistory: data.medicalHistory || ''
+    try {
+        const data = await profileStore.getUserProfile()
+        sidebarInfo.value.fullName = data.fullName
+        sidebarInfo.value.patientCode = data.patientCode
+    } catch (e) {
+        console.error(e)
     }
 })
 
@@ -175,39 +112,38 @@ const getInitials = (name) => {
     }
     return name.substring(0, 2).toUpperCase()
 }
-
-const saveProfile = async () => {
-    isLoading.value = true
-    try {
-        // Gọi API updateProfile(form.value)
-        await new Promise(resolve => setTimeout(resolve, 800)) // Fake delay
-        alert('Cập nhật hồ sơ thành công!')
-    } catch (error) {
-        alert('Có lỗi xảy ra!')
-    } finally {
-        isLoading.value = false
-    }
-}
 </script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 .profile-page {
+    --primary-color: #45C3D2;
+    --primary-hover: #3ba3b0;
+    --bg-white: #ffffff;
+    --bg-light: #f9fafb;
+    --text-dark: #111827;
+    --text-gray: #4b5563;
+    --border-color: #e5e7eb;
     font-family: 'Inter', -apple-system, sans-serif;
     background-color: #F4F7F9;
-    /* Nền xám xanh cực nhạt để tôn thẻ trắng lên */
+    background-image: radial-gradient(circle at top left, rgba(69, 195, 210, 0.08), transparent 500px), radial-gradient(circle at bottom right, rgba(69, 195, 210, 0.05), transparent 500px);
+    background-attachment: fixed;
     min-height: 100vh;
-    padding: 40px 20px;
-    color: #111827;
+    padding: 0 0 40px 0;
+    color: var(--text-dark);
 }
 
 .container {
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
+    padding: 0 20px;
 }
 
-/* HEADER */
+.content-wrapper {
+    margin-top: 30px;
+}
+
 .page-header {
     margin-bottom: 30px;
 }
@@ -216,29 +152,31 @@ const saveProfile = async () => {
     font-size: 28px;
     font-weight: 700;
     margin: 0 0 8px 0;
-    color: #111827;
+    color: var(--text-dark);
 }
 
 .page-subtitle {
-    color: #6b7280;
+    color: var(--text-gray);
     font-size: 15px;
     margin: 0;
 }
 
-/* LAYOUT 2 CỘT */
 .profile-layout {
     display: flex;
     gap: 30px;
     align-items: flex-start;
 }
 
-/* SIDEBAR */
+.profile-sidebar,
+.profile-content {
+    background: var(--bg-white);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
 .profile-sidebar {
     width: 280px;
-    background: #ffffff;
-    border-radius: 12px;
     padding: 24px 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     flex-shrink: 0;
 }
 
@@ -249,11 +187,11 @@ const saveProfile = async () => {
     margin-bottom: 16px;
 }
 
-.avatar-circle {
+.avatar-circle-large {
     width: 70px;
     height: 70px;
-    background-color: #e0f7f5;
-    color: #45C3D2;
+    background: linear-gradient(135deg, #e0f7f5 0%, #f0fbf9 100%);
+    color: var(--primary-color);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -261,9 +199,10 @@ const saveProfile = async () => {
     font-size: 22px;
     font-weight: 700;
     margin: 0 auto 12px;
+    box-shadow: 0 4px 10px rgba(69, 195, 210, 0.1);
 }
 
-.user-name {
+.sidebar-user-name {
     font-size: 18px;
     font-weight: 700;
     margin: 0 0 8px 0;
@@ -272,7 +211,7 @@ const saveProfile = async () => {
 .badge {
     display: inline-block;
     background: #f3f4f6;
-    color: #4b5563;
+    color: var(--text-gray);
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 12px;
@@ -289,7 +228,7 @@ const saveProfile = async () => {
     align-items: center;
     gap: 12px;
     padding: 14px 24px;
-    color: #4b5563;
+    color: var(--text-gray);
     text-decoration: none;
     font-weight: 500;
     font-size: 15px;
@@ -305,147 +244,27 @@ const saveProfile = async () => {
 }
 
 .nav-item:hover {
-    background-color: #f9fafb;
-    color: #111827;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
 }
 
 .nav-item.active {
     background-color: #f0fbf9;
-    color: #45C3D2;
-    border-left-color: #45C3D2;
+    color: var(--primary-color);
+    border-left-color: var(--primary-color);
 }
 
 .nav-item.active svg {
-    color: #45C3D2;
+    color: var(--primary-color);
 }
 
-/* MAIN CONTENT */
 .profile-content {
     flex: 1;
-    background: #ffffff;
-    border-radius: 12px;
     padding: 30px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    width: 100%;
+    min-height: 400px;
 }
 
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #f3f4f6;
-}
-
-.card-header h2 {
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0;
-}
-
-/* BUTTONS */
-.btn-primary {
-    background-color: #45C3D2;
-    color: #fff;
-    border: none;
-    padding: 10px 24px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 14.5px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 140px;
-    height: 42px;
-}
-
-.btn-primary:hover:not(:disabled) {
-    background-color: #3ba3b0;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(69, 195, 210, 0.25);
-}
-
-.btn-primary:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
-.spinner {
-    width: 18px;
-    height: 18px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-/* FORM STYLES */
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.mt-20 {
-    margin-top: 20px;
-}
-
-label {
-    font-size: 13.5px;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 8px;
-}
-
-.text-muted {
-    color: #9ca3af;
-    font-weight: 400;
-}
-
-input,
-select,
-textarea {
-    padding: 12px 16px;
-    font-size: 15px;
-    color: #111827;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 8px;
-    background-color: #fff;
-    transition: all 0.2s;
-    font-family: inherit;
-    outline: none;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-    border-color: #45C3D2;
-    box-shadow: 0 0 0 3px rgba(69, 195, 210, 0.1);
-}
-
-.input-readonly {
-    background-color: #f9fafb;
-    color: #6b7280;
-    cursor: not-allowed;
-}
-
-.input-readonly:focus {
-    border-color: #e5e7eb;
-    box-shadow: none;
-}
-
-textarea {
-    resize: vertical;
-}
-
-/* ANIMATIONS */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -458,28 +277,36 @@ textarea {
     }
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.slide-up-1 {
-    animation: fadeInUp 0.5s ease forwards 0.1s;
-    opacity: 0;
-}
-
 .slide-up-2 {
-    animation: fadeInUp 0.5s ease forwards 0.2s;
+    animation: fadeInUp 0.5s ease forwards 0.15s;
     opacity: 0;
 }
 
 .slide-up-3 {
-    animation: fadeInUp 0.5s ease forwards 0.3s;
+    animation: fadeInUp 0.5s ease forwards 0.25s;
     opacity: 0;
 }
 
-/* RESPONSIVE */
+.slide-up-4 {
+    animation: fadeInUp 0.5s ease forwards 0.35s;
+    opacity: 0;
+}
+
+.fade-tab-enter-active,
+.fade-tab-leave-active {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.fade-tab-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.fade-tab-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
 @media (max-width: 900px) {
     .profile-layout {
         flex-direction: column;
@@ -487,12 +314,6 @@ textarea {
 
     .profile-sidebar {
         width: 100%;
-    }
-}
-
-@media (max-width: 600px) {
-    .form-grid {
-        grid-template-columns: 1fr;
     }
 }
 </style>
