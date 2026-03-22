@@ -8,7 +8,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@microsoft/signalr": "^10.0.0",
     "axios": "^1.13.6",
+    "pinia": "^3.0.4",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"
   },
