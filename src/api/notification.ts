@@ -1,5 +1,6 @@
 import { EnumNotificationType } from "../constants/enum"
 import { ErrorMessageDictionary } from "../constants/ErrorMessageDictionary"
+import { buildApiUrl } from "../utils/apiConfig"
 
 // === Models ===
 export type NotificationModel = {
@@ -32,7 +33,7 @@ const getAccessToken = (): string | null => {
 
 // === API ===
 export async function doGetNotifications(): Promise<NotificationModel[]> {
-    const url = '/api/notification'
+    const url = buildApiUrl('/notification')
 
     const res = await fetch(url, {
         method: 'GET',
@@ -50,7 +51,7 @@ export async function doGetNotifications(): Promise<NotificationModel[]> {
 }
 
 export async function doMarkNotificationRead(data: MarkNotificationReadModel): Promise<boolean> {
-    const url = '/api/notification/read'
+    const url = buildApiUrl('/notification/read')
 
     const res = await fetch(url, {
         method: 'POST',
@@ -69,7 +70,7 @@ export async function doMarkNotificationRead(data: MarkNotificationReadModel): P
 }
 
 export async function doRespondNotification(data: RespondNotificationModel): Promise<boolean> {
-    const url = '/api/notification/respond'
+    const url = buildApiUrl('/notification/respond')
 
     const res = await fetch(url, {
         method: 'POST',

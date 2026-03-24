@@ -1,5 +1,6 @@
 import { EnumBloodType, EnumGender, EnumRelationship, EnumSharePermission, EnumShareStatus } from "../constants/enum"
 import { ErrorMessageDictionary } from '../constants/ErrorMessageDictionary'
+import { buildApiUrl } from "../utils/apiConfig"
 
 // === Models ===
 export type UserProfileModel = {
@@ -64,7 +65,7 @@ const getAccessToken = (): string | null => {
 
 // === API ===
 export async function doGetUserProfile(): Promise<UserProfileModel> {
-    const url = '/api/profile'
+    const url = buildApiUrl('/profile')
 
     const res = await fetch(url, {
         method: 'GET',
@@ -82,7 +83,7 @@ export async function doGetUserProfile(): Promise<UserProfileModel> {
 }
 
 export async function doUpdateUserProfile(data: UpdateUserProfileModel): Promise<boolean> {
-    const url = '/api/profile/update'
+    const url = buildApiUrl('/profile/update')
 
     const res = await fetch(url, {
         method: 'POST',
@@ -102,7 +103,7 @@ export async function doUpdateUserProfile(data: UpdateUserProfileModel): Promise
 }
 
 export async function doGetUserProfiles(): Promise<UserProfileModel[]> {
-    const url = '/api/profile/all'
+    const url = buildApiUrl('/profile/all')
 
     const res = await fetch(url, {
         method: 'GET',
@@ -120,7 +121,7 @@ export async function doGetUserProfiles(): Promise<UserProfileModel[]> {
 }
 
 export async function doCreateUserProfile(data: CreateUserProfileModel): Promise<boolean> {
-    const url = '/api/profile/create'
+    const url = buildApiUrl('/profile/create')
 
     const res = await fetch(url, {
         method: 'POST',
@@ -140,7 +141,7 @@ export async function doCreateUserProfile(data: CreateUserProfileModel): Promise
 }
 
 export async function doShareUserProfile(data: ShareProfileModel): Promise<boolean> {
-    const url = '/api/profile/share'
+    const url = buildApiUrl('/profile/share')
 
     const res = await fetch(url, {
         method: 'POST',
@@ -160,7 +161,7 @@ export async function doShareUserProfile(data: ShareProfileModel): Promise<boole
 }
 
 export async function doGetSharedProfiles(): Promise<SharedProfileModel[]> {
-    const url = '/api/profile/get-shared'
+    const url = buildApiUrl('/profile/get-shared')
 
     const res = await fetch(url, {
         method: 'GET',
@@ -178,7 +179,7 @@ export async function doGetSharedProfiles(): Promise<SharedProfileModel[]> {
 }
 
 export async function doCancelSharedProfile(profileShareId: string): Promise<boolean> {
-    const url = '/api/profile/cancel'
+    const url = buildApiUrl('/profile/cancel')
 
     const res = await fetch(url, {
         method: 'POST',

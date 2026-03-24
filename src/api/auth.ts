@@ -1,5 +1,6 @@
 import { ErrorMessageDictionary } from '../constants/ErrorMessageDictionary'
 import { EnumGender } from '../constants/enum'
+import { buildApiUrl } from '../utils/apiConfig'
 
 //=== Models ===
 export type AuthModel = {
@@ -33,7 +34,7 @@ export type VerifyPasswordModel = {
 
 //=== API ===
 export async function doLogin(body: LoginModel): Promise<AuthModel> {
-  const url = '/api/auth/login'
+  const url = buildApiUrl('/auth/login')
 
   const res = await fetch(url, {
     method: 'POST',
@@ -51,7 +52,7 @@ export async function doLogin(body: LoginModel): Promise<AuthModel> {
 }
 
 export async function doRegistere(body: RegisterModel): Promise<AuthModel> {
-  const url = '/api/auth/register'
+  const url = buildApiUrl('/auth/register')
 
   const res = await fetch(url, {
     method: 'POST',
@@ -69,7 +70,7 @@ export async function doRegistere(body: RegisterModel): Promise<AuthModel> {
 }
 
 export async function doSendRegisterOtp(email: string): Promise<boolean> {
-  const url = '/api/auth/send-register-otp'
+  const url = buildApiUrl('/auth/send-register-otp')
 
   const res = await fetch(url, {
     method: 'POST',
@@ -87,7 +88,7 @@ export async function doSendRegisterOtp(email: string): Promise<boolean> {
 }
 
 export async function doSendVerifyPasswordOtp(email: string): Promise<boolean> {
-  const url = '/api/auth/send-verify-password-otp'
+  const url = buildApiUrl('/auth/send-verify-password-otp')
 
   const res = await fetch(url, {
     method: 'POST',
@@ -105,7 +106,7 @@ export async function doSendVerifyPasswordOtp(email: string): Promise<boolean> {
 }
 
 export async function doVerifyPassword(body: VerifyPasswordModel): Promise<boolean> {
-  const url = '/api/auth/verify-password'
+  const url = buildApiUrl('/auth/verify-password')
 
   const res = await fetch(url, {
     method: 'POST',

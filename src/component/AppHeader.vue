@@ -113,6 +113,7 @@ import { useAuthStore } from '../stores/authStore'
 import { useNotificationStore } from '../stores/notificationStore'
 import * as signalR from '@microsoft/signalr'
 import { EnumNotificationType } from '../constants/enum'
+import { SIGNALR_URL } from '../utils/apiConfig'
 
 const authStore = useAuthStore()
 const notificationStore = useNotificationStore()
@@ -198,7 +199,7 @@ const startSignalR = async () => {
     if (!isAuthenticated.value) return;
 
     connection = new signalR.HubConnectionBuilder()
-        .withUrl("https://localhost:7243/notification", {
+        .withUrl(SIGNALR_URL, {
             accessTokenFactory: () => localStorage.getItem('accessToken')
         })
         .withAutomaticReconnect()
