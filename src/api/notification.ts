@@ -1,5 +1,5 @@
 import { EnumNotificationType } from "../constants/enum"
-import { ErrorMessageDictionary } from "../constants/ErrorMessageDictionary"
+import { ErrorMessageDictionary } from '../constants/errorMessageDictionary'
 import { buildApiUrl } from "../utils/apiConfig"
 
 // === Models ===
