@@ -1,0 +1,46 @@
+# Deploy BookingCare FE to Firebase Hosting.
+#
+# VITE_* URLs: define in .env.production in the repo; `vite build` loads them automatically.
+#
+# Required GitHub secret:
+#   FIREBASE_TOKEN — create locally: npm i -g firebase-tools && firebase login:ci
+#   (paste the token in Repo → Settings → Secrets and variables → Actions)
+
+name: Deploy to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase-hosting-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Firebase Hosting
+        run: npx firebase-tools@latest deploy --only hosting --non-interactive
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
