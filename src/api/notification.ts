@@ -7,6 +7,7 @@ export type NotificationModel = {
     notificationId: string
     receiverId: string
     senderId: string
+    shareProfileID?: string
     message: string
     type: EnumNotificationType
     objectId: string

@@ -1,6 +1,6 @@
 import { reactive, readonly, computed } from 'vue'
-import { doLogin, doRegistere, doSendRegisterOtp, doSendVerifyPasswordOtp, doVerifyPassword } from '../api/auth'
-import type { AuthModel, LoginModel, RegisterModel, VerifyPasswordModel } from '../api/auth'
+import { doLogin, doRegistere, doSendRegisterOtp, doSendVerifyPasswordOtp, doVerifyPassword, doChangePassword, doSendChangePasswordOtp } from '../api/auth'
+import type { AuthModel, LoginModel, RegisterModel, VerifyPasswordModel, ChangePasswordModel } from '../api/auth'
 
 // === MODELS, CONSTANTS ===
 export type ClaimsModel = {
@@ -96,6 +96,14 @@ function logout(): void {
   setTokens({ accessToken: '', refreshToken: '' })
 }
 
+function changePassword(data: ChangePasswordModel): Promise<boolean> {
+  return doChangePassword(data)
+}
+
+function sendChangePasswordOtp(data: ChangePasswordModel): Promise<boolean> {
+  return doSendChangePasswordOtp(data)
+}
+
 export const useAuthStore = () => ({
   state: readonly(state),
   isAuthenticated,
@@ -107,5 +115,7 @@ export const useAuthStore = () => ({
   getClaimsModel,
   logout,
   sendVerifyPasswordOtp,
-  verifyPassword
+  verifyPassword,
+  changePassword,
+  sendChangePasswordOtp
 })

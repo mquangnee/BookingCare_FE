@@ -1,17 +1,5 @@
-import {
-    doGetUserProfile,
-    doUpdateUserProfile,
-    doGetUserProfiles, 
-    doCreateUserProfile,
-    doShareUserProfile,
-    doGetSharedProfiles,
-    doCancelSharedProfile,
-    UpdateUserProfileModel, 
-    UserProfileModel, 
-    CreateUserProfileModel,
-    ShareProfileModel,
-    SharedProfileModel
- } from "../api/profile";
+import { doGetUserProfile, doUpdateUserProfile, doGetUserProfiles, doCreateUserProfile, doShareUserProfile, doGetSharedProfiles, doCancelSharedProfile, doGetUserProfileForBooking } from "../api/profile";
+import type { UpdateUserProfileModel, UserProfileModel, CreateUserProfileModel, ShareProfileModel, SharedProfileModel, GetUserProfileForBookingModel } from "../api/profile";
 
 async function getUserProfile() : Promise<UserProfileModel> {
     return doGetUserProfile()
@@ -40,6 +28,10 @@ async function getSharedProfiles() : Promise<SharedProfileModel[]> {
 async function cancelSharedProfile(sharedProfileId: string) {
     return doCancelSharedProfile(sharedProfileId)
 }
+    
+async function getUserProfileForBooking(body: GetUserProfileForBookingModel) {
+    return doGetUserProfileForBooking(body)
+}
 
 export const useProfileStore = () => ({
     getUserProfile,
@@ -48,5 +40,6 @@ export const useProfileStore = () => ({
     createUserProfile,
     shareUserProfile,
     getSharedProfiles,
-    cancelSharedProfile
+    cancelSharedProfile,
+    getUserProfileForBooking
 })

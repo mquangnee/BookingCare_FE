@@ -56,7 +56,8 @@
                             </svg>
                             Lịch sử đặt khám
                         </a>
-                        <a href="#" class="nav-item">
+                        <a href="#" :class="['nav-item', { active: currentTab === 'password' }]"
+                            @click.prevent="currentTab = 'password'">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
@@ -71,6 +72,7 @@
                         <PersonalProfileTab v-if="currentTab === 'personal'" />
                         <FamilyProfilesTab v-else-if="currentTab === 'family'" />
                         <SharedManagementTab v-else-if="currentTab === 'sharing'" />
+                        <ChangePasswordTab v-else-if="currentTab === 'password'" />
                     </transition>
                 </main>
             </div>
@@ -85,6 +87,7 @@ import { useProfileStore } from '../stores/profileStore'
 import PersonalProfileTab from '../component/PersonalProfileTab.vue'
 import FamilyProfilesTab from '../component/FamilyProfilesTab.vue'
 import SharedManagementTab from '../component/SharedManagementTab.vue'
+import ChangePasswordTab from '../component/ChangePasswordTab.vue'
 
 const profileStore = useProfileStore()
 const currentTab = ref('personal')

@@ -141,15 +141,12 @@ const handleRevokeAccess = async (shareId, name) => {
     text-align: center;
     padding: 40px 20px;
     color: #6b7280;
-    background: #f9fafb;
     border-radius: 12px;
-    border: 1px dashed #d1d5db;
 }
 
 .empty-state svg {
     width: 48px;
     height: 48px;
-    color: #9ca3af;
     margin-bottom: 16px;
 }
 
