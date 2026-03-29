@@ -5,7 +5,7 @@ import { buildApiUrl } from "../utils/apiConfig"
 // === Models ===
 export type UserProfileModel = {
     id: string
-    patientCode: string
+    patientCode?: string
     profileCode: string
     fullName: string
     dateOfBirth: string
@@ -15,6 +15,8 @@ export type UserProfileModel = {
     relationship: EnumRelationship
     bloodType: EnumBloodType
     medicalHistory?: string
+    isShared: boolean
+    sharePermission?: EnumSharePermission
 }
 
 export type UpdateUserProfileModel = {
@@ -56,6 +58,12 @@ export type SharedProfileModel = {
     shareStatus: EnumShareStatus
     sharePermission: EnumSharePermission
     createdDate: string
+}
+
+export type GetUserProfileForBookingModel = {
+    date: string
+    startTime: string
+    endTime: string
 }
 
 // === Constants ===
@@ -195,4 +203,24 @@ export async function doCancelSharedProfile(profileShareId: string): Promise<boo
         throw new Error(errorMessage)
     }
     return true
+}
+
+export async function doGetUserProfileForBooking(body: GetUserProfileForBookingModel): Promise<UserProfileModel[]> {
+    const url = '/api/profile/available?date=' + body.date + '&startTime=' + body.startTime + '&endTime=' + body.endTime
+
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    })
+
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+
+    return (await res.json()).result as UserProfileModel[]
 }

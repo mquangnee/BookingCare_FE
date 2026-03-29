@@ -16,5 +16,9 @@ export const ErrorMessageDictionary: Record<string, string> = {
   "VerifyPasswordFailed": "Khôi phục mật khẩu thất bại. Vui lòng kiểm tra lại thông tin và thử lại.",
   "ProfileSharedToThisUser": "Hồ sơ đã được chia sẻ với người dùng này. Vui lòng kiểm tra lại email hoặc chọn người dùng khác.",
   "CannotShareToYourself": "Bạn không thể chia sẻ hồ sơ cho chính mình. Vui lòng chọn người dùng khác.",
-  "CancelSharedFailed": "Hủy chia sẻ hồ sơ thất bại. Vui lòng thử lại sau giây lát."
+  "CancelSharedFailed": "Hủy chia sẻ hồ sơ thất bại. Vui lòng thử lại sau giây lát.",
+  "OldPasswordNotMatch": "Mật khẩu cũ không khớp. Vui lòng kiểm tra lại và nhập đúng mật khẩu cũ.",
+  "ChangePasswordFailed": "Đổi mật khẩu thất bại. Vui lòng thử lại sau giây lát.",
+  "SlotIsTaken": "Thời gian này đã có người đặt trước. Vui lòng chọn thời gian khác.",
+  "PatientHasOverlappingAppointment": "Bệnh nhân đã có một cuộc hẹn trùng lặp trong khoảng thời gian này. Vui lòng chọn thời gian khác.",
 };

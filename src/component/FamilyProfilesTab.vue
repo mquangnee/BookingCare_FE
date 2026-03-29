@@ -18,7 +18,6 @@
         <div v-else-if="profiles.length === 0" class="empty-state">
             <h3>Chưa có hồ sơ người thân</h3>
             <p>Thêm thông tin người thân để dễ dàng đặt lịch trực tuyến.</p>
-            <button class="btn-primary-outline mt-3" @click="openAddModal">Thêm hồ sơ ngay</button>
         </div>
 
         <div v-else class="profiles-grid">
@@ -29,17 +28,32 @@
                     </div>
                     <div class="card-title-area">
                         <h3 class="profile-name">{{ profile.fullName }}</h3>
-                        <span class="badge" :class="getRelationshipClass(profile.relationship)">
-                            {{ formatRelationship(profile.relationship) }}
-                        </span>
+
+                        <div class="badges-wrapper">
+                            <span v-if="formatRelationship(profile.relationship)" class="badge"
+                                :class="getRelationshipClass(profile.relationship)">
+                                {{ formatRelationship(profile.relationship) }}
+                            </span>
+
+                            <span v-if="profile.isShared" class="badge badge-shared"
+                                title="Hồ sơ được người khác chia sẻ với bạn">
+                                <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2"
+                                    fill="none">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="8.5" cy="7" r="4"></circle>
+                                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                                </svg>
+                                Được chia sẻ
+                            </span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="card-body">
                     <div class="info-row">
                         <span class="info-label">Mã hồ sơ:</span>
-                        <span class="info-value">{{ profile.profileCode || 'Chưa cấp'
-                            }}</span>
+                        <span class="info-value">{{ profile.profileCode || 'Chưa cấp' }}</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Ngày sinh:</span>
@@ -52,8 +66,20 @@
                 </div>
 
                 <div class="card-actions">
-                    <button class="btn-action edit-btn" @click="openEditModal(profile)">Chỉnh sửa</button>
-                    <button class="btn-action book-btn">Đặt lịch khám</button>
+                    <template v-if="canEdit(profile) || canBook(profile)">
+                        <button v-if="canEdit(profile)" class="btn-action edit-btn"
+                            @click="openEditModal(profile)">Chỉnh sửa</button>
+                        <button v-if="canBook(profile)" class="btn-action book-btn">Đặt lịch khám</button>
+                    </template>
+
+                    <div v-else class="read-only-notice">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2"
+                            fill="none">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        <span>Chỉ xem thông tin</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -61,7 +87,6 @@
         <transition name="modal">
             <div v-if="showAddModal" class="modal-overlay" @click.self="closeAddModal">
                 <div class="modal-container">
-
                     <div class="modal-header">
                         <h3>{{ isEditMode ? 'Chỉnh sửa hồ sơ' : 'Thêm hồ sơ người thân' }}</h3>
                         <button class="btn-close" @click="closeAddModal">
@@ -80,12 +105,10 @@
                                     <input type="text" v-model="newProfile.fullName" required
                                         placeholder="Nhập họ và tên" />
                                 </div>
-
                                 <div class="form-group">
                                     <label>Ngày sinh *</label>
                                     <input type="date" v-model="newProfile.dateOfBirth" required />
                                 </div>
-
                                 <div class="form-group">
                                     <label>Giới tính *</label>
                                     <select v-model="newProfile.gender">
@@ -94,7 +117,6 @@
                                         <option :value="2">Khác</option>
                                     </select>
                                 </div>
-
                                 <div class="form-group">
                                     <label>Mối quan hệ *</label>
                                     <select v-model="newProfile.relationship" required>
@@ -105,19 +127,16 @@
                                         <option :value="5">Ông/Bà</option>
                                     </select>
                                 </div>
-
                                 <div class="form-group">
                                     <label>Số CCCD *</label>
                                     <input type="text" v-model="newProfile.citizenId" placeholder="Nhập số CCCD"
                                         required />
                                 </div>
-
                                 <div class="form-group">
                                     <label>Số điện thoại *</label>
                                     <input type="tel" v-model="newProfile.phoneNumber" placeholder="Nhập số điện thoại"
                                         required />
                                 </div>
-
                                 <div class="form-group">
                                     <label>Nhóm máu *</label>
                                     <select v-model="newProfile.bloodType" required>
@@ -133,7 +152,6 @@
                                     </select>
                                 </div>
                             </div>
-
                             <div class="form-group mt-20">
                                 <label>Tiền sử bệnh (Dị ứng, bệnh mãn tính...)</label>
                                 <textarea v-model="newProfile.medicalHistory" rows="3"
@@ -149,11 +167,9 @@
                             <span v-else>{{ isEditMode ? 'Cập nhật hồ sơ' : 'Tạo hồ sơ' }}</span>
                         </button>
                     </div>
-
                 </div>
             </div>
         </transition>
-
     </div>
 </template>
 
@@ -196,6 +212,16 @@ const fetchProfiles = async () => {
     } finally {
         isLoading.value = false;
     }
+}
+
+const canEdit = (profile) => {
+    if (!profile.isShared) return true;
+    return profile.sharePermission === 2;
+}
+
+const canBook = (profile) => {
+    if (!profile.isShared) return true;
+    return profile.sharePermission === 1;
 }
 
 const openAddModal = () => {
@@ -335,21 +361,6 @@ const getRelationshipClass = (r) => {
     transform: translateY(-1px);
 }
 
-.btn-primary-outline {
-    color: #45C3D2;
-    border: 1.5px solid #45C3D2;
-    padding: 7px 18px;
-    border-radius: 8px;
-    font-weight: 600;
-    background: transparent;
-    cursor: pointer;
-}
-
-.btn-primary-outline:hover {
-    background-color: #45C3D2;
-    color: #fff;
-}
-
 .btn-primary:disabled {
     opacity: 0.7;
     cursor: not-allowed;
@@ -411,6 +422,14 @@ const getRelationshipClass = (r) => {
     color: #111827;
 }
 
+/* CHỈNH SỬA: Flexbox cho vùng Badge để chứa được 2 thẻ nhãn */
+.badges-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .badge {
     padding: 4px 10px;
     border-radius: 6px;
@@ -445,9 +464,15 @@ const getRelationshipClass = (r) => {
     color: #7e22ce;
 }
 
-.badge-default {
-    background-color: #f3f4f6;
+/* CSS nhãn "Được chia sẻ" */
+.badge-shared {
+    background-color: #f9fafb;
     color: #4b5563;
+    border: 1px solid #d1d5db;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
 }
 
 .card-body {
@@ -475,13 +500,16 @@ const getRelationshipClass = (r) => {
     color: #111827;
 }
 
+/* CHỈNH SỬA: Đổi card-actions sang Flex để nút tự giãn ra nếu chỉ có 1 nút được hiển thị */
 .card-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
     gap: 12px;
+    width: 100%;
 }
 
 .btn-action {
+    flex: 1;
+    /* Cho phép các nút chia đều chiều rộng */
     padding: 10px;
     border-radius: 8px;
     font-weight: 600;
@@ -512,13 +540,27 @@ const getRelationshipClass = (r) => {
     color: #fff;
 }
 
+/* CSS Thông báo Chỉ đọc */
+.read-only-notice {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    background-color: #f9fafb;
+    color: #6b7280;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 500;
+    font-style: italic;
+}
+
 .empty-state,
 .loading-state {
     text-align: center;
     padding: 60px 20px;
-    background: #f9fafb;
     border-radius: 12px;
-    border: 1px dashed #e5e7eb;
 }
 
 .empty-state h3 {
@@ -561,6 +603,7 @@ const getRelationshipClass = (r) => {
     }
 }
 
+/* CSS cho Modal (Giữ nguyên như cũ của bạn) */
 .modal-overlay {
     position: fixed;
     top: 0;

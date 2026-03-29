@@ -481,7 +481,7 @@ textarea {
 
 .share-info-box {
     background-color: #f0fbf9;
-    border: 1px dashed #45C3D2;
+    border: 1px solid #45C3D2;
     padding: 12px 16px;
     border-radius: 8px;
     display: flex;
@@ -524,6 +524,7 @@ textarea {
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+    white-space: nowrap;
 }
 
 .btn-secondary:hover {

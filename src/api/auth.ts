@@ -32,6 +32,18 @@ export type VerifyPasswordModel = {
   confirmNewPassword: string
 }
 
+export type ChangePasswordModel = {
+  otp?: string
+  oldPassword: string
+  newPassword: string
+  confirmPassword: string
+}
+
+// === Constants ===
+const getAccessToken = (): string | null => {
+    return localStorage.getItem('accessToken')
+}
+
 //=== API ===
 export async function doLogin(body: LoginModel): Promise<AuthModel> {
   const url = buildApiUrl('/auth/login')
@@ -121,4 +133,42 @@ export async function doVerifyPassword(body: VerifyPasswordModel): Promise<boole
     throw new Error(errorMessage)
   }
   return (await res.json()).result as Promise<boolean>
+}
+
+export async function doChangePassword(body: ChangePasswordModel): Promise<boolean> {
+  const url = '/api/auth/change-password'
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getAccessToken()}`
+    },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    const errorData = await res.json()
+    const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+    throw new Error(errorMessage)
+  }
+  return true
+}
+
+export async function doSendChangePasswordOtp (data: ChangePasswordModel): Promise<boolean> {
+  const url = '/api/auth/send-change-password'
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getAccessToken()}`
+    },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const errorData = await res.json()
+    const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+    throw new Error(errorMessage)
+  }
+  return true
 }

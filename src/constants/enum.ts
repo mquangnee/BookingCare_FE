@@ -62,6 +62,14 @@ export enum EnumNotificationType {
   ShareProfileRevoked = 7
 }
 
+export enum EnumAppointmentStatus {
+  Pending = 0,
+  Approved = 1,
+  InProgress = 2,
+  Completed = 3,
+  Canceled = 4
+}
+
 // === HELPER FUNCTIONS ===
 export const getPositionName = (pos: EnumPosition): string => {
   switch (pos) {
@@ -80,5 +88,17 @@ export const getSharePermissionName = (permission: EnumSharePermission): string 
     case EnumSharePermission.BookAppointment: return 'Đặt lịch hẹn';
     case EnumSharePermission.FullAccess: return 'Toàn quyền';
     default: return 'Chỉ xem';
+  }
+}
+
+export const getRelationshipName = (relationship: EnumRelationship): string => {
+  switch (relationship) {
+    case EnumRelationship.MySelf: return 'Bản thân';
+    case EnumRelationship.Parent: return 'Cha/Mẹ';
+    case EnumRelationship.Child: return 'Con cái';
+    case EnumRelationship.Sibling: return 'Anh/Chị em';
+    case EnumRelationship.Spouse: return 'Vợ/Chồng';
+    case EnumRelationship.Grandparent: return 'Ông/Bà';
+    default: return 'Bản thân';
   }
 }
