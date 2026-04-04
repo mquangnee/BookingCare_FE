@@ -21,6 +21,4 @@ export const ErrorMessageDictionary: Record<string, string> = {
   "ChangePasswordFailed": "Đổi mật khẩu thất bại. Vui lòng thử lại sau giây lát.",
   "SlotIsTaken": "Thời gian này đã có người đặt trước. Vui lòng chọn thời gian khác.",
   "PatientHasOverlappingAppointment": "Bệnh nhân đã có một cuộc hẹn trùng lặp trong khoảng thời gian này. Vui lòng chọn thời gian khác.",
-  "StatusNotValidForCancellation": "Cuộc hẹn không thể hủy vì trạng thái hiện tại không cho phép. Vui lòng kiểm tra lại trạng thái cuộc hẹn.",
-  "TimeNotValidForCancellation": "Cuộc hẹn không thể hủy vì đã quá gần với thời gian bắt đầu. Vui lòng kiểm tra lại thời gian cuộc hẹn.",
 };

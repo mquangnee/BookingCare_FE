@@ -1,4 +1,3 @@
-import { buildApiUrl } from '../utils/apiConfig'
 import { ErrorMessageDictionary } from '../constants/errorMessageDictionary'
 
 // === Constants ===
@@ -19,7 +18,7 @@ export type ServiceModel = {
 
 // === API ===
 export async function doGetServices(): Promise<ServiceModel[]> {
-    const url = buildApiUrl('/service')
+    const url = '/api/service'
 
     const res = await fetch(url, {
         method: 'GET',
