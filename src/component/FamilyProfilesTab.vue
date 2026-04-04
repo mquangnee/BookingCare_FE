@@ -84,92 +84,94 @@
             </div>
         </div>
 
-        <transition name="modal">
-            <div v-if="showAddModal" class="modal-overlay" @click.self="closeAddModal">
-                <div class="modal-container">
-                    <div class="modal-header">
-                        <h3>{{ isEditMode ? 'Chỉnh sửa hồ sơ' : 'Thêm hồ sơ người thân' }}</h3>
-                        <button class="btn-close" @click="closeAddModal">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
-                    </div>
+        <Teleport to="body">
+            <transition name="modal">
+                <div v-if="showAddModal" class="modal-overlay" @click.self="closeAddModal">
+                    <div class="modal-container">
+                        <div class="modal-header">
+                            <h3>{{ isEditMode ? 'Chỉnh sửa hồ sơ' : 'Thêm hồ sơ người thân' }}</h3>
+                            <button class="btn-close" @click="closeAddModal">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
 
-                    <div class="modal-body">
-                        <form id="addProfileForm" @submit.prevent="submitAddProfile" class="profile-form">
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label>Họ và tên *</label>
-                                    <input type="text" v-model="newProfile.fullName" required
-                                        placeholder="Nhập họ và tên" />
+                        <div class="modal-body">
+                            <form id="addProfileForm" @submit.prevent="submitAddProfile" class="profile-form">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label>Họ và tên *</label>
+                                        <input type="text" v-model="newProfile.fullName" required
+                                            placeholder="Nhập họ và tên" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Ngày sinh *</label>
+                                        <input type="date" v-model="newProfile.dateOfBirth" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Giới tính *</label>
+                                        <select v-model="newProfile.gender">
+                                            <option :value="0">Nam</option>
+                                            <option :value="1">Nữ</option>
+                                            <option :value="2">Khác</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Mối quan hệ *</label>
+                                        <select v-model="newProfile.relationship" required>
+                                            <option :value="1">Bố/Mẹ</option>
+                                            <option :value="2">Con cái</option>
+                                            <option :value="3">Anh/Chị/Em</option>
+                                            <option :value="4">Vợ/Chồng</option>
+                                            <option :value="5">Ông/Bà</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Số CCCD *</label>
+                                        <input type="text" v-model="newProfile.citizenId" placeholder="Nhập số CCCD"
+                                            required />
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Số điện thoại *</label>
+                                        <input type="tel" v-model="newProfile.phoneNumber"
+                                            placeholder="Nhập số điện thoại" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Nhóm máu *</label>
+                                        <select v-model="newProfile.bloodType" required>
+                                            <option :value="0">Chưa xác định</option>
+                                            <option :value="1">O+</option>
+                                            <option :value="2">O-</option>
+                                            <option :value="3">A+</option>
+                                            <option :value="4">A-</option>
+                                            <option :value="5">B+</option>
+                                            <option :value="6">B-</option>
+                                            <option :value="7">AB+</option>
+                                            <option :value="8">AB-</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label>Ngày sinh *</label>
-                                    <input type="date" v-model="newProfile.dateOfBirth" required />
+                                <div class="form-group mt-20">
+                                    <label>Tiền sử bệnh (Dị ứng, bệnh mãn tính...)</label>
+                                    <textarea v-model="newProfile.medicalHistory" rows="3"
+                                        placeholder="Cung cấp thông tin y tế để bác sĩ lưu ý..."></textarea>
                                 </div>
-                                <div class="form-group">
-                                    <label>Giới tính *</label>
-                                    <select v-model="newProfile.gender">
-                                        <option :value="0">Nam</option>
-                                        <option :value="1">Nữ</option>
-                                        <option :value="2">Khác</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Mối quan hệ *</label>
-                                    <select v-model="newProfile.relationship" required>
-                                        <option :value="1">Bố/Mẹ</option>
-                                        <option :value="2">Con cái</option>
-                                        <option :value="3">Anh/Chị/Em</option>
-                                        <option :value="4">Vợ/Chồng</option>
-                                        <option :value="5">Ông/Bà</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Số CCCD *</label>
-                                    <input type="text" v-model="newProfile.citizenId" placeholder="Nhập số CCCD"
-                                        required />
-                                </div>
-                                <div class="form-group">
-                                    <label>Số điện thoại *</label>
-                                    <input type="tel" v-model="newProfile.phoneNumber" placeholder="Nhập số điện thoại"
-                                        required />
-                                </div>
-                                <div class="form-group">
-                                    <label>Nhóm máu *</label>
-                                    <select v-model="newProfile.bloodType" required>
-                                        <option :value="0">Chưa xác định</option>
-                                        <option :value="1">O+</option>
-                                        <option :value="2">O-</option>
-                                        <option :value="3">A+</option>
-                                        <option :value="4">A-</option>
-                                        <option :value="5">B+</option>
-                                        <option :value="6">B-</option>
-                                        <option :value="7">AB+</option>
-                                        <option :value="8">AB-</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group mt-20">
-                                <label>Tiền sử bệnh (Dị ứng, bệnh mãn tính...)</label>
-                                <textarea v-model="newProfile.medicalHistory" rows="3"
-                                    placeholder="Cung cấp thông tin y tế để bác sĩ lưu ý..."></textarea>
-                            </div>
-                        </form>
-                    </div>
+                            </form>
+                        </div>
 
-                    <div class="modal-footer">
-                        <button class="btn-secondary" @click="closeAddModal" type="button">Hủy bỏ</button>
-                        <button class="btn-primary" type="submit" form="addProfileForm" :disabled="isSubmitting">
-                            <span v-if="isSubmitting" class="spinner"></span>
-                            <span v-else>{{ isEditMode ? 'Cập nhật hồ sơ' : 'Tạo hồ sơ' }}</span>
-                        </button>
+                        <div class="modal-footer">
+                            <button class="btn-secondary" @click="closeAddModal" type="button">Hủy bỏ</button>
+                            <button class="btn-primary" type="submit" form="addProfileForm" :disabled="isSubmitting">
+                                <span v-if="isSubmitting" class="spinner"></span>
+                                <span v-else>{{ isEditMode ? 'Cập nhật hồ sơ' : 'Tạo hồ sơ' }}</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </transition>
+            </transition>
+        </Teleport>
     </div>
 </template>
 
@@ -422,7 +424,6 @@ const getRelationshipClass = (r) => {
     color: #111827;
 }
 
-/* CHỈNH SỬA: Flexbox cho vùng Badge để chứa được 2 thẻ nhãn */
 .badges-wrapper {
     display: flex;
     align-items: center;
@@ -464,7 +465,6 @@ const getRelationshipClass = (r) => {
     color: #7e22ce;
 }
 
-/* CSS nhãn "Được chia sẻ" */
 .badge-shared {
     background-color: #f9fafb;
     color: #4b5563;
@@ -500,7 +500,6 @@ const getRelationshipClass = (r) => {
     color: #111827;
 }
 
-/* CHỈNH SỬA: Đổi card-actions sang Flex để nút tự giãn ra nếu chỉ có 1 nút được hiển thị */
 .card-actions {
     display: flex;
     gap: 12px;
@@ -509,7 +508,6 @@ const getRelationshipClass = (r) => {
 
 .btn-action {
     flex: 1;
-    /* Cho phép các nút chia đều chiều rộng */
     padding: 10px;
     border-radius: 8px;
     font-weight: 600;
@@ -540,7 +538,6 @@ const getRelationshipClass = (r) => {
     color: #fff;
 }
 
-/* CSS Thông báo Chỉ đọc */
 .read-only-notice {
     flex: 1;
     display: flex;
@@ -603,8 +600,7 @@ const getRelationshipClass = (r) => {
     }
 }
 
-/* CSS cho Modal (Giữ nguyên như cũ của bạn) */
-.modal-overlay {
+:global(.modal-overlay) {
     position: fixed;
     top: 0;
     left: 0;
@@ -620,7 +616,7 @@ const getRelationshipClass = (r) => {
     padding: 20px;
 }
 
-.modal-container {
+:global(.modal-container) {
     background: #fff;
     width: 100%;
     max-width: 750px;
@@ -630,9 +626,10 @@ const getRelationshipClass = (r) => {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    font-family: 'Inter', -apple-system, sans-serif;
 }
 
-.modal-header {
+:global(.modal-header) {
     padding: 20px 24px;
     border-bottom: 1px solid #e5e7eb;
     display: flex;
@@ -642,13 +639,13 @@ const getRelationshipClass = (r) => {
     z-index: 10;
 }
 
-.modal-header h3 {
+:global(.modal-header h3) {
     margin: 0;
     font-size: 18px;
     color: #111827;
 }
 
-.btn-close {
+:global(.btn-close) {
     background: transparent;
     border: none;
     color: #9ca3af;
@@ -658,22 +655,22 @@ const getRelationshipClass = (r) => {
     transition: all 0.2s;
 }
 
-.btn-close svg {
+:global(.btn-close svg) {
     width: 20px;
     height: 20px;
 }
 
-.btn-close:hover {
+:global(.btn-close:hover) {
     background-color: #f3f4f6;
     color: #ef4444;
 }
 
-.modal-body {
+:global(.modal-body) {
     padding: 24px;
     overflow-y: auto;
 }
 
-.modal-footer {
+:global(.modal-footer) {
     padding: 16px 24px;
     border-top: 1px solid #e5e7eb;
     display: flex;
@@ -683,7 +680,7 @@ const getRelationshipClass = (r) => {
     background-color: #f9fafb;
 }
 
-.btn-secondary {
+:global(.btn-secondary) {
     background-color: #fff;
     color: #4b5563;
     border: 1px solid #d1d5db;
@@ -702,42 +699,42 @@ const getRelationshipClass = (r) => {
     width: auto;
 }
 
-.btn-secondary:hover {
+:global(.btn-secondary:hover) {
     background-color: #f3f4f6;
     color: #111827;
     border-color: #9ca3af;
 }
 
-.modal-footer .btn-primary {
+:global(.modal-footer .btn-primary) {
     width: auto;
     flex: none;
 }
 
-.form-grid {
+:global(.form-grid) {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
 
-.form-group {
+:global(.form-group) {
     display: flex;
     flex-direction: column;
 }
 
-.mt-20 {
+:global(.mt-20) {
     margin-top: 20px;
 }
 
-label {
+:global(.profile-form label) {
     font-size: 13.5px;
     font-weight: 600;
     color: #374151;
     margin-bottom: 8px;
 }
 
-input,
-select,
-textarea {
+:global(.profile-form input),
+:global(.profile-form select),
+:global(.profile-form textarea) {
     padding: 12px 16px;
     font-size: 15px;
     color: #111827;
@@ -749,29 +746,29 @@ textarea {
     outline: none;
 }
 
-input:focus,
-select:focus,
-textarea:focus {
+:global(.profile-form input:focus),
+:global(.profile-form select:focus),
+:global(.profile-form textarea:focus) {
     border-color: #45C3D2;
     box-shadow: 0 0 0 4px rgba(69, 195, 210, 0.12);
 }
 
-textarea {
+:global(.profile-form textarea) {
     resize: vertical;
 }
 
-.modal-enter-active,
-.modal-leave-active {
+:global(.modal-enter-active),
+:global(.modal-leave-active) {
     transition: all 0.3s ease;
 }
 
-.modal-enter-from,
-.modal-leave-to {
+:global(.modal-enter-from),
+:global(.modal-leave-to) {
     opacity: 0;
 }
 
-.modal-enter-from .modal-container,
-.modal-leave-to .modal-container {
+:global(.modal-enter-from .modal-container),
+:global(.modal-leave-to .modal-container) {
     transform: scale(0.95) translateY(20px);
 }
 
@@ -782,11 +779,11 @@ textarea {
 }
 
 @media (max-width: 600px) {
-    .form-grid {
+    :global(.form-grid) {
         grid-template-columns: 1fr;
     }
 
-    .modal-container {
+    :global(.modal-container) {
         max-height: 100vh;
         border-radius: 0;
     }
