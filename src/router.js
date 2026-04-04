@@ -4,8 +4,8 @@ import Register from './views/Register.vue'
 import ForgotPassword from './views/ForgotPassword.vue'
 import Home from './views/Home.vue'
 import Profile from './views/Profile.vue'
-import BookingWizard from './component/BookingWizard.vue'
 import BookingView from './views/BookingView.vue'
+import BookingHistoryView from './views/BookingHistoryView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -38,6 +38,11 @@ const router = createRouter({
       path: '/booking',
       name: 'booking',
       component: BookingView
+    },
+    {
+      path: '/history',
+      name: 'history',
+      component: BookingHistoryView
     },
     {
       path: '/home',

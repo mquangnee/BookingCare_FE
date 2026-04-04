@@ -206,7 +206,7 @@ export async function doCancelSharedProfile(profileShareId: string): Promise<boo
 }
 
 export async function doGetUserProfileForBooking(body: GetUserProfileForBookingModel): Promise<UserProfileModel[]> {
-    const url = '/api/profile/available?date=' + body.date + '&startTime=' + body.startTime + '&endTime=' + body.endTime
+    const url = buildApiUrl(`/profile/available?date=${body.date}&startTime=${body.startTime}&endTime=${body.endTime}`)
 
     const res = await fetch(url, {
         method: 'GET',
