@@ -1,4 +1,4 @@
-const rawApiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7243'
+const rawApiBaseUrl = import.meta.env.VITE_API_BASE_URL || ''
 
 const normalizedApiBaseUrl = rawApiBaseUrl.replace(/\/+$/, '')
 

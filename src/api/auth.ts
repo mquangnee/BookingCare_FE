@@ -136,7 +136,7 @@ export async function doVerifyPassword(body: VerifyPasswordModel): Promise<boole
 }
 
 export async function doChangePassword(body: ChangePasswordModel): Promise<boolean> {
-  const url = '/api/auth/change-password'
+  const url = buildApiUrl('/auth/change-password')
 
   const res = await fetch(url, {
     method: 'POST',
@@ -155,7 +155,7 @@ export async function doChangePassword(body: ChangePasswordModel): Promise<boole
 }
 
 export async function doSendChangePasswordOtp (data: ChangePasswordModel): Promise<boolean> {
-  const url = '/api/auth/send-change-password'
+  const url = buildApiUrl('/auth/send-change-password')
 
   const res = await fetch(url, {
     method: 'POST',

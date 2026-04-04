@@ -1,3 +1,4 @@
+import { buildApiUrl } from '../utils/apiConfig'
 import { ErrorMessageDictionary } from "../constants/errorMessageDictionary"
 import { EnumGender, EnumPosition } from '../constants/enum'
 
@@ -17,7 +18,7 @@ export type SpecialtyModel = {
 
 // === API ===
 export async function doGetSpecialties(): Promise<SpecialtyModel[]> {
-    const url = '/api/specialty'
+    const url = buildApiUrl('/specialty')
 
     const res = await fetch(url, {
         method: 'GET',
