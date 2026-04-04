@@ -63,9 +63,7 @@
                                 <div v-for="spec in specialties" :key="spec.id"
                                     :class="['selection-card small-card', { selected: selectedSpecialty?.id === spec.id }]"
                                     @click="selectSpecialty(spec)">
-
                                     <img v-if="spec.imageUrl" :src="spec.imageUrl" class="spec-icon-mini">
-
                                     <div class="card-info">
                                         <h4 class="mb-0">{{ spec.name }}</h4>
                                     </div>
@@ -75,21 +73,16 @@
 
                             <div v-if="selectedSpecialty" class="mt-24 fade-in">
                                 <h3 class="section-title">2. Chọn Bác sĩ ({{ selectedSpecialty.name }})</h3>
-
                                 <div v-if="filteredDoctors.length === 0" class="empty-state">
                                     <p>Hiện tại chưa có bác sĩ trực thuộc chuyên khoa này.</p>
                                 </div>
-
                                 <div v-else class="grid-list">
                                     <div v-for="doc in filteredDoctors" :key="doc.id"
                                         :class="['selection-card', { selected: selectedDoctor?.id === doc.id }]"
                                         @click="selectedDoctor = doc">
-
-                                        <img :src="doc.avatarUrl || 'https://via.placeholder.com/150'"
-                                            :alt="doc.fullName" class="card-avatar-img">
-
+                                        <img :src="doc.avatarUrl" alt="avatar" class="card-avatar-img">
                                         <div class="card-info">
-                                            <h4>{{ doc.fullName }}</h4>
+                                            <h4>{{ getPositionName(doc.position) }} {{ doc.fullName }}</h4>
                                             <p class="text-muted">{{ doc.doctorCode }}</p>
                                             <p class="price-text">{{ formatPrice(doc.price) }}</p>
                                         </div>
@@ -99,11 +92,28 @@
                             </div>
                         </div>
 
+                        <div v-else-if="bookingMode === 'service'" class="flow-container fade-in">
+                            <h3 class="section-title">1. Chọn Dịch vụ</h3>
+                            <div v-if="services.length === 0" class="empty-state">
+                                <p>Hiện tại chưa có dịch vụ nào trên hệ thống.</p>
+                            </div>
+                            <div v-else class="grid-list">
+                                <div v-for="svc in services" :key="svc.id"
+                                    :class="['selection-card', { selected: selectedService?.id === svc.id }]"
+                                    @click="selectedService = svc">
+                                    <div class="card-info">
+                                        <h4>{{ svc.name }}</h4>
+                                        <p class="price-text">{{ formatPrice(svc.price) }}</p>
+                                    </div>
+                                    <div class="radio-circle"></div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="wizard-footer">
                             <div class="spacer"></div>
-                            <button class="btn-primary" :disabled="!canProceedToStep2" @click="step = 2">
-                                Tiếp tục
-                            </button>
+                            <button class="btn-primary" :disabled="!canProceedToStep2" @click="step = 2">Tiếp
+                                tục</button>
                         </div>
                     </div>
 
@@ -118,23 +128,46 @@
                             </div>
                         </div>
 
-                        <h3 class="section-title mt-24">Ca khám trống</h3>
                         <div v-if="isLoadingSlots" class="loading-state">
                             <span class="spinner-large"></span>
                             <p>Đang tìm lịch trống...</p>
                         </div>
+
                         <div v-else-if="availableSlots.length === 0" class="empty-state">
                             <p>Không có ca làm việc nào trống trong ngày này. Vui lòng chọn ngày khác.</p>
                         </div>
-                        <div v-else class="time-slots">
-                            <button v-for="slot in availableSlots" :key="slot.id"
-                                :class="['slot-btn', { selected: selectedSlot?.id === slot.id, full: slot.isFull }]"
-                                :disabled="slot.isFull" @click="selectedSlot = slot">
-                                <span class="time">{{ slot.time }}</span>
-                                <span v-if="bookingMode === 'service' && !slot.isFull" class="doctor-hint">{{
-                                    slot.doctorName }}</span>
-                                <span v-if="slot.isFull" class="status-full">Đã kín lịch</span>
-                            </button>
+
+                        <div v-else class="booking-flow-step2">
+                            <template v-if="bookingMode === 'service'">
+                                <h3 class="section-title mt-24">Bác sĩ có lịch trống</h3>
+                                <div class="doctor-mini-list">
+                                    <div v-for="doc in availableDoctorsInStep2" :key="doc.id"
+                                        :class="['doc-mini-card', { selected: selectedDoctorInStep2?.id === doc.id }]"
+                                        @click="selectedDoctorInStep2 = doc">
+                                        <div class="doc-mini-info">
+                                            <span class="doc-pos">{{ getPositionName(doc.position) }}</span>
+                                            <span class="doc-name">{{ doc.name }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <transition name="fade">
+                                <div v-if="bookingMode === 'doctor' || selectedDoctorInStep2" class="time-slot-wrapper">
+                                    <h3 class="section-title mt-24">
+                                        Ca khám trống của {{ bookingMode === 'doctor' ? selectedDoctor?.fullName :
+                                        selectedDoctorInStep2?.name }}
+                                    </h3>
+                                    <div class="time-slots">
+                                        <button v-for="slot in filteredSlots" :key="slot.id"
+                                            :class="['slot-btn', { selected: selectedSlot?.id === slot.id, full: slot.isFull }]"
+                                            :disabled="slot.isFull" @click="selectedSlot = slot">
+                                            <span class="time">{{ slot.time }}</span>
+                                            <span v-if="slot.isFull" class="status-full">Đã kín lịch</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </transition>
                         </div>
 
                         <div class="wizard-footer">
@@ -146,33 +179,26 @@
 
                     <div v-else-if="step === 3" class="step-content" key="step3">
                         <h3 class="section-title">Chọn hồ sơ bệnh nhân</h3>
-
                         <div v-if="isLoadingProfiles" class="loading-state fade-in">
                             <span class="spinner-large"></span>
                             <p>Đang tải danh sách hồ sơ phù hợp...</p>
                         </div>
-
                         <div v-else-if="availableProfiles.length === 0" class="empty-state fade-in">
-                            <p>Không có hồ sơ nào khả dụng vào thời gian này (có thể do trùng lịch khám). Vui lòng quay
-                                lại chọn khung giờ khác hoặc tạo hồ sơ mới.</p>
+                            <p>Không có hồ sơ nào khả dụng vào thời gian này. Vui lòng quay lại chọn khung giờ khác.</p>
                         </div>
-
                         <div v-else class="grid-list fade-in">
                             <div v-for="profile in availableProfiles" :key="profile.id"
                                 :class="['selection-card', { selected: selectedProfile?.id === profile.id }]"
                                 @click="selectedProfile = profile">
-                                <div class="avatar-circle">{{ profile.fullName ? profile.fullName.substring(0,
-                                    1).toUpperCase() : 'U' }}</div>
+                                <div class="avatar-circle">{{ profile.fullName?.substring(0, 1).toUpperCase() }}</div>
                                 <div class="card-info">
                                     <h4>{{ profile.fullName }}</h4>
                                     <p class="text-muted text-sm">
                                         Sinh năm: {{ new Date(profile.dateOfBirth).getFullYear() }}
-                                        - {{ profile.gender === 0 ? 'Nam' : (profile.gender === 1 ? 'Nữ' : 'Khác') }}
+                                        - {{ profile.gender === 0 ? 'Nam' : 'Nữ' }}
                                         <span v-if="profile.relationship"> - {{
                                             getRelationshipName(profile.relationship) }}</span>
                                     </p>
-                                    <span v-if="profile.isShared" class="text-primary text-sm font-bold"> (Được chia
-                                        sẻ)</span>
                                 </div>
                                 <div class="radio-circle"></div>
                             </div>
@@ -201,7 +227,10 @@
                                     </div>
                                     <div class="summary-row">
                                         <span class="label">Bác sĩ:</span>
-                                        <span class="value">{{ selectedDoctor?.fullName }}</span>
+                                        <span class="value">
+                                            {{ getPositionName(selectedDoctor?.position) }} {{ selectedDoctor?.fullName
+                                            }}
+                                        </span>
                                     </div>
                                 </template>
 
@@ -210,9 +239,12 @@
                                         <span class="label">Dịch vụ:</span>
                                         <span class="value">{{ selectedService?.name }}</span>
                                     </div>
-                                    <div v-if="selectedService?.doctorName" class="summary-row">
+                                    <div v-if="selectedSlot?.doctorName" class="summary-row">
                                         <span class="label">Bác sĩ thực hiện:</span>
-                                        <span class="value">{{ selectedService?.doctorName }}</span>
+                                        <span class="value">
+                                            {{ getPositionName(selectedSlot.doctorPosition) }} {{
+                                            selectedSlot.doctorName }}
+                                        </span>
                                     </div>
                                 </template>
 
@@ -229,10 +261,6 @@
                                     <span class="label">Tổng chi phí dự kiến:</span>
                                     <span class="value total-price">{{ formatPrice(calculateTotal()) }}</span>
                                 </div>
-                                <p class="text-muted text-sm text-center mt-2" style="font-style: italic;">
-                                    * Chi phí này là phí khám/dịch vụ ban đầu, chưa bao gồm các chỉ định cận lâm sàng
-                                    phát sinh (nếu có).
-                                </p>
                             </div>
                         </div>
 
@@ -259,7 +287,7 @@ import { useWorkSessionStore } from '../stores/workSessionStore'
 import { useProfileStore } from '../stores/profileStore'
 import { useServiceStore } from '../stores/serviceStore'
 import { useAppointmentStore } from '../stores/appointmentStore'
-import { getRelationshipName } from '../constants/enum'
+import { getRelationshipName, getPositionName } from '../constants/enum'
 
 const specialtyStore = useSpecialtyStore()
 const doctorStore = useDoctorStore()
@@ -269,6 +297,7 @@ const serviceStore = useServiceStore()
 const appointmentStore = useAppointmentStore()
 
 const specialties = ref([])
+const services = ref([])
 const doctorsBySpecialty = ref([])
 const weeklySchedule = ref([])
 const availableSlots = ref([])
@@ -281,168 +310,21 @@ const isSubmitting = ref(false)
 const isLoadingSlots = ref(false)
 const isSuccess = ref(false)
 
+const selectedDoctorInStep2 = ref(null);
 const selectedSpecialty = ref(null)
 const selectedDoctor = ref(null)
 const selectedService = ref(null)
 
 const getLocalToday = () => {
     const d = new Date();
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const date = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${date}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
 const selectedDate = ref(getLocalToday())
 const selectedSlot = ref(null)
 const selectedProfile = ref(null)
 
-const fetchPatientProfiles = async () => {
-    if (step.value !== 3 || !selectedSlot.value) return;
-
-    isLoadingProfiles.value = true;
-    selectedProfile.value = null;
-    availableProfiles.value = [];
-
-    try {
-        const timeParts = selectedSlot.value.time.split(' - ');
-        const payload = {
-            date: selectedDate.value,
-            startTime: timeParts[0] + ":00",
-            endTime: timeParts[1] + ":00"
-        };
-
-        const data = await profileStore.getUserProfileForBooking(payload);
-        availableProfiles.value = data || [];
-
-        if (availableProfiles.value.length > 0) {
-            selectedProfile.value = availableProfiles.value[0];
-        }
-    } catch (error) {
-        console.error("Lỗi lấy hồ sơ:", error);
-        alert(error.message?.replace(/^Error:\s*/, '').trim() || 'Lỗi khi tải hồ sơ');
-    } finally {
-        isLoadingProfiles.value = false;
-    }
-};
-
-watch(step, (newStep) => {
-    if (newStep === 2) {
-        selectedDate.value = getLocalToday();
-        fetchWeeklySchedule();
-    } else if (newStep === 3) {
-        fetchPatientProfiles();
-    }
-});
-
-const mockServices = [
-    { id: 'sv1', name: 'Nội soi dạ dày (Gây mê)', desc: 'Phương pháp nội soi không đau', price: 1200000 },
-    { id: 'sv2', name: 'Siêu âm thai 4D', desc: 'Kiểm tra dị tật thai nhi', price: 450000 }
-]
-
-const mockProfiles = [
-    { id: 'p1', name: 'Nguyễn Văn Dũng', yob: 2000, gender: 'Nam', relationship: 'Bản thân' },
-    { id: 'p2', name: 'Đỗ Thị Tường Vân', yob: 1965, gender: 'Nữ', relationship: 'Mẹ' }
-]
-
-onMounted(async () => {
-    try {
-        const dataSpecialties = await specialtyStore.getSpecialties()
-        const services = await serviceStore.getServices()
-        specialties.value = dataSpecialties || []
-        services.value = services || []
-    } catch (error) {
-        console.error("Lỗi lấy chuyên khoa:", error)
-        alert(error.message?.replace(/^Error:\s*/, '').trim() || 'Lỗi hệ thống')
-    }
-})
-
-watch(selectedSpecialty, async (newSpec) => {
-    if (newSpec && bookingMode.value === 'doctor') {
-        selectedDoctor.value = null
-        try {
-            const data = await doctorStore.getDoctorsBySpecialty(newSpec.id)
-            doctorsBySpecialty.value = data || []
-        } catch (error) {
-            console.error("Lỗi lấy bác sĩ:", error)
-            doctorsBySpecialty.value = []
-        }
-    }
-})
-
-const fetchWeeklySchedule = async () => {
-    if (step.value !== 2) return;
-
-    isLoadingSlots.value = true;
-    selectedSlot.value = null;
-    availableSlots.value = [];
-    weeklySchedule.value = [];
-
-    const targetDoctorId = bookingMode.value === 'doctor'
-        ? selectedDoctor.value?.id
-        : selectedService.value?.doctorId;
-
-    if (!targetDoctorId) {
-        isLoadingSlots.value = false;
-        return;
-    }
-
-    const targetDuration = bookingMode.value === 'service'
-        ? (selectedService.value?.durationInMinutes || 30)
-        : 30;
-
-    const targetStartDate = getLocalToday();
-
-    try {
-        const payload = {
-            doctorId: targetDoctorId,
-            date: targetStartDate,
-            durationInMinutes: targetDuration
-        };
-
-        const data = await workSessionStore.getAvailableTimeSlots(payload);
-
-        weeklySchedule.value = data || [];
-        extractSlotsForSelectedDate();
-
-    } catch (error) {
-        console.error("Lỗi lấy lịch trống:", error);
-    } finally {
-        isLoadingSlots.value = false;
-    }
-};
-
-const extractSlotsForSelectedDate = () => {
-    if (!weeklySchedule.value.length) {
-        availableSlots.value = [];
-        return;
-    }
-
-    const dateStr = selectedDate.value;
-
-    const dayData = weeklySchedule.value.find(d => {
-        const backendDateStr = d.date.split('T')[0];
-        return backendDateStr === dateStr;
-    });
-
-    if (dayData && dayData.availableTimeSlots && dayData.availableTimeSlots.length > 0) {
-        availableSlots.value = dayData.availableTimeSlots.map(s => ({
-            id: s.startTime,
-            time: s.timeString,
-            isFull: s.isFull
-        }));
-    } else {
-        availableSlots.value = [];
-    }
-};
-
-watch(selectedDate, (newDate) => {
-    if (step.value === 2) {
-        selectedSlot.value = null;
-        extractSlotsForSelectedDate();
-    }
-});
-
+// --- COMPUTED LOGIC ---
 const filteredDoctors = computed(() => doctorsBySpecialty.value || []);
 
 const canProceedToStep2 = computed(() => {
@@ -451,96 +333,195 @@ const canProceedToStep2 = computed(() => {
     return false;
 });
 
-const setMode = (mode) => {
-    bookingMode.value = mode;
-    selectedSpecialty.value = null;
-    selectedDoctor.value = null;
-    selectedService.value = null;
-};
-
-const selectSpecialty = (spec) => {
-    selectedSpecialty.value = spec;
-};
-
-const calculateTotal = () => {
-    if (bookingMode.value === 'doctor' && selectedDoctor.value) {
-        return selectedDoctor.value.price || 0;
-    }
-
-    if (bookingMode.value === 'service' && selectedService.value) {
-        return selectedService.value.price || 0;
-    }
-
-    return 0;
-};
-
-const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price || 0);
-
-const formatDateFull = (dateStr) => {
-    const d = new Date(dateStr);
-    return `Ngày ${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
-};
-
-const next7Days = computed(() => {
-    const days = [];
-    const today = new Date();
-
-    const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-
-    for (let i = 0; i < 7; i++) {
-        const d = new Date(today);
-        d.setDate(today.getDate() + i);
-
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const date = String(d.getDate()).padStart(2, '0');
-        const fullDateStr = `${year}-${month}-${date}`;
-
-        days.push({
-            full: fullDateStr,
-            dayName: i === 0 ? 'Hôm nay' : dayNames[d.getDay()],
-            dayNumber: d.getDate()
-        });
-    }
-    return days;
+const availableDoctorsInStep2 = computed(() => {
+    if (bookingMode.value !== 'service') return [];
+    const doctorsMap = new Map();
+    availableSlots.value.forEach(slot => {
+        if (slot.doctorId && !doctorsMap.has(slot.doctorId)) {
+            doctorsMap.set(slot.doctorId, {
+                id: slot.doctorId,
+                name: slot.doctorName,
+                position: slot.doctorPosition
+            });
+        }
+    });
+    return Array.from(doctorsMap.values());
 });
+
+const filteredSlots = computed(() => {
+    if (bookingMode.value === 'doctor') return availableSlots.value;
+    if (!selectedDoctorInStep2.value) return [];
+    return availableSlots.value.filter(s => s.doctorId === selectedDoctorInStep2.value.id);
+});
+
+// --- WATCHERS (CHỈNH SỬA QUAN TRỌNG TẠI ĐÂY) ---
+
+// Chỉ reset bác sĩ và giờ khi NGÀY thay đổi
+watch(selectedDate, () => {
+    if (step.value === 2) {
+        selectedDoctorInStep2.value = null;
+        selectedSlot.value = null;
+        extractSlotsForSelectedDate();
+    }
+});
+
+// Theo dõi chuyển bước
+watch(step, (newStep, oldStep) => {
+    // Nếu quay lại bước 1, reset toàn bộ
+    if (newStep === 1) {
+        resetSelections();
+    }
+    // Khi sang bước 2, lấy lịch
+    if (newStep === 2 && oldStep === 1) {
+        fetchWeeklySchedule();
+    }
+    // Khi sang bước 3, lấy hồ sơ
+    if (newStep === 3) {
+        fetchPatientProfiles();
+    }
+    // LƯU Ý: Không làm gì khi newStep === 4 để giữ selectedSlot
+});
+
+// Reset giờ khi đổi bác sĩ ở bước 2
+watch(selectedDoctorInStep2, () => {
+    if (step.value === 2) {
+        selectedSlot.value = null;
+    }
+});
+
+// --- METHODS ---
+const fetchPatientProfiles = async () => {
+    if (!selectedSlot.value) return;
+    isLoadingProfiles.value = true;
+    try {
+        const timeParts = selectedSlot.value.time.split(' - ');
+        const data = await profileStore.getUserProfileForBooking({
+            date: selectedDate.value,
+            startTime: timeParts[0] + ":00",
+            endTime: timeParts[1] + ":00"
+        });
+        availableProfiles.value = data || [];
+        if (availableProfiles.value.length > 0) {
+            selectedProfile.value = availableProfiles.value[0];
+        }
+    } catch (error) {
+        console.error("Lỗi lấy hồ sơ:", error);
+    } finally {
+        isLoadingProfiles.value = false;
+    }
+};
+
+onMounted(async () => {
+    try {
+        const [dataSpec, dataSvc] = await Promise.all([
+            specialtyStore.getSpecialties(),
+            serviceStore.getServices()
+        ]);
+        specialties.value = dataSpec || [];
+        services.value = dataSvc || [];
+    } catch (error) {
+        console.error("Lỗi khởi tạo:", error);
+    }
+});
+
+watch(selectedSpecialty, async (newSpec) => {
+    if (newSpec && bookingMode.value === 'doctor') {
+        selectedDoctor.value = null;
+        try {
+            doctorsBySpecialty.value = await doctorStore.getDoctorsBySpecialty(newSpec.id) || [];
+        } catch (e) { doctorsBySpecialty.value = []; }
+    }
+});
+
+const fetchWeeklySchedule = async () => {
+    isLoadingSlots.value = true;
+    const payload = {
+        date: selectedDate.value,
+        durationInMinutes: bookingMode.value === 'service' ? (selectedService.value?.durationInMinutes || 30) : 30
+    };
+    if (bookingMode.value === 'doctor') payload.doctorId = selectedDoctor.value.id;
+    else payload.serviceId = selectedService.value.id;
+
+    try {
+        weeklySchedule.value = await workSessionStore.getAvailableTimeSlots(payload) || [];
+        extractSlotsForSelectedDate();
+    } catch (e) { console.error(e); }
+    finally { isLoadingSlots.value = false; }
+}
+
+const extractSlotsForSelectedDate = () => {
+    const dayData = weeklySchedule.value.find(d => d.date.split('T')[0] === selectedDate.value);
+    if (dayData?.availableTimeSlots) {
+        availableSlots.value = dayData.availableTimeSlots.map(s => ({
+            id: `${s.startTime}_${s.doctorId}`,
+            time: s.timeString,
+            isFull: s.isFull,
+            doctorId: s.doctorId,
+            doctorName: s.doctorName,
+            doctorPosition: s.doctorPosition
+        }));
+    } else { availableSlots.value = []; }
+};
 
 const submitBooking = async () => {
     isSubmitting.value = true;
     try {
         const timeParts = selectedSlot.value.time.split(' - ');
-        const startTimeStr = timeParts[0] + ":00";
-        const endTimeStr = timeParts[1] + ":00";
-
         const payload = {
             patientProfileId: selectedProfile.value.id,
-            doctorId: bookingMode.value === 'doctor' ? selectedDoctor.value?.id : null,
+            doctorId: bookingMode.value === 'doctor' ? selectedDoctor.value?.id : selectedSlot.value?.doctorId,
             serviceId: bookingMode.value === 'service' ? selectedService.value?.id : null,
             date: selectedDate.value,
-            startTime: startTimeStr,
-            endTime: endTimeStr
+            startTime: timeParts[0] + ":00",
+            endTime: timeParts[1] + ":00"
         };
-
-        const result = await appointmentStore.createAppointment(payload);
+        await appointmentStore.createAppointment(payload);
         isSuccess.value = true;
-
     } catch (error) {
-        console.error('Lỗi đặt lịch:', error);
-        alert(error.message?.replace(/^Error:\s*/, '').trim() || 'Có lỗi xảy ra khi đặt lịch. Vui lòng thử lại!');
-    } finally {
-        isSubmitting.value = false;
-    }
+        alert(error.message?.replace(/^Error:\s*/, '') || 'Lỗi đặt lịch');
+    } finally { isSubmitting.value = false; }
 };
 
+const resetSelections = () => {
+    selectedSpecialty.value = null;
+    selectedDoctor.value = null;
+    selectedService.value = null;
+    selectedDoctorInStep2.value = null;
+    selectedSlot.value = null;
+    selectedProfile.value = null;
+};
+
+const setMode = (mode) => {
+    bookingMode.value = mode;
+    resetSelections();
+};
+
+const selectSpecialty = (spec) => { selectedSpecialty.value = spec; };
+const formatPrice = (p) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p || 0);
+const calculateTotal = () => bookingMode.value === 'doctor' ? selectedDoctor.value?.price : selectedService.value?.price;
+const formatDateFull = (dStr) => {
+    const d = new Date(dStr);
+    return `Ngày ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+};
 const resetWizard = () => {
     step.value = 1;
     isSuccess.value = false;
-    selectedProfile.value = null;
-    selectedSlot.value = null;
-    selectedDoctor.value = null;
+    resetSelections();
     selectedDate.value = getLocalToday();
-    availableProfiles.value = [];
 };
+
+const next7Days = computed(() => {
+    const days = [];
+    const today = new Date();
+    const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
+        const full = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        days.push({ full, dayName: i === 0 ? 'Hôm nay' : dayNames[d.getDay()], dayNumber: d.getDate() });
+    }
+    return days;
+});
 </script>
 
 <style scoped>
@@ -782,9 +763,9 @@ const resetWizard = () => {
 }
 
 .spec-icon-mini {
-    width: 60px !important;
+    width: 70px !important;
     min-width: 60px !important;
-    height: 60px !important;
+    height: 70px !important;
     min-height: 60px !important;
     aspect-ratio: 1 / 1;
     object-fit: cover;
@@ -797,8 +778,8 @@ const resetWizard = () => {
 }
 
 .card-avatar-img {
-    width: 64px;
-    height: 64px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     object-fit: cover;
     margin-right: 18px;
@@ -968,7 +949,7 @@ const resetWizard = () => {
     font-family: 'Inter', sans-serif;
 }
 
-.slot-btn:hover:not(.full) {
+.slot-btn:hover:not(.full):not(.selected) {
     border-color: #45C3D2;
     color: #45C3D2;
     background: #f0fbf9;
@@ -977,6 +958,12 @@ const resetWizard = () => {
 .slot-btn.selected {
     background-color: #45C3D2;
     border-color: #45C3D2;
+    color: #ffffff;
+}
+
+.slot-btn.selected:hover {
+    background-color: #3ba3b0;
+    border-color: #3ba3b0;
     color: #ffffff;
 }
 
@@ -993,8 +980,9 @@ const resetWizard = () => {
     font-weight: 500;
 }
 
-.slot-btn.selected .doctor-hint {
-    color: rgba(255, 255, 255, 0.9);
+.slot-btn.selected .doctor-hint,
+.slot-btn.selected:hover .doctor-hint {
+    color: rgba(255, 255, 255, 0.95);
 }
 
 .summary-box {
@@ -1070,9 +1058,7 @@ const resetWizard = () => {
 .loading-state {
     text-align: center;
     padding: 40px 20px;
-    background: #f9fafb;
     border-radius: 10px;
-    border: 1px dashed #d1d5db;
     color: #6b7280;
     font-size: 15px;
     font-weight: 500;
@@ -1185,6 +1171,69 @@ const resetWizard = () => {
     background-color: #f9fafb;
     border-color: #9ca3af;
     color: #111827;
+}
+
+/* Danh sách bác sĩ mini ở Bước 2 */
+.doctor-mini-list {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.doc-mini-card {
+    padding: 12px 20px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 180px;
+    text-align: center;
+}
+
+.doc-mini-card:hover {
+    border-color: #45C3D2;
+    background-color: #fcfefe;
+}
+
+.doc-mini-card.selected {
+    background-color: #45C3D2;
+    border-color: #45C3D2;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(69, 195, 210, 0.2);
+}
+
+.doc-mini-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.doc-pos {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.8;
+}
+
+.doc-name {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+.time-slot-wrapper {
+    animation: fadeIn 0.4s ease;
 }
 
 @media (max-width: 768px) {
