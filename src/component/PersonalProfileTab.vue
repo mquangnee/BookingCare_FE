@@ -152,6 +152,7 @@
 import { ref, onMounted } from 'vue'
 import { useProfileStore } from '../stores/profileStore'
 import axios from 'axios'
+import { notifySuccess, notifyError, messageFromCaught } from '../utils/notify'
 
 const profileStore = useProfileStore()
 const isLoading = ref(false)
@@ -184,10 +185,10 @@ const handleUpdateProfile = async () => {
     isLoading.value = true
     try {
         await profileStore.updateUserProfile(form.value)
-        alert('Cập nhật hồ sơ thành công!')
+        notifySuccess('Cập nhật hồ sơ thành công!')
     } catch (error) {
         console.error(error);
-        alert(error.message.replace(/^Error:\s*/, '').trim());
+        notifyError(messageFromCaught(error));
     } finally {
         isLoading.value = false;
     }
@@ -217,17 +218,17 @@ const closeShareModal = () => {
 
 const submitShareProfile = async () => {
     if (!shareForm.value.profileId) {
-        alert('Lỗi: Không tìm thấy ID hồ sơ để chia sẻ!');
+        notifyError('Lỗi: Không tìm thấy ID hồ sơ để chia sẻ!');
         return;
     }
     isSharing.value = true
     try {
         await profileStore.shareUserProfile(shareForm.value)
-        alert('Đã gửi lời mời chia sẻ hồ sơ thành công!')
+        notifySuccess('Đã gửi lời mời chia sẻ hồ sơ thành công!')
         closeShareModal()
     } catch (error) {
         console.error(error);
-        alert(error.message.replace(/^Error:\s*/, '').trim());
+        notifyError(messageFromCaught(error));
     } finally {
         isSharing.value = false;
     }

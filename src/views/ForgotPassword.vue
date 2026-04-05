@@ -105,6 +105,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
+import { notifySuccess, notifyError, messageFromCaught } from '../utils/notify'
 
 const step = ref(1)
 const isLoading = ref(false)
@@ -145,8 +146,7 @@ const handleStep1 = async () => {
         await authStore.sendVerifyPasswordOtp(form.email);
         step.value = 2;
     } catch (error) {
-        const finalMessage = error.message || error;
-        alert(String(finalMessage).replace(/^Error:\s*/, '').trim());
+        notifyError(messageFromCaught(error));
         console.error(error);
     } finally {
         isLoading.value = false;
@@ -155,16 +155,16 @@ const handleStep1 = async () => {
 
 const handleStep2 = async () => {
     if (form.otp.length < 6) {
-        alert('Vui lòng nhập mã OTP hợp lệ!');
+        notifyError('Vui lòng nhập mã OTP hợp lệ!');
         return;
     }
     const passwordError = validatePassword(form.newPassword);
     if (passwordError) {
-        alert(passwordError);
+        notifyError(passwordError);
         return;
     }
     if (form.newPassword !== form.confirmPassword) {
-        alert('Mật khẩu xác nhận không khớp!');
+        notifyError('Mật khẩu xác nhận không khớp!');
         return;
     }
     try {
@@ -176,11 +176,10 @@ const handleStep2 = async () => {
             confirmNewPassword: form.confirmPassword
         };
         await authStore.verifyPassword(payload);
-        alert('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
+        notifySuccess('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
         router.push('/login');
     } catch (error) {
-        const finalMessage = error.message || error;
-        alert(String(finalMessage).replace(/^Error:\s*/, '').trim());
+        notifyError(messageFromCaught(error));
         console.error(error);
     } finally {
         isLoading.value = false;
