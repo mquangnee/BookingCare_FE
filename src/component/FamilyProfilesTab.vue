@@ -178,6 +178,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useProfileStore } from '../stores/profileStore'
+import { notifySuccess, notifyError, messageFromCaught } from '../utils/notify'
 
 const profileStore = useProfileStore()
 const isLoading = ref(true)
@@ -210,7 +211,7 @@ const fetchProfiles = async () => {
         profiles.value = data
     } catch (error) {
         console.error(error);
-        alert(error.message.replace(/^Error:\s*/, '').trim());
+        notifyError(messageFromCaught(error));
     } finally {
         isLoading.value = false;
     }
@@ -251,16 +252,16 @@ const submitAddProfile = async () => {
     try {
         if (isEditMode.value) {
             await profileStore.updateUserProfile(newProfile.value)
-            alert('Cập nhật hồ sơ thành công!')
+            notifySuccess('Cập nhật hồ sơ thành công!')
         } else {
             await profileStore.createUserProfile(newProfile.value)
-            alert('Thêm hồ sơ người thân thành công!')
+            notifySuccess('Thêm hồ sơ người thân thành công!')
         }
         closeAddModal()
         await fetchProfiles()
     } catch (error) {
         console.error(error);
-        alert(error.message.replace(/^Error:\s*/, '').trim());
+        notifyError(messageFromCaught(error));
     } finally {
         isSubmitting.value = false;
     }

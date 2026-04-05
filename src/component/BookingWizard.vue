@@ -288,6 +288,7 @@ import { useProfileStore } from '../stores/profileStore'
 import { useServiceStore } from '../stores/serviceStore'
 import { useAppointmentStore } from '../stores/appointmentStore'
 import { getRelationshipName, getPositionName } from '../constants/enum'
+import { notifyError, messageFromCaught } from '../utils/notify'
 
 const specialtyStore = useSpecialtyStore()
 const doctorStore = useDoctorStore()
@@ -478,7 +479,7 @@ const submitBooking = async () => {
         await appointmentStore.createAppointment(payload);
         isSuccess.value = true;
     } catch (error) {
-        alert(error.message?.replace(/^Error:\s*/, '') || 'Lỗi đặt lịch');
+        notifyError(messageFromCaught(error) || 'Lỗi đặt lịch');
     } finally { isSubmitting.value = false; }
 };
 

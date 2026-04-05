@@ -50,6 +50,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useProfileStore } from '../stores/profileStore'
+import { notifySuccess, notifyError, messageFromCaught } from '../utils/notify'
 
 const isLoading = ref(false)
 const sharedUsers = ref([])
@@ -63,7 +64,7 @@ const fetchSharedUsers = async () => {
         isLoading.value = false
     } catch (error) {
         console.error(error);
-        alert(error.message.replace(/^Error:\s*/, '').trim());
+        notifyError(messageFromCaught(error));
     }
 }
 
@@ -105,9 +106,9 @@ const handleRevokeAccess = async (shareId, name) => {
         try {
             await profileStore.cancelSharedProfile(shareId)
             sharedUsers.value = sharedUsers.value.filter(u => u.id !== shareId)
-            alert('Hủy quyền thành công!')
+            notifySuccess('Hủy quyền thành công!')
         } catch (error) {
-            alert('Có lỗi xảy ra khi hủy quyền.')
+            notifyError(messageFromCaught(error) || 'Có lỗi xảy ra khi hủy quyền.')
         }
     }
 }

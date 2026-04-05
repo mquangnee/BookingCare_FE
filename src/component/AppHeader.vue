@@ -114,6 +114,7 @@ import { useNotificationStore } from '../stores/notificationStore'
 import * as signalR from '@microsoft/signalr'
 import { EnumNotificationType } from '../constants/enum'
 import { SIGNALR_URL } from '../utils/apiConfig'
+import { notifySuccess, notifyError, messageFromCaught } from '../utils/notify'
 
 const authStore = useAuthStore()
 const notificationStore = useNotificationStore()
@@ -183,14 +184,14 @@ const handleRespondNotification = async (notiId, isAccepted) => {
     try {
         formRespond.value = { notificationId: notiId, isAccepted: isAccepted }
         await notificationStore.respondNotification(formRespond.value);
-        alert(`Bạn đã ${isAccepted ? 'ĐỒNG Ý' : 'TỪ CHỐI'} lời mời chia sẻ hồ sơ!`);
+        notifySuccess(`Bạn đã ${isAccepted ? 'ĐỒNG Ý' : 'TỪ CHỐI'} lời mời chia sẻ hồ sơ!`);
         const noti = notifications.value.find(n => n.notificationId === notiId);
         if (noti) {
             noti.isActioned = true;
             noti.isRead = true;
         }
     } catch (error) {
-        alert('Có lỗi xảy ra, vui lòng thử lại.');
+        notifyError(messageFromCaught(error) || 'Có lỗi xảy ra, vui lòng thử lại.');
     }
 }
 

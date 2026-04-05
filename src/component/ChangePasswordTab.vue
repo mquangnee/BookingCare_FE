@@ -98,6 +98,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useAuthStore } from '../stores/authStore'
+import { notifySuccess, notifyError, messageFromCaught } from '../utils/notify'
 
 const authStore = useAuthStore()
 const step = ref(1)
@@ -150,7 +151,7 @@ const handleRequestOTP = async () => {
         otpCode.value = ''
     } catch (error) {
         console.error(error);
-        alert(error.message.replace(/^Error:\s*/, '').trim());
+        notifyError(messageFromCaught(error));
     } finally {
         isLoading.value = false;
     }
@@ -166,13 +167,13 @@ const handleVerifyOTP = async () => {
             confirmPassword: form.value.confirmPassword
         }
         await authStore.changePassword(body)
-        alert('Bạn đã đổi mật khẩu thành công.')
+        notifySuccess('Bạn đã đổi mật khẩu thành công.')
         form.value = { oldPassword: '', newPassword: '', confirmPassword: '' }
         step.value = 1
         showPasswords.value = false
     } catch (error) {
         console.error(error);
-        alert(error.message.replace(/^Error:\s*/, '').trim());
+        notifyError(messageFromCaught(error));
     } finally {
         isLoading.value = false;
     }

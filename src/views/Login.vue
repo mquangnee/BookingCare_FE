@@ -62,6 +62,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
+import { notifySuccess, notifyError, messageFromCaught } from '../utils/notify'
 
 const authStore = useAuthStore()
 const email = ref('')
@@ -79,11 +80,12 @@ const handleLogin = async () => {
       email: email.value,
       password: password.value
     })
-    alert('Đăng nhập thành công')
-    router.push('/home');
+    notifySuccess('Đăng nhập thành công')
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+    router.push('/home')
   } catch (error) {
     console.error(error);
-    alert(error.message.replace(/^Error:\s*/, '').trim());
+    notifyError(messageFromCaught(error));
   } finally {
     isLoading.value = false;
   }

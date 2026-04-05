@@ -1,4 +1,3 @@
-```vue
 <template>
   <div class="split-layout">
     <div class="auth-banner">
@@ -134,6 +133,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
+import { notifySuccess, notifyError, messageFromCaught } from '../utils/notify'
 
 const step = ref(1)
 const isLoading = ref(false)
@@ -172,12 +172,13 @@ const validatePassword = (password) => {
 }
 
 const handleStep1 = async () => {
-  if (validatePassword(form.password)) {
-    alert(validatePassword(form.password));
+  const passwordError = validatePassword(form.password)
+  if (passwordError) {
+    notifyError(passwordError);
     return;
   }
   if (form.password !== form.confirmPassword) {
-    alert('Mật khẩu xác nhận không khớp!')
+    notifyError('Mật khẩu xác nhận không khớp!')
     return
   }
   try {
@@ -185,7 +186,7 @@ const handleStep1 = async () => {
     await authStore.sendRegisterOtp(form.email)
     step.value = 2
   } catch (error) {
-    alert(error.message.replace(/^Error:\s*/, '').trim());
+    notifyError(messageFromCaught(error));
     console.error(error);
   } finally {
     isLoading.value = false;
@@ -194,7 +195,7 @@ const handleStep1 = async () => {
 
 const handleStep2 = async () => {
   if (form.otp.length < 6) {
-    alert('Vui lòng nhập mã OTP hợp lệ!')
+    notifyError('Vui lòng nhập mã OTP hợp lệ!')
     return
   }
   try {
@@ -211,10 +212,10 @@ const handleStep2 = async () => {
       citizenId: form.cccd
     }
     await authStore.register(payload)
-    alert('Đăng ký tài khoản thành công!')
+    notifySuccess('Đăng ký tài khoản thành công!')
     router.push('/login')
   } catch (error) {
-    alert(error.message.replace(/^Error:\s*/, '').trim());
+    notifyError(messageFromCaught(error));
     console.error(error);
   } finally {
     isLoading.value = false;

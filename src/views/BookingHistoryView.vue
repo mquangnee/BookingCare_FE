@@ -149,6 +149,7 @@ import { ref, computed, onMounted } from 'vue'
 import AppHeader from '../component/AppHeader.vue'
 import AppointmentCard from '../component/BookingHistoryCard.vue'
 import { useAppointmentStore } from '../stores/appointmentStore'
+import { notifySuccess, notifyError, messageFromCaught } from '../utils/notify'
 
 const appointmentStore = useAppointmentStore()
 
@@ -232,9 +233,9 @@ const handleCancel = async (id) => {
     if (confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?')) {
         try {
             await appointmentStore.cancelAppointment(id)
-            alert('Hủy lịch hẹn thành công.')
+            notifySuccess('Hủy lịch hẹn thành công.')
         } catch (error) {
-            alert(String(error.message || error).replace(/^Error:\s*/, '').trim())
+            notifyError(messageFromCaught(error))
         }
         loadData(pageNumber.value)
     }
