@@ -1,55 +1,107 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Login from './views/Login.vue'
-import Register from './views/Register.vue'
-import ForgotPassword from './views/ForgotPassword.vue'
-import Home from './views/Home.vue'
-import Profile from './views/Profile.vue'
-import BookingView from './views/BookingView.vue'
-import BookingHistoryView from './views/BookingHistoryView.vue'
+import { useAuthStore } from '@/stores/authStore'
+import Login from '@/views/Login.vue'
+import Register from '@/views/Register.vue'
+import ForgotPassword from '@/views/ForgotPassword.vue'
+import Home from '@/views/Home.vue'
+import Profile from '@/views/Profile.vue'
+import BookingView from '@/views/BookingView.vue'
+import BookingHistoryView from '@/views/BookingHistoryView.vue'
+
+const routes = [
+  {
+    path: '/',
+    redirect: '/home'
+  },
+  {
+    path: '/home',
+    name: 'home',
+    component: Home,
+    meta: { requiresAuth: false } 
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: Login,
+    meta: { requiresGuest: true }
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: Register,
+    meta: { requiresGuest: true }
+  },
+  {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    component: ForgotPassword,
+    meta: { requiresGuest: true }
+  },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: Profile,
+    meta: { requiresAuth: true, allowedRoles: ['Patient'] }
+  },
+  {
+    path: '/booking',
+    name: 'booking',
+    component: BookingView,
+    meta: { requiresAuth: true, allowedRoles: ['Patient'] }
+  },
+  {
+    path: '/history',
+    name: 'history',
+    component: BookingHistoryView,
+    meta: { requiresAuth: true, allowedRoles: ['Patient'] }
+  },
+  {
+    path: '/admin',
+    component: () => import('@/views/layouts/AdminLayout.vue'),
+    // meta: { requiresAuth: true, allowedRoles: ['Admin'] },
+    children: [
+      {
+        path: '', 
+        name: 'admin-dashboard',
+        component: () => import('@/views/admin/Dashboard.vue') 
+      },
+      {
+        path: 'doctors', 
+        name: 'admin-doctors',
+        component: () => import('@/views/admin/ManageDoctors.vue') 
+      }
+    ]
+}
+]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/login',
-      name: 'login',
-      component: Login
-    },
-    {
-      path: '/register',
-      name: 'register',
-      component: Register
-    },
-    {
-      path: '/',
-      redirect: '/home'
-    },
-    {
-      path: '/forgot-password',
-      name: 'forgot-password',
-      component: ForgotPassword
-    },
-    {
-      path: '/profile',
-      name: 'profile',
-      component: Profile
-    },
-    {
-      path: '/booking',
-      name: 'booking',
-      component: BookingView
-    },
-    {
-      path: '/history',
-      name: 'history',
-      component: BookingHistoryView
-    },
-    {
-      path: '/home',
-      name: 'home',
-      component: Home
+  routes
+})
+
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  
+  const isLoggedIn = authStore.isAuthenticated.value 
+
+  if (to.meta.requiresGuest && isLoggedIn) {
+    return next({ name: 'home' })
+  }
+
+  if (to.meta.requiresAuth) {
+    if (!isLoggedIn) {
+      return next({ name: 'login', query: { redirect: to.fullPath } })
     }
-  ]
+
+    const claims = authStore.getClaimsModel()
+    const userRole = claims.role 
+
+    if (to.meta.allowedRoles && (!userRole || !to.meta.allowedRoles.includes(userRole))) {
+      console.warn(`Truy cập bị từ chối. Role hiện tại: ${userRole}`)
+      return next({ name: 'home' }) 
+    }
+  }
+  next()
 })
 
 export default router

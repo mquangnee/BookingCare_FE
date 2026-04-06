@@ -80,9 +80,27 @@ const handleLogin = async () => {
       email: email.value,
       password: password.value
     })
+
+    const role = authStore.getClaimsModel().role;
+    switch (role) {
+      case 'Admin':
+        router.push('/admin')
+        break
+      // case 'Doctor':
+      //   router.push('/doctor/dashboard')
+      //   break
+      // case 'Receptionist':
+      //   router.push('/receptionist/dashboard')
+      //   break
+      case 'Patient':
+        router.push('/home')
+        break
+      default:
+        router.push('/unauthorized')
+        break
+    }
     notifySuccess('Đăng nhập thành công')
     await new Promise((resolve) => setTimeout(resolve, 1500))
-    router.push('/home')
   } catch (error) {
     console.error(error);
     notifyError(messageFromCaught(error));

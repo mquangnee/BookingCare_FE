@@ -19,7 +19,7 @@ export type ServiceModel = {
 
 // === API ===
 export async function doGetServices(): Promise<ServiceModel[]> {
-    const url = buildApiUrl('/service')
+    const url = buildApiUrl('patient/service')
 
     const res = await fetch(url, {
         method: 'GET',
