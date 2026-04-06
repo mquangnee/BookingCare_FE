@@ -55,7 +55,7 @@ export type GetBookingHistoryModel = {
 
 // === API ===
 export async function doCreateAppointment(body: CreateAppointmentModel): Promise<void> {
-    const url = buildApiUrl('/appointment/create')
+    const url = buildApiUrl('patient/appointment/create')
 
     const res = await fetch(url, {
         method: 'POST',
@@ -89,7 +89,7 @@ export async function doGetAppointmentHistory(payload: GetBookingHistoryModel): 
         queryParams.append('patientProfileName', payload.patientProfileName.trim());
     }
 
-    const url = `${buildApiUrl('/appointment/booking-history')}?${queryParams.toString()}`;
+    const url = `${buildApiUrl('patient/appointment/booking-history')}?${queryParams.toString()}`;
 
     const res = await fetch(url, {
         method: 'GET',
@@ -108,7 +108,7 @@ export async function doGetAppointmentHistory(payload: GetBookingHistoryModel): 
 }
 
 export async function doCancelAppointment(appointmentId: string): Promise<boolean> {
-    const url = buildApiUrl(`/appointment/cancel/${appointmentId}`)
+    const url = buildApiUrl(`patient/appointment/cancel/${appointmentId}`)
 
     const res = await fetch(url, {
         method: 'POST',

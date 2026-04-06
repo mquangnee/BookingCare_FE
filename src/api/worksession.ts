@@ -15,7 +15,7 @@ export type AvailableDayModel = {
 export type AvailableTimeSlotModel = {
     startTime: string
     endTime: string
-    timeString: string // Bổ sung trường này để map lên UI
+    timeString: string
     isFull: boolean
     doctorId?: string
     doctorName?: string
@@ -24,8 +24,6 @@ export type AvailableTimeSlotModel = {
 
 // === API ===
 export async function doGetAvailableTimeSlots(body: { serviceId?: string; doctorId?: string; date: string; durationInMinutes: number }): Promise<AvailableDayModel[]> {
-    
-    // Sử dụng URLSearchParams để build Query String tự động và an toàn
     const params = new URLSearchParams();
     
     if (body.doctorId) {
@@ -38,13 +36,13 @@ export async function doGetAvailableTimeSlots(body: { serviceId?: string; doctor
     params.append('date', body.date);
     params.append('durationInMinutes', body.durationInMinutes.toString());
 
-    const url = `${buildApiUrl('/worksession/available')}?${params.toString()}`;
+    const url = `${buildApiUrl('patient/worksession/available')}?${params.toString()}`;
 
     const res = await fetch(url, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getAccessToken()}` // Bỏ hoặc giữ tùy thuộc API này có yêu cầu Auth không
+            'Authorization': `Bearer ${getAccessToken()}`
         }
     })
     if (!res.ok) {

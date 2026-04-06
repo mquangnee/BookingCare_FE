@@ -1,6 +1,5 @@
 import { buildApiUrl } from '../utils/apiConfig'
 import { ErrorMessageDictionary } from "../constants/errorMessageDictionary"
-import { EnumGender, EnumPosition } from '../constants/enum'
 
 // === Constants ===
 const getAccessToken = (): string | null => {
@@ -18,7 +17,7 @@ export type SpecialtyModel = {
 
 // === API ===
 export async function doGetSpecialties(): Promise<SpecialtyModel[]> {
-    const url = buildApiUrl('/specialty')
+    const url = buildApiUrl('patient/specialty')
 
     const res = await fetch(url, {
         method: 'GET',

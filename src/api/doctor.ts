@@ -28,7 +28,7 @@ export type DoctorModel = {
 
 //=== API ===
 export async function doGetDoctorsBySpecialty(specialtyId: string): Promise<DoctorModel[]> {
-    const url = buildApiUrl(`/doctor/${specialtyId}`)
+    const url = buildApiUrl(`patient/doctor/${specialtyId}`)
     
     const res = await fetch(url, {
         method: 'GET',
