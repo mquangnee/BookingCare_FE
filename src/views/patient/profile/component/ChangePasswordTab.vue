@@ -97,8 +97,8 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useAuthStore } from '../stores/authStore'
-import { notifySuccess, notifyError, messageFromCaught } from '../utils/notify'
+import { useAuthStore } from '../../../../stores/authStore'
+import { notifySuccess, notifyError, messageFromCaught } from '../../../../utils/notify'
 
 const authStore = useAuthStore()
 const step = ref(1)

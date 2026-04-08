@@ -45,7 +45,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { getStatusDetail } from '../constants/appointmentStatus';
+import { getStatusDetail } from '../../../../constants/appointmentStatus';
 
 const props = defineProps(['data']);
 

@@ -61,8 +61,8 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/authStore'
-import { notifySuccess, notifyError, messageFromCaught } from '../utils/notify'
+import { useAuthStore } from '../../stores/authStore'
+import { notifySuccess, notifyError, messageFromCaught } from '../../utils/notify'
 
 const authStore = useAuthStore()
 const email = ref('')

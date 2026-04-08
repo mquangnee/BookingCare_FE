@@ -1,6 +1,6 @@
 <script setup>
 import { RouterView } from 'vue-router'
-import AppToasts from './component/AppToasts.vue'
+import AppToasts from './views/system/AppToasts.vue'
 </script>
 
 <template>

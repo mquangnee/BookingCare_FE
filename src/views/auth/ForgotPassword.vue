@@ -104,8 +104,8 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/authStore'
-import { notifySuccess, notifyError, messageFromCaught } from '../utils/notify'
+import { useAuthStore } from '../../stores/authStore'
+import { notifySuccess, notifyError, messageFromCaught } from '../../utils/notify'
 
 const step = ref(1)
 const isLoading = ref(false)

@@ -1,25 +1,10 @@
 import { buildApiUrl } from '../utils/apiConfig'
 import { ErrorMessageDictionary } from "../constants/errorMessageDictionary"
+import { AvailableDayModel } from '../types/index'
 
 // === Constants ===
 const getAccessToken = (): string | null => {
     return localStorage.getItem('accessToken')
-}
-
-// === Models ===
-export type AvailableDayModel = {
-    date: string
-    availableTimeSlots: AvailableTimeSlotModel[]
-}
-
-export type AvailableTimeSlotModel = {
-    startTime: string
-    endTime: string
-    timeString: string
-    isFull: boolean
-    doctorId?: string
-    doctorName?: string
-    doctorPosition?: number
 }
 
 // === API ===

@@ -82,12 +82,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import AppHeader from '../component/AppHeader.vue'
-import { useProfileStore } from '../stores/profileStore'
-import PersonalProfileTab from '../component/PersonalProfileTab.vue'
-import FamilyProfilesTab from '../component/FamilyProfilesTab.vue'
-import SharedManagementTab from '../component/SharedManagementTab.vue'
-import ChangePasswordTab from '../component/ChangePasswordTab.vue'
+import AppHeader from '@/views/system/AppHeader.vue'
+import { useProfileStore } from '../../../stores/profileStore'
+import PersonalProfileTab from '@/views/patient/profile/component/PersonalProfileTab.vue'
+import FamilyProfilesTab from '@/views/patient/profile/component/FamilyProfilesTab.vue'
+import SharedManagementTab from '@/views/patient/profile/component/SharedManagementTab.vue'
+import ChangePasswordTab from '@/views/patient/profile/component/ChangePasswordTab.vue'
 
 const profileStore = useProfileStore()
 const currentTab = ref('personal')

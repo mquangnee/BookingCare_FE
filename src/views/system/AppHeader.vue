@@ -109,12 +109,12 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/authStore'
-import { useNotificationStore } from '../stores/notificationStore'
+import { useAuthStore } from '../../stores/authStore'
+import { useNotificationStore } from '../../stores/notificationStore'
 import * as signalR from '@microsoft/signalr'
-import { EnumNotificationType } from '../constants/enum'
-import { SIGNALR_URL } from '../utils/apiConfig'
-import { notifySuccess, notifyError, messageFromCaught } from '../utils/notify'
+import { EnumNotificationType } from '../../constants/enum'
+import { SIGNALR_URL } from '../../utils/apiConfig'
+import { notifySuccess, notifyError, messageFromCaught } from '../../utils/notify'
 
 const authStore = useAuthStore()
 const notificationStore = useNotificationStore()

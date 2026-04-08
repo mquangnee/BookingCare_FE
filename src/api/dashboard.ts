@@ -1,6 +1,7 @@
+import { buildApiUrl } from '../utils/apiConfig'
+import { ChartDataModel, DashboardSummaryModel, DashboardMetricModel , SpecialtyDistributionModel, DoctorModel, UpdateDoctorModel, LockUnlockAccountModel, CreateDoctorAccountModel } from '../types/index'
 import { ErrorMessageDictionary } from '../constants/errorMessageDictionary'
-import { buildApiUrl } from "../utils/apiConfig"
-import { CreateUserProfileModel, GetUserProfileForBookingModel, ShareProfileModel, SharedProfileModel, UpdateUserProfileModel, UserProfileModel } from "../types/profile.type"
+import { P } from 'vue-router/dist/router-CWoNjPRp.mjs'
 
 // === Constants ===
 const getAccessToken = (): string | null => {
@@ -8,146 +9,12 @@ const getAccessToken = (): string | null => {
 }
 
 // === API ===
-export async function doGetUserProfile(): Promise<UserProfileModel> {
-    const url = buildApiUrl('patient/profile')
+export async function doGetDashboardSummary(): Promise<DashboardSummaryModel> {
+    const url = buildApiUrl('admin/dashboard/summary')
 
     const res = await fetch(url, {
         method: 'GET',
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getAccessToken()}`
-        },
-    })
-    if (!res.ok) {
-        const errorData = await res.json()
-        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
-        throw new Error(errorMessage)
-    }
-    return (await res.json()).result as UserProfileModel
-}
-
-export async function doUpdateUserProfile(data: UpdateUserProfileModel): Promise<boolean> {
-    const url = buildApiUrl('patient/profile/update')
-
-    const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getAccessToken()}`
-        },
-        body: JSON.stringify(data)
-    })
-
-    if (!res.ok) {
-        const errorData = await res.json()
-        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
-        throw new Error(errorMessage)
-    }
-    return true
-}
-
-export async function doGetUserProfiles(): Promise<UserProfileModel[]> {
-    const url = buildApiUrl('patient/profile/all')
-
-    const res = await fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getAccessToken()}`
-        },
-    })
-    if (!res.ok) {
-        const errorData = await res.json()
-        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
-        throw new Error(errorMessage)
-    }
-    return (await res.json()).result as UserProfileModel[]
-}
-
-export async function doCreateUserProfile(data: CreateUserProfileModel): Promise<boolean> {
-    const url = buildApiUrl('patient/profile/create')
-
-    const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getAccessToken()}`
-        },
-        body: JSON.stringify(data)
-    })
-
-    if (!res.ok) {
-        const errorData = await res.json()
-        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
-        throw new Error(errorMessage)
-    }
-    return true
-}
-
-export async function doShareUserProfile(data: ShareProfileModel): Promise<boolean> {
-    const url = buildApiUrl('patient/profile/share')
-
-    const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getAccessToken()}`
-        },
-        body: JSON.stringify(data)
-    })
-
-    if (!res.ok) {
-        const errorData = await res.json()
-        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
-        throw new Error(errorMessage)
-    }
-    return true
-}
-
-export async function doGetSharedProfiles(): Promise<SharedProfileModel[]> {
-    const url = buildApiUrl('patient/profile/get-shared')
-
-    const res = await fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getAccessToken()}`
-        },
-    })
-    if (!res.ok) {
-        const errorData = await res.json()
-        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
-        throw new Error(errorMessage)
-    }
-    return (await res.json()).result as SharedProfileModel[]
-}
-
-export async function doCancelSharedProfile(profileShareId: string): Promise<boolean> {
-    const url = buildApiUrl('patient/profile/cancel')
-
-    const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getAccessToken()}`
-        },
-        body: JSON.stringify({ profileShareId })
-    })
-    if (!res.ok) {
-        const errorData = await res.json()
-        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
-        throw new Error(errorMessage)
-    }
-    return true
-}
-
-export async function doGetUserProfileForBooking(body: GetUserProfileForBookingModel): Promise<UserProfileModel[]> {
-    const url = buildApiUrl(`patient/profile/available?date=${body.date}&startTime=${body.startTime}&endTime=${body.endTime}`)
-
-    const res = await fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${getAccessToken()}`
         }
     })
@@ -157,6 +24,116 @@ export async function doGetUserProfileForBooking(body: GetUserProfileForBookingM
         const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
         throw new Error(errorMessage)
     }
+    return (await res.json()).result as DashboardSummaryModel
+}
 
-    return (await res.json()).result as UserProfileModel[]
+export async function doGetWeeklyBookingChart(): Promise<ChartDataModel[]> {
+    const url = buildApiUrl('admin/dashboard/booking-chart')
+
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    })
+
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return (await res.json()).result as ChartDataModel[]
+}
+
+export async function doGetWeeklySpecialtyChart(): Promise<SpecialtyDistributionModel[]> {
+    const url = buildApiUrl('admin/dashboard/specialty-chart')
+
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    })
+    
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return (await res.json()).result as SpecialtyDistributionModel[]
+}
+
+export async function doGetTotalDoctors() : Promise<DashboardMetricModel<DoctorModel>> {
+    const url = buildApiUrl('admin/doctor/all')
+
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    })
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return (await res.json()).result as DashboardMetricModel<DoctorModel>
+}
+
+export async function doUpdateDoctorInfo(payload: UpdateDoctorModel): Promise<boolean> {
+    const url = buildApiUrl('admin/doctor/update')
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+        },
+        body: JSON.stringify(payload)
+    })
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return true
+}
+
+export async function doUpdateAccountStatus(payload: LockUnlockAccountModel): Promise<boolean> {
+    const url = buildApiUrl('admin/doctor/lock-unlock')
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+        },
+        body: JSON.stringify(payload)
+    })
+
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return true
+}
+
+export async function doCreateDoctorAccount(formData: FormData) : Promise<boolean> {
+    const url = buildApiUrl('admin/doctor/create')
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${getAccessToken()}`
+        },
+        body: formData
+    })
+
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return true
 }

@@ -1,29 +1,10 @@
 import { buildApiUrl } from '../utils/apiConfig'
 import { ErrorMessageDictionary } from "../constants/errorMessageDictionary"
-import { EnumGender, EnumPosition } from '../constants/enum'
+import { DoctorModel } from '../types/index'
 
 // === Constants ===
 const getAccessToken = (): string | null => {
     return localStorage.getItem('accessToken')
-}
-
-//=== Models ===
-export type DoctorModel = {
-    id: string
-    userId: string
-    specialtyId: string
-    doctorCode?: string
-    avatarUrl?: string
-    fullName?: string
-    dateOfBirth: string
-    gender: EnumGender
-    citizenId?: string
-    experienceYears: number
-    position: EnumPosition
-    subSpecialties?: string[]
-    workingHistory?: string
-    description?: string
-    price?: number
 }
 
 //=== API ===

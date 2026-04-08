@@ -150,9 +150,9 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useProfileStore } from '../stores/profileStore'
+import { useProfileStore } from '../../../../stores/profileStore'
 import axios from 'axios'
-import { notifySuccess, notifyError, messageFromCaught } from '../utils/notify'
+import { notifySuccess, notifyError, messageFromCaught } from '../../../../utils/notify'
 
 const profileStore = useProfileStore()
 const isLoading = ref(false)

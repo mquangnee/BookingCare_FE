@@ -69,7 +69,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import AppHeader from '../component/AppHeader.vue'
+import AppHeader from '@/views/system/AppHeader.vue'
 
 const searchQuery = ref('')
 

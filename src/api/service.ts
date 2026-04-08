@@ -1,20 +1,10 @@
 import { buildApiUrl } from '../utils/apiConfig'
 import { ErrorMessageDictionary } from '../constants/errorMessageDictionary'
+import { ServiceModel } from '../types/index'
 
 // === Constants ===
 const getAccessToken = (): string | null => {
     return localStorage.getItem('accessToken')
-}
-
-// === Models ===
-export type ServiceModel = {
-    id: string
-    serviceCode?: string
-    name?: string
-    price: number
-    description?: string
-    durationInMinutes: number
-    isActive: boolean
 }
 
 // === API ===

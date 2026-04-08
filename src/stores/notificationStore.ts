@@ -1,5 +1,5 @@
 import { doGetNotifications, doMarkNotificationRead, doRespondNotification} from "../api/notification"
-import type { NotificationModel, MarkNotificationReadModel, RespondNotificationModel } from "../api/notification"
+import type { NotificationModel, MarkNotificationReadModel, RespondNotificationModel } from "../types/index"
 
 async function getNotifications() : Promise<NotificationModel[]> {
     return doGetNotifications()

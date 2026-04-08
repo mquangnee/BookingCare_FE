@@ -1,5 +1,5 @@
 import { doCancelAppointment, doCreateAppointment, doGetAppointmentHistory } from "../api/appointment"
-import type { CreateAppointmentModel, PagedResult, BookingHistoryModel, GetBookingHistoryModel } from "../api/appointment"
+import type { CreateAppointmentModel, PagedResult, BookingHistoryModel, GetBookingHistoryModel } from "../types/index"
 
 async function createAppointment(appointmentData: CreateAppointmentModel): Promise<void> {
     doCreateAppointment(appointmentData)

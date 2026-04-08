@@ -1,23 +1,15 @@
 import { buildApiUrl } from '../utils/apiConfig'
 import { ErrorMessageDictionary } from "../constants/errorMessageDictionary"
+import { SpecialtyModel } from '../types/index'
 
 // === Constants ===
 const getAccessToken = (): string | null => {
     return localStorage.getItem('accessToken')
 }
 
-// === Models ===
-export type SpecialtyModel = {
-    id: string
-    specialtyCode?: string
-    name?: string
-    imageUrl?: string
-    description?: string
-}
-
 // === API ===
 export async function doGetSpecialties(): Promise<SpecialtyModel[]> {
-    const url = buildApiUrl('patient/specialty')
+    const url = buildApiUrl('/specialty')
 
     const res = await fetch(url, {
         method: 'GET',

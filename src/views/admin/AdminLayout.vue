@@ -37,7 +37,7 @@
                 </router-link>
 
                 <p class="nav-label">QUẢN LÝ DỊCH VỤ</p>
-                <router-link to="/admin/specialties" class="nav-item">login
+                <router-link to="/admin/specialties" class="nav-item">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
@@ -59,13 +59,41 @@
                     </svg>
                     <input type="text" placeholder="Tìm kiếm nhanh..." />
                 </div>
+
                 <div class="topbar-actions">
-                    <div class="admin-profile">
-                        <img src="https://ui-avatars.com/api/?name=Admin&background=45C3D2&color=fff" alt="Admin" />
-                        <div class="profile-info">
-                            <span class="name">Quản trị viên</span>
-                            <span class="role">Admin</span>
+                    <div class="profile-container">
+                        <div class="admin-profile" @click="toggleDropdown">
+                            <img src="https://ui-avatars.com/api/?name=Admin&background=45C3D2&color=fff" alt="Admin" />
+                            <div class="profile-info">
+                                <span class="name">Quản trị viên</span>
+                                <span class="role">Admin</span>
+                            </div>
+                            <svg class="arrow-icon" :class="{ 'rotate': isDropdownOpen }" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
                         </div>
+
+                        <transition name="slide-fade">
+                            <div v-if="isDropdownOpen" class="profile-dropdown">
+                                <router-link to="/admin/profile" class="dropdown-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                    Hồ sơ của tôi
+                                </router-link>
+                                <div class="dropdown-divider"></div>
+                                <button @click="handleLogout" class="dropdown-item logout-btn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                        <polyline points="16 17 21 12 16 7"></polyline>
+                                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                                    </svg>
+                                    Đăng xuất
+                                </button>
+                            </div>
+                        </transition>
                     </div>
                 </div>
             </header>
@@ -80,6 +108,38 @@
         </main>
     </div>
 </template>
+
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../../stores/authStore'
+
+const router = useRouter()
+const authStore = useAuthStore()
+const isDropdownOpen = ref(false)
+
+const toggleDropdown = (event) => {
+    event.stopPropagation()
+    isDropdownOpen.value = !isDropdownOpen.value
+}
+
+const handleLogout = () => {
+    authStore.logout()
+    router.push('/login')
+}
+
+const closeDropdown = () => {
+    isDropdownOpen.value = false
+}
+
+onMounted(() => {
+    window.addEventListener('click', closeDropdown)
+})
+
+onUnmounted(() => {
+    window.removeEventListener('click', closeDropdown)
+})
+</script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -178,7 +238,6 @@
     color: var(--text-dark);
 }
 
-/* VUE ROUTER TỰ ĐỘNG ACTIVE CLASS NÀY KHI TRÙNG URL */
 .nav-item.router-link-exact-active {
     background-color: var(--primary-light) !important;
     color: var(--primary-color) !important;
@@ -262,7 +321,6 @@
     padding: 30px;
 }
 
-/* Hiệu ứng chuyển trang mượt mà */
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.2s ease;
@@ -270,6 +328,111 @@
 
 .fade-enter-from,
 .fade-leave-to {
+    opacity: 0;
+}
+
+.profile-container {
+    position: relative;
+}
+
+.admin-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 12px;
+    transition: background 0.2s;
+}
+
+.admin-profile:hover {
+    background-color: var(--bg-main);
+}
+
+.arrow-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--text-gray);
+    transition: transform 0.3s ease;
+}
+
+.arrow-icon.rotate {
+    transform: rotate(180deg);
+}
+
+/* Dropdown Menu Style */
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 200px;
+    background-color: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    padding: 8px;
+    z-index: 1000;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    color: var(--text-dark);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.dropdown-item svg {
+    width: 18px;
+    height: 18px;
+    color: var(--text-gray);
+}
+
+.dropdown-item:hover {
+    background-color: var(--bg-main);
+    color: var(--primary-color);
+}
+
+.dropdown-item:hover svg {
+    color: var(--primary-color);
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 8px 0;
+}
+
+.logout-btn {
+    color: #ef4444 !important;
+}
+
+.logout-btn:hover {
+    background-color: #fef2f2 !important;
+}
+
+.logout-btn svg {
+    color: #ef4444 !important;
+}
+
+.slide-fade-enter-active {
+    transition: all 0.2s ease-out;
+}
+.slide-fade-leave-active {
+    transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+    transform: translateY(-10px);
     opacity: 0;
 }
 </style>
