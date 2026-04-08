@@ -1,12 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
-import Login from '@/views/Login.vue'
-import Register from '@/views/Register.vue'
-import ForgotPassword from '@/views/ForgotPassword.vue'
-import Home from '@/views/Home.vue'
-import Profile from '@/views/Profile.vue'
-import BookingView from '@/views/BookingView.vue'
-import BookingHistoryView from '@/views/BookingHistoryView.vue'
+import Login from '@/views/auth/Login.vue'
+import Register from '@/views/auth/Register.vue'
+import ForgotPassword from '@/views/auth/ForgotPassword.vue'
+import Home from '@/views/system/Home.vue'
+import Profile from '@/views/patient/profile/Profile.vue'
+import BookingView from '@/views/patient/booking/BookingView.vue'
+import BookingHistoryView from '@/views/patient/booking/BookingHistoryView.vue'
 
 const routes = [
   {
@@ -57,18 +57,18 @@ const routes = [
   },
   {
     path: '/admin',
-    component: () => import('@/views/layouts/AdminLayout.vue'),
-    // meta: { requiresAuth: true, allowedRoles: ['Admin'] },
+    component: () => import('@/views/admin/AdminLayout.vue'),
+    meta: { requiresAuth: true, allowedRoles: ['Admin'] },
     children: [
       {
         path: '', 
         name: 'admin-dashboard',
-        component: () => import('@/views/admin/Dashboard.vue') 
+        component: () => import('@/views/admin/component/dashboard/Dashboard.vue') 
       },
       {
         path: 'doctors', 
         name: 'admin-doctors',
-        component: () => import('@/views/admin/ManageDoctors.vue') 
+        component: () => import('@/views/admin/component/doctormanagement/ManageDoctors.vue') 
       }
     ]
 }

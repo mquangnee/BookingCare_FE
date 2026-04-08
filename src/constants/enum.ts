@@ -70,6 +70,11 @@ export enum EnumAppointmentStatus {
   Canceled = 4
 }
 
+export enum EnumAccountStatus {
+  Active = 0,
+  Inactive = 1
+}
+
 // === HELPER FUNCTIONS ===
 export const getPositionName = (pos: EnumPosition): string => {
   switch (pos) {
@@ -100,5 +105,13 @@ export const getRelationshipName = (relationship: EnumRelationship): string => {
     case EnumRelationship.Spouse: return 'Vợ/Chồng';
     case EnumRelationship.Grandparent: return 'Ông/Bà';
     default: return 'Bản thân';
+  }
+}
+
+export const getAccountStatusName = (status: EnumAccountStatus): string => {
+  switch (status) {
+    case EnumAccountStatus.Active: return 'Đang hoạt động';
+    case EnumAccountStatus.Inactive: return 'Đã khóa';
+    default: return 'Đang hoạt động';
   }
 }

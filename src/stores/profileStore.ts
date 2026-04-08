@@ -1,5 +1,5 @@
-import { doGetUserProfile, doUpdateUserProfile, doGetUserProfiles, doCreateUserProfile, doShareUserProfile, doGetSharedProfiles, doCancelSharedProfile, doGetUserProfileForBooking } from "../api/profile";
-import type { UpdateUserProfileModel, UserProfileModel, CreateUserProfileModel, ShareProfileModel, SharedProfileModel, GetUserProfileForBookingModel } from "../api/profile";
+import { doGetUserProfile, doUpdateUserProfile, doGetUserProfiles, doCreateUserProfile, doShareUserProfile, doGetSharedProfiles, doCancelSharedProfile, doGetUserProfileForBooking } from "../api/profile"
+import type { UpdateUserProfileModel, UserProfileModel, CreateUserProfileModel, ShareProfileModel, SharedProfileModel, GetUserProfileForBookingModel } from "../types/index"
 
 async function getUserProfile() : Promise<UserProfileModel> {
     return doGetUserProfile()

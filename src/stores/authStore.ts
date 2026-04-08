@@ -1,15 +1,8 @@
 import { reactive, readonly, computed } from 'vue'
 import { doLogin, doRegistere, doSendRegisterOtp, doSendVerifyPasswordOtp, doVerifyPassword, doChangePassword, doSendChangePasswordOtp } from '../api/auth'
-import type { AuthModel, LoginModel, RegisterModel, VerifyPasswordModel, ChangePasswordModel } from '../api/auth'
+import type { AuthModel, LoginModel, RegisterModel, VerifyPasswordModel, ChangePasswordModel, ClaimsModel } from '../types/index'
 
-// === MODELS, CONSTANTS ===
-export type ClaimsModel = {
-  sub?: string
-  email?: string
-  role?: string
-  jti?: string
-}
-
+// === CONSTANTS ===
 const state = reactive({
   accessToken: localStorage.getItem('accessToken') || '',
   refreshToken: localStorage.getItem('refreshToken') || ''

@@ -1,56 +1,10 @@
 import { buildApiUrl } from "../utils/apiConfig"
 import { ErrorMessageDictionary } from "../constants/errorMessageDictionary"
-import { EnumAppointmentStatus } from "../constants/enum"
+import { BookingHistoryModel, CreateAppointmentModel, GetBookingHistoryModel, PagedResult } from "../types/index"
 
 // === Constants ===
 const getAccessToken = (): string | null => {
     return localStorage.getItem('accessToken')
-}
-
-// === Models ===
-export type CreateAppointmentModel = {
-    patientProfileId: string
-    doctorId?: string
-    serviceId?: string
-    date: string
-    startTime: string
-    endTime: string
-}
-
-export type BookingHistoryModel = {
-    id: string
-    appointmentCode: string
-    date: string
-    startTime: string
-    endTime: string
-    queueNumber?: number
-    status: EnumAppointmentStatus
-    doctorName: string
-    doctorCode: string
-    doctorId: string
-    specialtyName: string
-    patientProfileName: string
-    patientProfileCode: string
-    patientProfileId: string
-    services: string[]
-    createdDate: string
-}
-
-export type PagedResult<T> = {
-    items: T[]
-    totalCount: number
-    pageNumber: number
-    pageSize: number
-    totalPages: number
-    hasPreviousPage: boolean
-    hasNextPage: boolean
-}
-
-export type GetBookingHistoryModel = {
-    status?: EnumAppointmentStatus
-    doctorName?: string
-    patientProfileName?: string
-    pageNumber?: number
 }
 
 // === API ===

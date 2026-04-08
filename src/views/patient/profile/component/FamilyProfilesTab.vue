@@ -177,8 +177,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useProfileStore } from '../stores/profileStore'
-import { notifySuccess, notifyError, messageFromCaught } from '../utils/notify'
+import { useProfileStore } from '../../../../stores/profileStore'
+import { notifySuccess, notifyError, messageFromCaught } from '../../../../utils/notify'
 
 const profileStore = useProfileStore()
 const isLoading = ref(true)

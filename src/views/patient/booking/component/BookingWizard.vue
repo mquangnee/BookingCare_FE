@@ -281,14 +281,14 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { useSpecialtyStore } from '../stores/specialtyStore'
-import { useDoctorStore } from '../stores/doctorStore'
-import { useWorkSessionStore } from '../stores/workSessionStore'
-import { useProfileStore } from '../stores/profileStore'
-import { useServiceStore } from '../stores/serviceStore'
-import { useAppointmentStore } from '../stores/appointmentStore'
-import { getRelationshipName, getPositionName } from '../constants/enum'
-import { notifyError, messageFromCaught } from '../utils/notify'
+import { useSpecialtyStore } from '../../../../stores/specialtyStore'
+import { useDoctorStore } from '../../../../stores/doctorStore'
+import { useWorkSessionStore } from '../../../../stores/workSessionStore'
+import { useProfileStore } from '../../../../stores/profileStore'
+import { useServiceStore } from '../../../../stores/serviceStore'
+import { useAppointmentStore } from '../../../../stores/appointmentStore'
+import { getRelationshipName, getPositionName } from '../../../../constants/enum'
+import { notifyError, messageFromCaught } from '../../../../utils/notify'
 
 const specialtyStore = useSpecialtyStore()
 const doctorStore = useDoctorStore()

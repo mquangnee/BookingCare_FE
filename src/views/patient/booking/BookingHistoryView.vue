@@ -146,10 +146,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import AppHeader from '../component/AppHeader.vue'
-import AppointmentCard from '../component/BookingHistoryCard.vue'
-import { useAppointmentStore } from '../stores/appointmentStore'
-import { notifySuccess, notifyError, messageFromCaught } from '../utils/notify'
+import AppHeader from '@/views/system/AppHeader.vue'
+import AppointmentCard from './component/BookingHistoryCard.vue'
+import { useAppointmentStore } from '../../../stores/appointmentStore'
+import { notifySuccess, notifyError, messageFromCaught } from '../../../utils/notify'
 
 const appointmentStore = useAppointmentStore()
 

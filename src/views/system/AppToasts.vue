@@ -1,5 +1,5 @@
 <script setup>
-import { toastState, dismissNotify } from '../utils/notify'
+import { toastState, dismissNotify } from '../../utils/notify'
 </script>
 
 <template>

@@ -11,8 +11,8 @@
 </template>
 
 <script setup>
-import AppHeader from '@/component/AppHeader.vue'
-import BookingWizard from '@/component/BookingWizard.vue'
+import AppHeader from '@/views/system/AppHeader.vue'
+import BookingWizard from './component/BookingWizard.vue'
 </script>
 
 <style scoped>
