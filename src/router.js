@@ -7,6 +7,10 @@ import Home from '@/views/system/Home.vue'
 import Profile from '@/views/patient/profile/Profile.vue'
 import BookingView from '@/views/patient/booking/BookingView.vue'
 import BookingHistoryView from '@/views/patient/booking/BookingHistoryView.vue'
+import ExamRoom from './views/doctor/component/ExamRoom.vue'
+import Schedule from './views/doctor/component/Schedule.vue'
+import AccountSettings from './views/doctor/component/AccountSettings.vue'
+import History from './views/doctor/component/History.vue'
 
 const routes = [
   {
@@ -71,7 +75,46 @@ const routes = [
         component: () => import('@/views/admin/component/doctormanagement/ManageDoctors.vue') 
       }
     ]
-}
+  },
+  {
+    path: '/doctor',
+    component: () => import('@/views/doctor/DoctorLayout.vue'),
+    // meta: { requiresAuth: true, allowedRoles: ['Doctor'] },
+    children: [
+      {
+        path: '', 
+        name: 'examination',
+        component: ExamRoom
+      },
+      {
+        path: 'examination', 
+        name: 'examination',
+        component: ExamRoom
+      },
+      {
+        path: 'schedule', 
+        name: 'doctor-schedule',
+        component: Schedule
+      },
+      {
+        path: 'profile',
+        name: 'doctor-profile',
+        component: AccountSettings
+      },
+      {
+        path: 'history',
+        name: 'doctor-history',
+        component: History
+      }
+    ] 
+  },
+  {
+    path: '/receptionist',
+    name: 'receptionist-dashboard',
+    component: () => import('@/views/receptionist/ReceptionistDashboardView.vue'),
+    
+    // meta: { requiresAuth: true, allowedRoles: ['Receptionist'] } 
+  }
 ]
 
 const router = createRouter({

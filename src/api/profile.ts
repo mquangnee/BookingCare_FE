@@ -1,6 +1,7 @@
 import { ErrorMessageDictionary } from '../constants/errorMessageDictionary'
 import { buildApiUrl } from "../utils/apiConfig"
-import { CreateUserProfileModel, GetUserProfileForBookingModel, ShareProfileModel, SharedProfileModel, UpdateUserProfileModel, UserProfileModel } from "../types/profile.type"
+import { CreateUserProfileModel, GetUserProfileForBookingModel, ShareProfileModel, SharedProfileModel, UpdateUserProfileModel, PatientProfileModel } from "../types/profile.type"
+import { DoctorModel } from '../types'
 
 // === Constants ===
 const getAccessToken = (): string | null => {
@@ -8,7 +9,7 @@ const getAccessToken = (): string | null => {
 }
 
 // === API ===
-export async function doGetUserProfile(): Promise<UserProfileModel> {
+export async function doGetUserProfile(): Promise<PatientProfileModel> {
     const url = buildApiUrl('patient/profile')
 
     const res = await fetch(url, {
@@ -23,7 +24,7 @@ export async function doGetUserProfile(): Promise<UserProfileModel> {
         const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
         throw new Error(errorMessage)
     }
-    return (await res.json()).result as UserProfileModel
+    return (await res.json()).result as PatientProfileModel
 }
 
 export async function doUpdateUserProfile(data: UpdateUserProfileModel): Promise<boolean> {
@@ -46,7 +47,7 @@ export async function doUpdateUserProfile(data: UpdateUserProfileModel): Promise
     return true
 }
 
-export async function doGetUserProfiles(): Promise<UserProfileModel[]> {
+export async function doGetUserProfiles(): Promise<PatientProfileModel[]> {
     const url = buildApiUrl('patient/profile/all')
 
     const res = await fetch(url, {
@@ -61,7 +62,7 @@ export async function doGetUserProfiles(): Promise<UserProfileModel[]> {
         const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
         throw new Error(errorMessage)
     }
-    return (await res.json()).result as UserProfileModel[]
+    return (await res.json()).result as PatientProfileModel[]
 }
 
 export async function doCreateUserProfile(data: CreateUserProfileModel): Promise<boolean> {
@@ -141,7 +142,7 @@ export async function doCancelSharedProfile(profileShareId: string): Promise<boo
     return true
 }
 
-export async function doGetUserProfileForBooking(body: GetUserProfileForBookingModel): Promise<UserProfileModel[]> {
+export async function doGetUserProfileForBooking(body: GetUserProfileForBookingModel): Promise<PatientProfileModel[]> {
     const url = buildApiUrl(`patient/profile/available?date=${body.date}&startTime=${body.startTime}&endTime=${body.endTime}`)
 
     const res = await fetch(url, {
@@ -158,5 +159,60 @@ export async function doGetUserProfileForBooking(body: GetUserProfileForBookingM
         throw new Error(errorMessage)
     }
 
-    return (await res.json()).result as UserProfileModel[]
+    return (await res.json()).result as PatientProfileModel[]
+}
+
+export async function doSearchPatientProfiles(keyword: string): Promise<PatientProfileModel[]> {
+    const url = buildApiUrl(`receptionist/profile/search?keyword=${encodeURIComponent(keyword)}`)
+
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    })
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return (await res.json()).result as PatientProfileModel[]
+}
+
+export async function doCreatePatientProfileByReceptionist(payload: CreateUserProfileModel): Promise<PatientProfileModel> {
+    const url = buildApiUrl(`receptionist/profile/create`)
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+        },
+        body: JSON.stringify(payload)
+    })
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return (await res.json()).result as PatientProfileModel
+}
+
+export async function doGetDoctorProfile(): Promise<DoctorModel> {
+    const url = buildApiUrl(`doctor/profile`)
+
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    })
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return (await res.json()).result as DoctorModel
 }

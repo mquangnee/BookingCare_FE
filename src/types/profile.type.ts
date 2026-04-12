@@ -1,6 +1,6 @@
 import { EnumBloodType, EnumGender, EnumRelationship, EnumSharePermission, EnumShareStatus } from "../constants/enum"
 
-export type UserProfileModel = {
+export type PatientProfileModel = {
     id: string
     patientCode?: string
     profileCode: string
@@ -9,10 +9,10 @@ export type UserProfileModel = {
     gender: EnumGender
     citizenId: string
     phoneNumber: string
-    relationship: EnumRelationship
-    bloodType: EnumBloodType
+    relationship?: EnumRelationship
+    bloodType?: EnumBloodType
     medicalHistory?: string
-    isShared: boolean
+    isShared?: boolean
     sharePermission?: EnumSharePermission
 }
 
@@ -34,8 +34,8 @@ export type CreateUserProfileModel = {
     gender: EnumGender
     citizenId: string
     phoneNumber: string
-    relationship: EnumRelationship
-    bloodType: EnumBloodType
+    relationship?: EnumRelationship
+    bloodType?: EnumBloodType
     medicalHistory?: string
 }
 
