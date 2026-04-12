@@ -67,7 +67,9 @@ export enum EnumAppointmentStatus {
   Approved = 1,
   InProgress = 2,
   Completed = 3,
-  Canceled = 4
+  Canceled = 4,
+  Waiting = 5,
+  NoShow = 6
 }
 
 export enum EnumAccountStatus {
@@ -75,15 +77,54 @@ export enum EnumAccountStatus {
   Inactive = 1
 }
 
+export enum EnumMedicineUnit {
+  Tablet = 0, //viên
+  Blister = 1, //vỉ
+  Box = 2, //hộp
+  Bottle = 3, //chai
+  Vial = 4, //lọ
+  Ampule = 5, //ống tiêm
+  Sachet = 6, //gói
+  Tube = 7 //tuýp
+}
+
+export enum EnumStatus {
+  Active = 0,
+  Inactive = 1
+}
+
+export enum EnumAppointmentPriority
+{
+  Level0 = 0, //Mặc định
+  Level1 = 1, //Dành cho bệnh nhân đến đúng giờ
+  Level2 = 2, //Dành cho bệnh nhân đặt lịch offline
+  Level3 = 3  //Dành cho bệnh nhân đến muộn
+}
+
+export enum EnumAppointmentType
+{
+  Online = 0,
+  Offline = 1
+}
+
 // === HELPER FUNCTIONS ===
+export const getGenderName = (gender: EnumGender): string => {
+  switch (gender) {
+    case EnumGender.Male: return 'Nam';
+    case EnumGender.Female: return 'Nữ';
+    case EnumGender.Others: return 'Khác';
+    default: return 'Khác';
+  }
+}
+
 export const getPositionName = (pos: EnumPosition): string => {
   switch (pos) {
-    case EnumPosition.Doctor: return 'Bác sĩ';
-    case EnumPosition.Master: return 'Thạc sĩ';
-    case EnumPosition.DoctorOfPhilosophy: return 'Tiến sĩ';
-    case EnumPosition.AssociateProfessor: return 'Phó Giáo sư';
-    case EnumPosition.Professor: return 'Giáo sư';
-    default: return 'Bác sĩ';
+    case EnumPosition.Doctor: return 'BS.';
+    case EnumPosition.Master: return 'Ths.';
+    case EnumPosition.DoctorOfPhilosophy: return 'TS.';
+    case EnumPosition.AssociateProfessor: return 'PGS.TS';
+    case EnumPosition.Professor: return 'GS.TS';
+    default: return 'BS.';
   }
 }
 
@@ -113,5 +154,26 @@ export const getAccountStatusName = (status: EnumAccountStatus): string => {
     case EnumAccountStatus.Active: return 'Đang hoạt động';
     case EnumAccountStatus.Inactive: return 'Đã khóa';
     default: return 'Đang hoạt động';
+  }
+}
+
+export const getAppointmentStatusName = (status: EnumAppointmentStatus): string => {
+  switch (status) {
+    case EnumAppointmentStatus.Pending: return 'Chờ duyệt';
+    case EnumAppointmentStatus.Approved: return 'Chờ check-in';
+    case EnumAppointmentStatus.Waiting: return 'Đã check-in';
+    case EnumAppointmentStatus.InProgress: return 'Đang khám';
+    case EnumAppointmentStatus.Completed: return 'Hoàn thành';
+    case EnumAppointmentStatus.Canceled: return 'Hủy/Vắng';
+    case EnumAppointmentStatus.NoShow: return 'Vắng mặt';
+    default: return 'Unknown';
+  }
+}
+
+export const getAppointmentTypeName = (type: EnumAppointmentType): string => {
+  switch (type) {
+    case EnumAppointmentType.Online: return 'Đặt trước';
+    case EnumAppointmentType.Offline: return 'Vãng lai';
+    default: return 'Đặt trước';
   }
 }

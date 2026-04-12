@@ -113,7 +113,7 @@
 
             <div v-else class="list-wrapper">
                 <TransitionGroup name="card-list" tag="div" class="card-list">
-                    <AppointmentCard v-for="item in sortedAppointments" :key="item.id" :data="item"
+                    <AppointmentCard v-for="item in paginatedAppointments" :key="item.id" :data="item"
                         @cancel="handleCancel" />
                 </TransitionGroup>
 
@@ -155,11 +155,8 @@ const appointmentStore = useAppointmentStore()
 
 const appointments = ref([])
 const loading = ref(true)
-const totalCount = ref(0)
-const totalPages = ref(1)
 const pageNumber = ref(1)
-const hasNext = ref(false)
-const hasPrevious = ref(false)
+const itemsPerPage = ref(5)
 
 const selectedStatus = ref(null)
 const searchDoctor = ref('')
@@ -181,8 +178,28 @@ const currentStatusColor = computed(() =>
     statusOptions.find(s => s.value === selectedStatus.value)?.color ?? '#9ca3af'
 )
 
+const filteredAppointments = computed(() => {
+    let list = [...appointments.value]
+    
+    if (selectedStatus.value !== null) {
+        list = list.filter(item => item.status === selectedStatus.value)
+    }
+    
+    if (searchDoctor.value.trim()) {
+        const keyword = searchDoctor.value.toLowerCase().trim()
+        list = list.filter(item => item.doctorName.toLowerCase().includes(keyword))
+    }
+    
+    if (searchPatient.value.trim()) {
+        const keyword = searchPatient.value.toLowerCase().trim()
+        list = list.filter(item => item.patientProfileName.toLowerCase().includes(keyword))
+    }
+    
+    return list
+})
+
 const sortedAppointments = computed(() => {
-    const list = [...appointments.value]
+    const list = [...filteredAppointments.value]
     switch (sortKey.value) {
         case 'date_asc': return list.sort((a, b) => new Date(a.date) - new Date(b.date))
         case 'date_desc': return list.sort((a, b) => new Date(b.date) - new Date(a.date))
@@ -194,6 +211,17 @@ const sortedAppointments = computed(() => {
     }
 })
 
+const totalCount = computed(() => filteredAppointments.value.length)
+const totalPages = computed(() => Math.ceil(totalCount.value / itemsPerPage.value) || 1)
+const hasPrevious = computed(() => pageNumber.value > 1)
+const hasNext = computed(() => pageNumber.value < totalPages.value)
+
+const paginatedAppointments = computed(() => {
+    const start = (pageNumber.value - 1) * itemsPerPage.value
+    const end = start + itemsPerPage.value
+    return sortedAppointments.value.slice(start, end)
+})
+
 const visiblePages = computed(() => {
     const total = totalPages.value, cur = pageNumber.value
     if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
@@ -202,46 +230,51 @@ const visiblePages = computed(() => {
     return [1, '...', cur - 1, cur, cur + 1, '...', total]
 })
 
-const loadData = async (page = 1) => {
+const loadHistory = async () => {
     loading.value = true
     try {
-        const payload = {
-            pageNumber: page,
-            ...(selectedStatus.value !== null && { status: selectedStatus.value }),
-            ...(searchDoctor.value.trim() && { doctorName: searchDoctor.value.trim() }),
-            ...(searchPatient.value.trim() && { patientProfileName: searchPatient.value.trim() }),
-        }
-        const res = await appointmentStore.getHistory(payload)
-        appointments.value = res.items
-        totalCount.value = res.totalCount
-        totalPages.value = res.totalPages
-        pageNumber.value = res.pageNumber
-        hasNext.value = res.hasNextPage
-        hasPrevious.value = res.hasPreviousPage
+        const res = await appointmentStore.getHistory()
+        appointments.value = Array.isArray(res) ? res : (res.items || [])
     } catch (err) {
         console.error('Lỗi tải lịch sử:', err)
+        appointments.value = []
     } finally {
         loading.value = false
     }
 }
 
-const applyStatusFilter = (status) => { selectedStatus.value = status; loadData(1) }
-const debouncedSearch = () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(() => loadData(1), 450) }
-const changePage = (newPage) => { loadData(newPage); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+const applyStatusFilter = (status) => {
+    selectedStatus.value = status
+    pageNumber.value = 1
+}
+
+const debouncedSearch = () => {
+    clearTimeout(debounceTimer)
+    debounceTimer = setTimeout(() => {
+        pageNumber.value = 1
+    }, 450)
+}
+
+const changePage = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages.value) {
+        pageNumber.value = newPage
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+}
 
 const handleCancel = async (id) => {
     if (confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?')) {
         try {
             await appointmentStore.cancelAppointment(id)
             notifySuccess('Hủy lịch hẹn thành công.')
+            await loadHistory()
         } catch (error) {
             notifyError(messageFromCaught(error))
         }
-        loadData(pageNumber.value)
     }
 }
 
-onMounted(() => loadData())
+onMounted(() => loadHistory())
 </script>
 
 <style scoped>

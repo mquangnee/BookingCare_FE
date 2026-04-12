@@ -1,6 +1,6 @@
 import { buildApiUrl } from "../utils/apiConfig"
 import { ErrorMessageDictionary } from "../constants/errorMessageDictionary"
-import { BookingHistoryModel, CreateAppointmentModel, GetBookingHistoryModel, PagedResult } from "../types/index"
+import { AppointmentModel, BookingHistoryModel, ChangeAppointmentStatusModel, CreateAppointmentModel, GetBookingHistoryModel, PagedResult, SendMedicalReportModel } from "../types/index"
 
 // === Constants ===
 const getAccessToken = (): string | null => {
@@ -26,20 +26,17 @@ export async function doCreateAppointment(body: CreateAppointmentModel): Promise
     }
 }
 
-export async function doGetAppointmentHistory(payload: GetBookingHistoryModel): Promise<PagedResult<BookingHistoryModel>> {
-    const pageNumber = payload.pageNumber || 1;
+export async function doGetAppointmentHistory(payload?: GetBookingHistoryModel): Promise<PagedResult<BookingHistoryModel>> {
 
-    const queryParams = new URLSearchParams({
-        pageNumber: pageNumber.toString(),
-    });
+    const queryParams = new URLSearchParams({});
 
-    if (payload.status !== undefined && payload.status !== null) {
+    if (payload?.status !== undefined && payload?.status !== null) {
         queryParams.append('status', payload.status.toString());
     }
-    if (payload.doctorName) {
+    if (payload?.doctorName) {
         queryParams.append('doctorName', payload.doctorName.trim());
     }
-    if (payload.patientProfileName) {
+    if (payload?.patientProfileName) {
         queryParams.append('patientProfileName', payload.patientProfileName.trim());
     }
 
@@ -77,4 +74,78 @@ export async function doCancelAppointment(appointmentId: string): Promise<boolea
         throw new Error(errorMessage)
     }
     return (await res.json()).result as Promise<boolean>
+}
+
+export async function doGetAppointmentsToday(): Promise<AppointmentModel[]> {
+    const url = buildApiUrl('doctor/appointment/today')
+
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    })
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return (await res.json()).result as AppointmentModel[]
+}
+
+export async function doCompleteAppointment(payload: SendMedicalReportModel): Promise<boolean> {
+    const url = buildApiUrl('doctor/appointment/complete')
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+        },
+        body: JSON.stringify(payload)
+    })
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return (await res.json()).result as boolean
+}
+
+export async function doGetAppointmentsByWorkSessionId(worksessionId: string): Promise<AppointmentModel[]> {
+    const url = buildApiUrl(`receptionist/appointment/${worksessionId}`)
+
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    })
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return (await res.json()).result as AppointmentModel[]
+}
+
+export async function doChangeAppointmentStatus(payload: ChangeAppointmentStatusModel): Promise<boolean> {
+    const url = buildApiUrl(`receptionist/appointment/status`)
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+        },
+        body: JSON.stringify(payload)
+    })
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return (await res.json()).result as boolean
 }

@@ -25,4 +25,6 @@ export const ErrorMessageDictionary: Record<string, string> = {
   "TimeNotValidForCancellation": "Cuộc hẹn không thể hủy vì đã quá gần với thời gian bắt đầu. Vui lòng kiểm tra lại thời gian cuộc hẹn.",
   "UpdateInfoFailed": "Cập nhật thông tin thất bại. Vui lòng thử lại sau giây lát.",
   "LockUnlockAccountFailed": "Thao tác khóa/mở khóa tài khoản thất bại. Vui lòng thử lại sau giây lát.",
+  "PhoneNumberAlreadyExists": "Số điện thoại đã tồn tại trong hệ thống. Vui lòng sử dụng số điện thoại khác.",
+  "CitizenIdAlreadyExists": "Số căn cước công dân đã tồn tại trong hệ thống. Vui lòng sử dụng số khác."
 };

@@ -1,7 +1,6 @@
 import { buildApiUrl } from '../utils/apiConfig'
 import { ChartDataModel, DashboardSummaryModel, DashboardMetricModel , SpecialtyDistributionModel, DoctorModel, UpdateDoctorModel, LockUnlockAccountModel, CreateDoctorAccountModel } from '../types/index'
 import { ErrorMessageDictionary } from '../constants/errorMessageDictionary'
-import { P } from 'vue-router/dist/router-CWoNjPRp.mjs'
 
 // === Constants ===
 const getAccessToken = (): string | null => {

@@ -8,13 +8,10 @@ export * from './worksession.type'
 export * from './appointment.type'
 export * from './patient.type'
 export * from './dashboard.type'
+export * from './medicine.type'
+export * from './prescription.type'
 
 export type PagedResult<T> = {
     items: T[]
     totalCount: number
-    pageNumber: number
-    pageSize: number
-    totalPages: number
-    hasPreviousPage: boolean
-    hasNextPage: boolean
 }

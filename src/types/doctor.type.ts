@@ -15,7 +15,6 @@ export type DoctorModel = {
     citizenId?: string
     experienceYears: number
     position: EnumPosition
-    subSpecialties?: string[]
     workingHistory?: string
     description?: string
     status?: EnumAccountStatus

@@ -1,4 +1,4 @@
-import { EnumAppointmentStatus } from "../constants/enum"
+import { EnumAccountStatus, EnumAppointmentPriority, EnumAppointmentStatus, EnumAppointmentType, EnumGender } from "../constants/enum"
 
 export type AppointmentModel = {
     id: string
@@ -8,9 +8,15 @@ export type AppointmentModel = {
     doctorName: string
     patientProfileId: string
     patientName: string
+    age?: number
+    gender?: EnumGender
+    type?: EnumAppointmentType
+    status?: EnumAppointmentStatus
+    priority?: EnumAppointmentPriority
     date: string
     startTime?: string
     endTime?: string
+    checkInDate?: string
 }
 
 export type CreateAppointmentModel = {
@@ -28,7 +34,6 @@ export type BookingHistoryModel = {
     date: string
     startTime: string
     endTime: string
-    queueNumber?: number
     status: EnumAppointmentStatus
     doctorName: string
     doctorCode: string
@@ -45,5 +50,10 @@ export type GetBookingHistoryModel = {
     status?: EnumAppointmentStatus
     doctorName?: string
     patientProfileName?: string
-    pageNumber?: number
+}
+
+export type ChangeAppointmentStatusModel = {
+    appointmentId: string
+    status: EnumAccountStatus
+    priority: EnumAppointmentPriority
 }
