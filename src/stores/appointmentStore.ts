@@ -1,9 +1,9 @@
 import { doCancelAppointment, doChangeAppointmentStatus, doCompleteAppointment, doCreateAppointment, doGetAppointmentHistory, doGetAppointmentsByWorkSessionId, doGetAppointmentsToday } from "../api/appointment"
-import type { CreateAppointmentModel, PagedResult, BookingHistoryModel, GetBookingHistoryModel, AppointmentModel, ChangeAppointmentStatusModel } from "../types/index"
+import type { CreateAppointmentModel, PagedResult, BookingHistoryModel, GetBookingHistoryModel, AppointmentModel, ChangeAppointmentStatusModel, PaymentResponseModel } from "../types/index"
 import { SendMedicalReportModel } from "../types/prescription.type"
 
-async function createAppointment(appointmentData: CreateAppointmentModel): Promise<void> {
-    doCreateAppointment(appointmentData)
+async function createAppointment(appointmentData: CreateAppointmentModel): Promise<PaymentResponseModel> {
+    return await doCreateAppointment(appointmentData)
 }
 
 async function getHistory(payload?: GetBookingHistoryModel): Promise<PagedResult<BookingHistoryModel>> {

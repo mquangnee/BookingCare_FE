@@ -476,12 +476,33 @@ const submitBooking = async () => {
             startTime: timeParts[0] + ":00",
             endTime: timeParts[1] + ":00"
         };
-        await appointmentStore.createAppointment(payload);
-        isSuccess.value = true;
+        const response = await appointmentStore.createAppointment(payload);
+        if (response?.checkoutUrl && response?.formFields) {
+            submitToSePay(response.checkoutUrl, response.formFields);
+        } else {
+            isSuccess.value = true;
+        }
     } catch (error) {
         notifyError(messageFromCaught(error) || 'Lỗi đặt lịch');
     } finally { isSubmitting.value = false; }
 };
+
+function submitToSePay(checkoutUrl, formFields) {
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = checkoutUrl;
+
+    Object.entries(formFields).forEach(([key, value]) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+}
 
 const resetSelections = () => {
     selectedSpecialty.value = null;
