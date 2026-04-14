@@ -1,6 +1,6 @@
 import { buildApiUrl } from "../utils/apiConfig"
 import { ErrorMessageDictionary } from "../constants/errorMessageDictionary"
-import { AppointmentModel, BookingHistoryModel, ChangeAppointmentStatusModel, CreateAppointmentModel, GetBookingHistoryModel, PagedResult, SendMedicalReportModel } from "../types/index"
+import { AppointmentModel, BookingHistoryModel, ChangeAppointmentStatusModel, CreateAppointmentModel, GetBookingHistoryModel, PagedResult, SendMedicalReportModel, PaymentResponseModel } from "../types/index"
 
 // === Constants ===
 const getAccessToken = (): string | null => {
@@ -8,7 +8,7 @@ const getAccessToken = (): string | null => {
 }
 
 // === API ===
-export async function doCreateAppointment(body: CreateAppointmentModel): Promise<void> {
+export async function doCreateAppointment(body: CreateAppointmentModel): Promise<PaymentResponseModel> {
     const url = buildApiUrl('patient/appointment/create')
 
     const res = await fetch(url, {
@@ -24,6 +24,8 @@ export async function doCreateAppointment(body: CreateAppointmentModel): Promise
         const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
         throw new Error(errorMessage)
     }
+    const data = await res.json()
+    return data.result as PaymentResponseModel
 }
 
 export async function doGetAppointmentHistory(payload?: GetBookingHistoryModel): Promise<PagedResult<BookingHistoryModel>> {

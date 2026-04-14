@@ -30,9 +30,7 @@
                     <span>Bệnh nhân: {{ data.patientProfileName }}</span>
                 </div>
                 <div class="service-list">
-                    <span v-for="(svc, index) in data.services" :key="index" class="service-tag">
-                        {{ svc }}
-                    </span>
+                    <span class="service-tag">{{ data.serviceName }}</span>
                 </div>
             </div>
         </div>

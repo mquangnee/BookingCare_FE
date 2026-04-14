@@ -75,7 +75,6 @@ const handleLogin = async () => {
 
   try {
     isLoading.value = true;
-    await new Promise(resolve => setTimeout(resolve, 1000));
     await authStore.login({
       email: email.value,
       password: password.value
@@ -100,7 +99,6 @@ const handleLogin = async () => {
         break
     }
     notifySuccess('Đăng nhập thành công')
-    await new Promise((resolve) => setTimeout(resolve, 1500))
   } catch (error) {
     console.error(error);
     notifyError(messageFromCaught(error));

@@ -42,7 +42,8 @@ export type BookingHistoryModel = {
     patientProfileName: string
     patientProfileCode: string
     patientProfileId: string
-    services: string[]
+    serviceId: string
+    serviceName: string
     createdDate: string
 }
 
@@ -56,4 +57,12 @@ export type ChangeAppointmentStatusModel = {
     appointmentId: string
     status: EnumAccountStatus
     priority: EnumAppointmentPriority
+}
+
+export type PaymentResponseModel = {
+    checkoutUrl: string
+    appointmentId: string
+    paymentId: string
+    paymentCode: string
+    formFields: Record<string, string>
 }
