@@ -17,6 +17,12 @@
             </nav>
 
             <div class="user-actions">
+                <button @click="aiStore.toggleAssistant" class="ai-assistant-btn"
+                    :class="{ 'active': aiStore.isConnected }" title="Trợ lý ảo AI">
+                    <div v-if="aiStore.isConnected" class="pulse-ring"></div>
+                    <i class="fas" :class="aiStore.isConnected ? 'fa-stop' : 'fa-microphone'"></i>
+                    <span class="btn-text">{{ aiStore.isConnected ? 'Đang nghe...' : 'Trợ lý AI' }}</span>
+                </button>
                 <template v-if="!isAuthenticated">
                     <button class="btn-outline">Hỗ trợ</button>
                     <router-link to="/login" class="btn-primary">Đăng nhập</router-link>
@@ -114,10 +120,12 @@ import { useNotificationStore } from '../../stores/notificationStore'
 import * as signalR from '@microsoft/signalr'
 import { EnumNotificationType } from '../../constants/enum'
 import { SIGNALR_URL } from '../../utils/apiConfig'
+import { useAiStore } from '../../stores/aiStore'
 import { notifySuccess, notifyError, messageFromCaught } from '../../utils/notify'
 
 const authStore = useAuthStore()
 const notificationStore = useNotificationStore()
+const aiStore = useAiStore()
 
 const isAuthenticated = computed(() => authStore.isAuthenticated.value)
 const router = useRouter()
@@ -290,6 +298,62 @@ onUnmounted(() => {
     z-index: 1000;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     font-family: 'Inter', -apple-system, sans-serif;
+}
+
+/* Style cho nút Trợ lý AI */
+.ai-assistant-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: none;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.ai-assistant-btn.active {
+    background: #ef4444;
+    /* Màu đỏ khi đang nghe để nhấn mạnh */
+}
+
+.ai-assistant-btn i {
+    font-size: 16px;
+}
+
+/* Hiệu ứng vòng tròn tỏa ra khi AI đang hoạt động */
+.pulse-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+    left: 0;
+    top: 0;
+    border: 2px solid #ef4444;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1.2);
+        opacity: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .ai-assistant-btn .btn-text {
+        display: none;
+        /* Ẩn chữ trên mobile, chỉ hiện icon */
+    }
 }
 
 .container {

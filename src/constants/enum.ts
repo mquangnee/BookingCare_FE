@@ -177,3 +177,17 @@ export const getAppointmentTypeName = (type: EnumAppointmentType): string => {
     default: return 'Đặt trước';
   }
 }
+
+export const getMedicineUnitName = (unit: EnumMedicineUnit): string => {
+  switch (unit) {
+    case EnumMedicineUnit.Tablet: return 'Viên';
+    case EnumMedicineUnit.Blister: return 'Vỉ';
+    case EnumMedicineUnit.Box: return 'Hộp';
+    case EnumMedicineUnit.Bottle: return 'Chai';
+    case EnumMedicineUnit.Vial: return 'Lọ';
+    case EnumMedicineUnit.Ampule: return 'Ống tiêm';
+    case EnumMedicineUnit.Sachet: return 'Gói';
+    case EnumMedicineUnit.Tube: return 'Tuýp';
+    default: return '';
+  }
+}

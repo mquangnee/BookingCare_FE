@@ -1,5 +1,5 @@
-import { doCancelAppointment, doChangeAppointmentStatus, doCompleteAppointment, doCreateAppointment, doGetAppointmentHistory, doGetAppointmentsByWorkSessionId, doGetAppointmentsToday } from "../api/appointment"
-import type { CreateAppointmentModel, PagedResult, BookingHistoryModel, GetBookingHistoryModel, AppointmentModel, ChangeAppointmentStatusModel, PaymentResponseModel } from "../types/index"
+import { doCancelAppointment, doChangeAppointmentStatus, doCompleteAppointment, doCreateAppointment, doGetAppointmentHistory, doGetAppointmentsByWorkSessionId, doGetAppointmentsToday, doGetMedicalReport } from "../api/appointment"
+import type { CreateAppointmentModel, PagedResult, BookingHistoryModel, GetBookingHistoryModel, AppointmentModel, ChangeAppointmentStatusModel, PaymentResponseModel, PrescriptionModel } from "../types/index"
 import { SendMedicalReportModel } from "../types/prescription.type"
 
 async function createAppointment(appointmentData: CreateAppointmentModel): Promise<PaymentResponseModel> {
@@ -30,6 +30,10 @@ async function changeAppointmentStatus(payload: ChangeAppointmentStatusModel): P
     return await doChangeAppointmentStatus(payload)
 }
 
+async function getMedicalReport(appointmentId: string): Promise<PrescriptionModel> {
+    return await doGetMedicalReport(appointmentId)
+}
+
 export const useAppointmentStore = () => ({
     createAppointment,
     getHistory,
@@ -37,5 +41,6 @@ export const useAppointmentStore = () => ({
     getAppointmentsToday,
     completeAppointment,
     getAppointmentsByWorkSessionId,
-    changeAppointmentStatus
+    changeAppointmentStatus,
+    getMedicalReport
 });

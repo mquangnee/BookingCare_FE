@@ -1,6 +1,5 @@
 import { doGetUserProfile, doUpdateUserProfile, doGetUserProfiles, doCreateUserProfile, doShareUserProfile, doGetSharedProfiles, doCancelSharedProfile, doGetUserProfileForBooking, doSearchPatientProfiles, doCreatePatientProfileByReceptionist, doGetDoctorProfile } from "../api/profile"
 import type { UpdateUserProfileModel, CreateUserProfileModel, ShareProfileModel, SharedProfileModel, GetUserProfileForBookingModel, PatientProfileModel, DoctorModel } from "../types/index"
-import { buildApiUrl } from "../utils/apiConfig"
 
 async function getUserProfile() : Promise<PatientProfileModel> {
     return doGetUserProfile()

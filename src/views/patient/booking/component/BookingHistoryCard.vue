@@ -35,8 +35,13 @@
             </div>
         </div>
 
-        <div class="card-actions" v-if="data.status === 0">
-            <button class="btn-outline-danger" @click="$emit('cancel', data.id)">Hủy lịch</button>
+        <div class="card-actions" v-if="data.status === 0 || data.status === 3">
+            <button v-if="data.status === 0" class="btn-outline-danger" @click="$emit('cancel', data.id)">
+                Hủy lịch
+            </button>
+            <button v-if="data.status === 3" class="btn-primary" @click.stop="$emit('view-result', data.id)">
+                Xem kết quả
+            </button>
         </div>
     </div>
 </template>
@@ -46,6 +51,7 @@ import { computed } from 'vue';
 import { getStatusDetail } from '../../../../constants/appointmentStatus';
 
 const props = defineProps(['data']);
+const emit = defineEmits(['cancel', 'view-result']); // Khai báo emit mới
 
 const status = computed(() => getStatusDetail(props.data.status));
 
@@ -158,6 +164,8 @@ const formatDate = (dateStr) => {
     margin-top: 16px;
     display: flex;
     justify-content: flex-end;
+    gap: 12px;
+    /* Khoảng cách giữa các nút nếu có nhiều nút */
 }
 
 .btn-outline-danger {
@@ -170,10 +178,31 @@ const formatDate = (dateStr) => {
     cursor: pointer;
     transition: 0.2s;
     font-family: inherit;
+    width: fit-content;
 }
 
 .btn-outline-danger:hover {
     background: #fef2f2;
     border-color: #ef4444;
+}
+
+/* Thêm style cho nút Xem kết quả */
+.btn-primary {
+    padding: 6px 16px;
+    border: 1px solid #45C3D2;
+    background: #45C3D2;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: inherit;
+    font-weight: 500;
+    width: fit-content;
+}
+
+.btn-primary:hover {
+    background: #3ba3b0;
+    border-color: #3ba3b0;
 }
 </style>

@@ -36,7 +36,6 @@
                     </div>
                 </div>
 
-                <!-- Bác sĩ -->
                 <div class="toolbar-item">
                     <label class="filter-label">Bác sĩ</label>
                     <div class="control-wrap">
@@ -50,7 +49,6 @@
                     </div>
                 </div>
 
-                <!-- Bệnh nhân -->
                 <div class="toolbar-item">
                     <label class="filter-label">Bệnh nhân</label>
                     <div class="control-wrap">
@@ -64,7 +62,6 @@
                     </div>
                 </div>
 
-                <!-- Sắp xếp -->
                 <div class="toolbar-item">
                     <label class="filter-label">Sắp xếp</label>
                     <div class="control-wrap">
@@ -114,7 +111,7 @@
             <div v-else class="list-wrapper">
                 <TransitionGroup name="card-list" tag="div" class="card-list">
                     <AppointmentCard v-for="item in paginatedAppointments" :key="item.id" :data="item"
-                        @cancel="handleCancel" />
+                        @cancel="handleCancel" @view-result="handleViewResult" />
                 </TransitionGroup>
 
                 <div class="pagination" v-if="totalPages > 1">
@@ -139,8 +136,113 @@
                     </button>
                 </div>
             </div>
-
         </div>
+
+        <Transition name="fade">
+            <div v-if="showResultModal" class="modal-overlay" @click.self="closeModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Kết quả khám bệnh</h2>
+                        <button class="close-btn" @click="closeModal">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="modal-body" v-if="selectedAppointment">
+                        <div class="appointment-summary">
+                            <div class="summary-item">
+                                <span class="lbl">Mã lịch hẹn:</span>
+                                <span class="val text-primary">{{ selectedAppointment.appointmentCode }}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="lbl">Bệnh nhân:</span>
+                                <span class="val">{{ selectedAppointment.patientProfileName }}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="lbl">Bác sĩ khám:</span>
+                                <span class="val">{{ selectedAppointment.doctorName }} - {{
+                                    selectedAppointment.specialtyName }}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="lbl">Thời gian:</span>
+                                <span class="val">
+                                    {{ selectedAppointment.startTime?.substring(0, 5) }} |
+                                    {{ formatDate(selectedAppointment.date) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <hr class="modal-divider" />
+
+                        <div class="loading-state-mini" v-if="loadingResult">
+                            <div class="spinner-ring"></div>
+                            <p class="loading-text">Đang tải chi tiết kết quả...</p>
+                        </div>
+
+                        <div v-else-if="currentResult">
+                            <div class="result-section">
+                                <div class="section-icon diagnosis-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                                    </svg>
+                                </div>
+                                <div class="section-content">
+                                    <h4>Chẩn đoán</h4>
+                                    <p>{{ currentResult.diagnosis || 'Không có thông tin' }}</p>
+                                </div>
+                            </div>
+
+                            <div class="result-section" v-if="currentResult.instructions">
+                                <div class="section-icon instruction-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                </div>
+                                <div class="section-content">
+                                    <h4>Lời khuyên / Chỉ định</h4>
+                                    <p>{{ currentResult.instructions }}</p>
+                                </div>
+                            </div>
+
+                            <div class="prescription-wrapper"
+                                v-if="currentResult.prescriptionDetails && currentResult.prescriptionDetails.length > 0">
+                                <h4>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M10.5 20.5V19a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v1.5"></path>
+                                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                        <path d="M12 11v4"></path>
+                                        <path d="M10 13h4"></path>
+                                    </svg>
+                                    Đơn thuốc
+                                </h4>
+                                <ul class="medicine-list">
+                                    <li v-for="med in currentResult.prescriptionDetails" :key="med.id"
+                                        class="medicine-item">
+                                        <div class="med-header">
+                                            <span class="med-name">{{ med.medicineName }}</span>
+                                            <span class="med-qty">SL: {{ med.dosage }} {{
+                                                getMedicineUnitName(med.medicineUnit) }}</span>
+                                        </div>
+                                        <div class="med-usage">
+                                            <strong>Cách dùng:</strong> {{ med.usage }}
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
     </div>
 </template>
 
@@ -150,6 +252,7 @@ import AppHeader from '@/views/system/AppHeader.vue'
 import AppointmentCard from './component/BookingHistoryCard.vue'
 import { useAppointmentStore } from '../../../stores/appointmentStore'
 import { notifySuccess, notifyError, messageFromCaught } from '../../../utils/notify'
+import { getMedicineUnitName } from '../../../constants/enum'
 
 const appointmentStore = useAppointmentStore()
 
@@ -174,27 +277,40 @@ const statusOptions = [
     { value: 4, label: 'Đã hủy', color: '#ef4444' },
 ]
 
+// State quản lý Modal
+const showResultModal = ref(false)
+const loadingResult = ref(false)
+const currentResult = ref(null)
+const selectedAppointment = ref(null) // Thêm state lưu lịch khám được chọn
+
+// Hàm format ngày tháng dùng trong view
+const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('vi-VN');
+};
+
 const currentStatusColor = computed(() =>
     statusOptions.find(s => s.value === selectedStatus.value)?.color ?? '#9ca3af'
 )
 
 const filteredAppointments = computed(() => {
     let list = [...appointments.value]
-    
+
     if (selectedStatus.value !== null) {
         list = list.filter(item => item.status === selectedStatus.value)
     }
-    
+
     if (searchDoctor.value.trim()) {
         const keyword = searchDoctor.value.toLowerCase().trim()
         list = list.filter(item => item.doctorName.toLowerCase().includes(keyword))
     }
-    
+
     if (searchPatient.value.trim()) {
         const keyword = searchPatient.value.toLowerCase().trim()
         list = list.filter(item => item.patientProfileName.toLowerCase().includes(keyword))
     }
-    
+
     return list
 })
 
@@ -274,10 +390,38 @@ const handleCancel = async (id) => {
     }
 }
 
+// Logic xử lý khi click "Xem kết quả"
+const handleViewResult = async (id) => {
+    // 1. Tìm thông tin lịch hẹn đang được click từ danh sách data
+    selectedAppointment.value = appointments.value.find(item => item.id === id);
+
+    showResultModal.value = true;
+    loadingResult.value = true;
+    currentResult.value = null;
+
+    try {
+        const res = await appointmentStore.getMedicalReport(id);
+        currentResult.value = res;
+    } catch (error) {
+        console.error('Lỗi Modal:', error);
+        notifyError(messageFromCaught(error));
+        showResultModal.value = false;
+    } finally {
+        loadingResult.value = false;
+    }
+};
+
+const closeModal = () => {
+    showResultModal.value = false;
+    currentResult.value = null;
+    selectedAppointment.value = null;
+};
+
 onMounted(() => loadHistory())
 </script>
 
 <style scoped>
+/* Các style giao diện cũ được giữ nguyên... */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 .history-page {
@@ -618,6 +762,244 @@ onMounted(() => loadHistory())
     cursor: default;
     background: transparent;
     color: #9ca3af;
+}
+
+/* ------------------- CSS MODAL KẾT QUẢ MỚI ------------------- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(17, 24, 39, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background: #fff;
+    width: 100%;
+    max-width: 540px;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    background: #f9fafb;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.close-btn:hover {
+    background: #e5e7eb;
+    color: var(--text-dark);
+}
+
+.modal-body {
+    padding: 24px;
+    overflow-y: auto;
+}
+
+/* Thêm style cho phần hiển thị thông tin lịch hẹn */
+.appointment-summary {
+    background: #f0fbf9;
+    border: 1px solid #c2f0e9;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14.5px;
+}
+
+.summary-item .lbl {
+    color: var(--text-gray);
+    font-weight: 500;
+}
+
+.summary-item .val {
+    color: var(--text-dark);
+    font-weight: 600;
+    text-align: right;
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.modal-divider {
+    border: 0;
+    height: 1px;
+    background: #f3f4f6;
+    margin: 0 0 20px 0;
+}
+
+.loading-state-mini {
+    padding: 30px 0;
+    text-align: center;
+}
+
+.loading-text {
+    text-align: center;
+    color: var(--text-gray);
+    margin-top: 12px;
+}
+
+.result-section {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.section-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.diagnosis-icon {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.instruction-icon {
+    background: #fdf2f8;
+    color: #ec4899;
+}
+
+.section-content h4 {
+    margin: 0 0 6px;
+    font-size: 14px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.section-content p {
+    margin: 0;
+    font-size: 16px;
+    color: var(--text-dark);
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+.prescription-wrapper {
+    margin-top: 32px;
+}
+
+.prescription-wrapper h4 {
+    font-size: 16px;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    font-weight: 700;
+}
+
+.prescription-wrapper h4 svg {
+    color: var(--primary-color);
+}
+
+.medicine-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.medicine-item {
+    background: #f9fafb;
+    border: 1px solid var(--border-color);
+    padding: 16px;
+    border-radius: 10px;
+}
+
+.med-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.med-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.med-qty {
+    font-size: 13px;
+    font-weight: 600;
+    background: #e0f2fe;
+    color: #0284c7;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.med-usage {
+    font-size: 14px;
+    color: var(--text-gray);
+    line-height: 1.5;
+}
+
+/* Animations */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.25s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
 }
 
 @media (max-width: 768px) {

@@ -45,6 +45,7 @@ export type BookingHistoryModel = {
     serviceId: string
     serviceName: string
     createdDate: string
+    prescriptionId: string
 }
 
 export type GetBookingHistoryModel = {

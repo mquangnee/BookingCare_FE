@@ -26,5 +26,7 @@ export const ErrorMessageDictionary: Record<string, string> = {
   "UpdateInfoFailed": "Cập nhật thông tin thất bại. Vui lòng thử lại sau giây lát.",
   "LockUnlockAccountFailed": "Thao tác khóa/mở khóa tài khoản thất bại. Vui lòng thử lại sau giây lát.",
   "PhoneNumberAlreadyExists": "Số điện thoại đã tồn tại trong hệ thống. Vui lòng sử dụng số điện thoại khác.",
-  "CitizenIdAlreadyExists": "Số căn cước công dân đã tồn tại trong hệ thống. Vui lòng sử dụng số khác."
+  "CitizenIdAlreadyExists": "Số căn cước công dân đã tồn tại trong hệ thống. Vui lòng sử dụng số khác.",
+  "PrescriptionNotFound": "Không tìm thấy đơn thuốc. Vui lòng kiểm tra lại thông tin và thử lại.",
+  "PrescriptionDetailNotFound": "Không tìm thấy chi tiết đơn thuốc. Vui lòng kiểm tra lại thông tin và thử lại.",
 };

@@ -477,11 +477,12 @@ const submitBooking = async () => {
             endTime: timeParts[1] + ":00"
         };
         const response = await appointmentStore.createAppointment(payload);
-        if (response?.checkoutUrl && response?.formFields) {
-            submitToSePay(response.checkoutUrl, response.formFields);
-        } else {
-            isSuccess.value = true;
-        }
+        isSuccess.value = true;
+        // if (response?.checkoutUrl && response?.formFields) {
+        //     submitToSePay(response.checkoutUrl, response.formFields);
+        // } else {
+        //     isSuccess.value = true;
+        // }
     } catch (error) {
         notifyError(messageFromCaught(error) || 'Lỗi đặt lịch');
     } finally { isSubmitting.value = false; }
