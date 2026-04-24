@@ -1,6 +1,6 @@
 import { buildApiUrl } from "../utils/apiConfig"
 import { ErrorMessageDictionary } from "../constants/errorMessageDictionary"
-import { AppointmentModel, BookingHistoryModel, ChangeAppointmentStatusModel, CreateAppointmentModel, GetBookingHistoryModel, PagedResult, SendMedicalReportModel, PaymentResponseModel, PrescriptionModel } from "../types/index"
+import { AppointmentModel, BookingHistoryModel, ChangeAppointmentStatusModel, CreateAppointmentModel, GetBookingHistoryModel, PagedResult, SendMedicalReportModel, PaymentResponseModel, PrescriptionModel, MedicalHistoryModel } from "../types/index"
 
 // === Constants ===
 const getAccessToken = (): string | null => {
@@ -152,7 +152,7 @@ export async function doChangeAppointmentStatus(payload: ChangeAppointmentStatus
     return (await res.json()).result as boolean
 }
 
-export async function doGetMedicalReport(appointmentId: string): Promise<PrescriptionModel> {
+export async function doGetMedicalReportPatient(appointmentId: string): Promise<PrescriptionModel> {
     const url = buildApiUrl(`patient/appointment/result/${appointmentId}`)
 
     const res = await fetch(url, {
@@ -168,4 +168,71 @@ export async function doGetMedicalReport(appointmentId: string): Promise<Prescri
         throw new Error(errorMessage)
     }
     return (await res.json()).result as PrescriptionModel
+}
+
+export async function doGetMedicalReportDoctor(appointmentId: string): Promise<PrescriptionModel> {
+    const url = buildApiUrl(`doctor/appointment/report/${appointmentId}`)
+
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    })
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return (await res.json()).result as PrescriptionModel
+}
+
+export async function doGetMedicalHistory(keyword?: string, fromDate?: string, toDate?: string): Promise<MedicalHistoryModel[]> {
+    const queryParams = new URLSearchParams({});
+
+    if (keyword) {
+        queryParams.append('keyword', keyword.trim());
+    }
+    if (fromDate) {
+        queryParams.append('fromDate', fromDate);
+    }
+    if (toDate) {
+        queryParams.append('toDate', toDate);
+    }
+    const url = `${buildApiUrl('doctor/appointment/history')}?${queryParams.toString()}`;
+
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    })
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return (await res.json()).result as MedicalHistoryModel[]
+}
+
+export async function doExportMedicalReport(appointmentId: string): Promise<Blob> {
+    const url = buildApiUrl(`doctor/appointment/export/${appointmentId}`)
+
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${getAccessToken()}`,
+            'Accept': 'application/pdf'
+        }
+    })
+    
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    
+    return await res.blob()
 }

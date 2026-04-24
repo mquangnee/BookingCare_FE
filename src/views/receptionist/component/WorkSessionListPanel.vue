@@ -24,7 +24,8 @@
                     </svg>
                     Ca Sáng
                 </h3>
-                <div v-if="morningDoctorWorkSessions.length === 0" class="empty-shift text-sm text-gray">Không có bác sĩ ca sáng
+                <div v-if="morningDoctorWorkSessions.length === 0" class="empty-shift text-sm text-gray">Không có bác sĩ
+                    ca sáng
                 </div>
                 <div v-for="workSession in morningDoctorWorkSessions" :key="workSession.id" class="doctor-card"
                     :class="{ active: selectedWorkSessionId === workSession.id }" @click="$emit('select', workSession)">
@@ -43,7 +44,8 @@
                     </svg>
                     Ca Chiều
                 </h3>
-                <div v-if="afternoonDoctorWorkSessions.length === 0" class="empty-shift text-sm text-gray">Không có bác sĩ ca chiều
+                <div v-if="afternoonDoctorWorkSessions.length === 0" class="empty-shift text-sm text-gray">Không có bác
+                    sĩ ca chiều
                 </div>
                 <div v-for="workSession in afternoonDoctorWorkSessions" :key="workSession.id" class="doctor-card"
                     :class="{ active: selectedWorkSessionId === workSession.id }" @click="$emit('select', workSession)">
@@ -67,7 +69,8 @@
                     </svg>
                     Ca Tối
                 </h3>
-                <div v-if="eveningDoctorWorkSessions.length === 0" class="empty-shift text-sm text-gray">Không có bác sĩ ca tối
+                <div v-if="eveningDoctorWorkSessions.length === 0" class="empty-shift text-sm text-gray">Không có bác sĩ
+                    ca tối
                 </div>
                 <div v-for="workSession in eveningDoctorWorkSessions" :key="workSession.id" class="doctor-card"
                     :class="{ active: selectedWorkSessionId === workSession.id }" @click="$emit('select', workSession)">

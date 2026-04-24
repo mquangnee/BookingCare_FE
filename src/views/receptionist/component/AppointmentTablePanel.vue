@@ -325,14 +325,13 @@ const getStatusClass = (status) => {
     gap: 8px;
 }
 
-/* ── Nút chính: Xác nhận đến ── */
 .btn-primary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 5px;
-    background-color: #45c3d2 !important; /* Thêm !important để chống bị ghi đè */
-    background-image: none !important; /* Xóa gradient rác nếu có */
+    background-color: #45c3d2 !important;
+    background-image: none !important;
     color: #fff !important;
     border: 1px solid #45c3d2 !important;
     padding: 8px 14px;
@@ -345,9 +344,8 @@ const getStatusClass = (status) => {
 }
 
 .btn-primary:hover {
-    background-color: #3ba3b0 !important; /* Đổi màu nền khi hover */
+    background-color: #3ba3b0 !important;
     border-color: #3ba3b0 !important;
-    /* Bỏ translateY để tránh lỗi giật lag nút */
 }
 
 .btn-primary:active {
@@ -387,7 +385,6 @@ const getStatusClass = (status) => {
     color: #111827 !important;
 }
 
-/* ── Dropdown ── */
 .dropdown {
     position: relative;
     display: inline-block;
@@ -408,15 +405,14 @@ const getStatusClass = (status) => {
     animation: dropIn 0.15s ease;
 }
 
-/* Thêm đoạn này để tạo "cây cầu tàng hình" nối khoảng hở */
 .dropdown-content::before {
     content: '';
     position: absolute;
-    top: -10px; /* Đẩy lên trên để lấp đầy khoảng hở 6px */
+    top: -10px;
     left: 0;
     right: 0;
     height: 10px;
-    background: transparent; /* Tàng hình */
+    background: transparent;
 }
 
 @keyframes dropIn {
@@ -466,7 +462,6 @@ const getStatusClass = (status) => {
     opacity: 0.7;
 }
 
-/* ── Trạng thái: Đã chuyển BS ── */
 .status-action-group {
     display: flex;
     align-items: center;
@@ -505,7 +500,6 @@ const getStatusClass = (status) => {
     background: #f9fafb;
 }
 
-/* ── State labels ── */
 .state-label {
     display: inline-flex;
     align-items: center;
@@ -532,7 +526,6 @@ const getStatusClass = (status) => {
     color: #16a34a;
 }
 
-/* ── Misc ── */
 .empty-state {
     display: flex;
     flex-direction: column;

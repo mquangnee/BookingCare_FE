@@ -47,7 +47,8 @@
                         </div>
                         <div class="exam-header-actions">
                             <button class="btn-outline" @click="openHistoryModal">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                 </svg>
                                 Xem bệnh án cũ
@@ -72,10 +73,11 @@
                             <div class="prescription-search">
                                 <input type="text" v-model="drugSearch" @input="searchDrug"
                                     placeholder="Nhập tên thuốc để tìm kiếm (VD: Para, Amo...)" class="form-control" />
-                                
+
                                 <ul v-if="suggestedDrugs.length > 0" class="autocomplete-list">
                                     <li v-for="drug in suggestedDrugs" :key="drug.id" @click="addDrug(drug)">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" style="flex-shrink: 0;">
                                             <line x1="12" y1="5" x2="12" y2="19"></line>
                                             <line x1="5" y1="12" x2="19" y2="12"></line>
                                         </svg>
@@ -103,7 +105,8 @@
                                             <td><input type="text" v-model="item.usage" class="form-control"
                                                     placeholder="Sáng 1, Tối 1 sau ăn" /></td>
                                             <td style="text-align: center;">
-                                                <button class="btn-delete" @click="removeDrug(index)" title="Xóa thuốc">&times;</button>
+                                                <button class="btn-delete" @click="removeDrug(index)"
+                                                    title="Xóa thuốc">&times;</button>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -113,14 +116,16 @@
                     </div>
 
                     <div class="exam-footer">
-                        <button class="btn-outline-danger" @click="skipCurrentPatient" :disabled="isSubmitting">Bệnh nhân không đến</button>
-                        
+                        <button class="btn-outline-danger" @click="skipCurrentPatient" :disabled="isSubmitting">Bệnh
+                            nhân không đến</button>
+
                         <button class="btn-primary btn-auto-width" @click="finishExam" :disabled="isSubmitting">
                             <template v-if="isSubmitting">
                                 Đang lưu kết quả...
                             </template>
                             <template v-else>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" style="flex-shrink: 0;">
                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                                     <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                 </svg>
@@ -183,16 +188,13 @@
 </template>
 
 <script setup>
-// THÊM onUnmounted vào import của Vue
-import { ref, computed, onMounted, onUnmounted } from 'vue' 
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAppointmentStore } from '../../../stores/appointmentStore'
 import { useMedicineStore } from '../../../stores/medicineStore'
 import { notifyError, notifySuccess } from '@/utils/notify'
 import { useAuthStore } from '../../../stores/authStore'
 
-// --- TÍCH HỢP SIGNALR ---
-// Đảm bảo đường dẫn import đúng với file service bạn đã tạo
-import { signalRService } from '@/services/signalrService' 
+import { signalRService } from '@/services/signalrService'
 
 const appointmentStore = useAppointmentStore()
 const medicineStore = useMedicineStore()
@@ -211,28 +213,28 @@ const pendingPatients = computed(() => patientQueue.value.filter(p => p.status =
 const sortedPatientQueue = computed(() => {
     return [...patientQueue.value].sort((a, b) => {
         const isADone = a.status === 'completed' || a.status === 'skipped';
-        const isBDone = b.status === 'completed' || b.status === 'skipped'  ;
+        const isBDone = b.status === 'completed' || b.status === 'skipped';
 
         if (isADone && !isBDone) return 1;
         if (!isADone && isBDone) return -1;
-        
+
         if (!a.time || !b.time) return 0;
         return a.time.localeCompare(b.time);
     });
 })
 
-const mapApiStatusToUI = (status) => {  
+const mapApiStatusToUI = (status) => {
     if (status === null || status === undefined) return 'waiting';
     const safeStatus = status.toString();
-    switch(safeStatus) {
-        case '3': return 'completed'; 
-        case '4': return 'skipped';  
-        case '2': return 'examining'; 
+    switch (safeStatus) {
+        case '3': return 'completed';
+        case '4': return 'skipped';
+        case '2': return 'examining';
         case '0':
         case 'pending':
         case '1':
         case 'approved':
-        default: return 'waiting';  
+        default: return 'waiting';
     }
 }
 
@@ -275,14 +277,10 @@ const fetchMedicines = async () => {
     }
 }
 
-// --- TÍCH HỢP SIGNALR: VÀO LIFECYCLE ON_MOUNTED ---
 onMounted(async () => {
-    // 1. Tải dữ liệu ban đầu
     await fetchTodayAppointments();
     await fetchMedicines();
 
-    // 2. Khởi tạo SignalR
-    // LƯU Ý: Thay localStorage.getItem('doctorId') bằng cách lấy ID thực tế từ AuthStore của bạn
     const claims = authStore.getClaimsModel()
     if (claims) {
         signalRService.initConnection();
@@ -298,7 +296,7 @@ onMounted(async () => {
                 status: mapApiStatusToUI(newAppt.status)
             };
             const existingIndex = patientQueue.value.findIndex(p => p.id === formattedAppt.id);
-            
+
             if (existingIndex > -1) {
                 patientQueue.value[existingIndex] = { ...patientQueue.value[existingIndex], ...formattedAppt };
             } else {
@@ -318,7 +316,6 @@ onMounted(async () => {
 
 })
 
-// --- TÍCH HỢP SIGNALR: HỦY LẮNG NGHE KHI TẮT COMPONENT ---
 onUnmounted(() => {
     signalRService.offAppointmentStatusChanged();
 })
@@ -338,18 +335,18 @@ const callPatient = (patient) => {
 const skipCurrentPatient = () => {
     if (!currentPatient.value) return
     const idx = patientQueue.value.findIndex(p => p.id === currentPatient.value.id)
-    
+
     if (idx > -1) {
-        patientQueue.value[idx].status = 'skipped' 
+        patientQueue.value[idx].status = 'skipped'
     }
-    
+
     currentPatient.value = null
 }
 
 const finishExam = async () => {
-    if (!examForm.value.diagnosis) { 
+    if (!examForm.value.diagnosis) {
         notifyError("Vui lòng nhập chẩn đoán bệnh!")
-        return 
+        return
     }
     if (!currentPatient.value) return;
 
@@ -368,7 +365,7 @@ const finishExam = async () => {
         };
         await appointmentStore.completeAppointment(payload);
         notifySuccess("Lưu kết quả khám thành công!");
-        
+
         const idx = patientQueue.value.findIndex(p => p.id === currentPatient.value.id)
         if (idx > -1) {
             patientQueue.value[idx].status = 'completed'
@@ -393,11 +390,11 @@ const searchDrug = () => {
 
 const addDrug = (drug) => {
     if (!examForm.value.prescriptions.some(p => p.medicineId === drug.id)) {
-        examForm.value.prescriptions.push({ 
-            medicineId: drug.id,  
-            name: drug.name,      
-            dosage: '', 
-            usage: '' 
+        examForm.value.prescriptions.push({
+            medicineId: drug.id,
+            name: drug.name,
+            dosage: '',
+            usage: ''
         })
     }
     drugSearch.value = ''; suggestedDrugs.value = []
@@ -405,7 +402,6 @@ const addDrug = (drug) => {
 
 const removeDrug = (index) => examForm.value.prescriptions.splice(index, 1)
 
-// --- LOGIC MODAL BỆNH ÁN CŨ ---
 const isHistoryModalOpen = ref(false)
 const patientHistory = ref([])
 
@@ -433,110 +429,634 @@ const closeHistoryModal = () => {
 </script>
 
 <style scoped>
-.exam-room { height: calc(100vh - 120px); }
-.exam-layout { display: grid; grid-template-columns: 350px 1fr; gap: 24px; height: 100%; }
-.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
-.panel-header { padding: 20px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
-.panel-header h2 { font-size: 16px; margin: 0; }
-.badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-.badge-primary { background: #e0f7fa; color: #00838f; }
+.exam-room {
+    height: calc(100vh - 120px);
+}
 
-.queue-panel { display: flex; flex-direction: column; overflow: hidden; }
-.patient-list { overflow-y: auto; flex: 1; padding: 12px; }
-.patient-item { padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 12px; transition: 0.3s ease; }
-.patient-item.waiting { background: #fff; }
-.patient-item.examining { border-color: #45C3D2; background: #f0fbFC; }
-.patient-item.completed { background: #f9fafb; opacity: 0.6; }
-.patient-item.skipped { background: #fef2f2; opacity: 0.6; border-color: #fecaca; }
-.patient-item.active { border-left: 4px solid #45C3D2; opacity: 1; box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
+.exam-layout {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 24px;
+    height: 100%;
+}
 
-.patient-info-basic { display: flex; gap: 12px; }
-.p-time { font-weight: 700; color: #374151; font-size: 14px; width: 45px; }
-.p-details strong { display: block; font-size: 15px; color: #111827; }
-.p-code { font-size: 12px; color: #00838f; background: #e0f7fa; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 4px; margin-right: 4px; font-weight: 600; }
-.p-details span { font-size: 13px; color: #6b7280; }
+.card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
 
-.patient-actions { display: flex; justify-content: flex-end; align-items: center; border-top: 1px dashed #e5e7eb; padding-top: 12px; }
-.status-text { font-size: 13px; font-weight: 600; }
-.text-blue { color: #0284c7; } .text-red { color: #dc2626; } .text-green { color: #16a34a; } .text-gray { color: #6b7280; }
+.panel-header {
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-.exam-panel { display: flex; flex-direction: column; overflow: hidden; }
-.exam-header { padding: 24px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: #f9fafb; flex-shrink: 0; }
-.exam-patient-profile { display: flex; align-items: center; gap: 16px; }
-.avatar-circle { width: 50px; height: 50px; background: #45C3D2; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; flex-shrink: 0; }
-.exam-patient-profile h2 { margin: 0 0 4px 0; font-size: 18px; }
-.exam-patient-profile p { margin: 0; color: #4b5563; font-size: 14px; }
+.panel-header h2 {
+    font-size: 16px;
+    margin: 0;
+}
 
-.exam-body { padding: 24px; overflow-y: auto; flex: 1; }
-.form-grid { display: flex; flex-direction: column; gap: 20px; }
-.form-group { display: flex; flex-direction: column; gap: 8px; }
-.form-group label { font-weight: 600; font-size: 14px; color: #374151; }
-.form-control { padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-family: inherit; font-size: 14px; outline: none; }
-.form-control:focus { border-color: #45C3D2; box-shadow: 0 0 0 3px rgba(69, 195, 210, 0.1); }
+.badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
 
-.exam-footer { padding: 20px 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; align-items: center; gap: 12px; background: #fff; flex-shrink: 0; margin-top: auto; }
+.badge-primary {
+    background: #e0f7fa;
+    color: #00838f;
+}
 
-.btn-primary, .btn-outline, .btn-outline-danger, .btn-sm { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: inherit; transition: 0.2s; width: fit-content; white-space: nowrap; }
-.btn-primary { background-color: #45C3D2; color: #fff; border: none; padding: 10px 20px; }
-.btn-primary:hover { background-color: #3ba3b0; }
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-outline { background-color: transparent; border: 1px solid #d1d5db; padding: 8px 16px; color: #374151; }
-.btn-outline:hover { background-color: #f3f4f6; }
-.btn-outline-danger { background-color: transparent; border: 1px solid #fecaca; padding: 10px 20px; color: #dc2626; }
-.btn-outline-danger:hover { background-color: #fee2e2; }
-.btn-outline-danger:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-sm { padding: 6px 12px; font-size: 13px; border: 1px solid #e5e7eb; background: #fff; color: #45C3D2; border-color: #45C3D2; }
+.queue-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
 
-svg { flex-shrink: 0; }
+.patient-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 12px;
+}
 
-.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #9ca3af; text-align: center; }
-.empty-state.fill-height { height: 100%; }
+.patient-item {
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: 0.3s ease;
+}
 
-.prescription-group { background: #f9fafb; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; }
-.prescription-search { position: relative; }
+.patient-item.waiting {
+    background: #fff;
+}
 
-.autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #d1d5db; border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 50; padding: 0; margin: 4px 0 0 0; list-style: none; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
-.autocomplete-list li { padding: 10px 16px; cursor: pointer; border-bottom: 1px solid #f3f4f6; font-size: 14px; display: flex; align-items: center; gap: 8px; }
-.autocomplete-list li:hover { background: #f0fbFC; color: #00838f; }
-.drug-name-text { font-weight: 500; color: #111827; }
-.drug-func-text { font-size: 12px; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+.patient-item.examining {
+    border-color: #45C3D2;
+    background: #f0fbFC;
+}
 
-.table-responsive { overflow-x: auto; margin-top: 16px; background: white; border-radius: 8px; }
-.prescription-table { width: 100%; border-collapse: collapse; }
-.prescription-table th, .prescription-table td { padding: 12px; border: 1px solid #e5e7eb; font-size: 13px; vertical-align: middle; }
-.prescription-table th { background: #f3f4f6; font-weight: 600; text-align: left; color: #374151; }
-.drug-name-cell { font-weight: 600; color: #111827; }
-.btn-delete { color: #dc2626; background: none; border: none; cursor: pointer; font-size: 20px; font-weight: bold; line-height: 1; padding: 4px 8px; border-radius: 4px; }
+.patient-item.completed {
+    background: #f9fafb;
+    opacity: 0.6;
+}
 
-.slide-up { animation: fadeInUp 0.4s ease forwards; }
+.patient-item.skipped {
+    background: #fef2f2;
+    opacity: 0.6;
+    border-color: #fecaca;
+}
 
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(17, 24, 39, 0.5); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 9999; }
-.modal-content { background: #fff; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; max-height: 90vh; overflow: hidden; }
-.modal-lg { width: 700px; max-width: 95%; }
-.modal-header { padding: 20px 24px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: #fff;}
-.modal-header h2 { font-size: 18px; margin: 0; color: #111827; }
-.close-btn { background: none; border: none; font-size: 24px; color: #6b7280; cursor: pointer; line-height: 1; }
-.close-btn:hover { color: #111827; }
-.modal-body { padding: 24px; overflow-y: auto; }
-.bg-gray-50 { background-color: #f9fafb; }
-.history-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
-.history-card-header { padding: 16px; background: #f0fbfc; display: flex; gap: 16px; align-items: center; border-bottom: 1px solid #e5e7eb; }
-.date-badge { background: #45C3D2; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 8px; flex-shrink: 0; }
-.date-badge .day { font-size: 18px; font-weight: bold; line-height: 1; }
-.date-badge .month { font-size: 11px; text-transform: uppercase; margin-top: 2px; }
-.history-meta h4 { margin: 0 0 4px 0; color: #111827; font-size: 15px; }
-.history-meta p { margin: 0; color: #6b7280; font-size: 13px; }
-.history-card-body { padding: 16px; font-size: 14px; color: #374151; }
-.info-block { margin-bottom: 8px; }
-.info-block strong { color: #111827; }
-.drug-list-simple { list-style: none; padding: 0; margin: 4px 0 0 0; color: #4b5563; }
-.drug-list-simple li { margin-bottom: 4px; padding-left: 8px; }
-.mt-2 { margin-top: 8px; }
-.mb-4 { margin-bottom: 16px; }
-.py-8 { padding-top: 32px; padding-bottom: 32px; }
+.patient-item.active {
+    border-left: 4px solid #45C3D2;
+    opacity: 1;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
 
-.slide-down { animation: slideDown 0.3s ease forwards; }
+.patient-info-basic {
+    display: flex;
+    gap: 12px;
+}
 
-@keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+.p-time {
+    font-weight: 700;
+    color: #374151;
+    font-size: 14px;
+    width: 45px;
+}
+
+.p-details strong {
+    display: block;
+    font-size: 15px;
+    color: #111827;
+}
+
+.p-code {
+    font-size: 12px;
+    color: #00838f;
+    background: #e0f7fa;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 4px;
+    margin-right: 4px;
+    font-weight: 600;
+}
+
+.p-details span {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.patient-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    border-top: 1px dashed #e5e7eb;
+    padding-top: 12px;
+}
+
+.status-text {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.text-blue {
+    color: #0284c7;
+}
+
+.text-red {
+    color: #dc2626;
+}
+
+.text-green {
+    color: #16a34a;
+}
+
+.text-gray {
+    color: #6b7280;
+}
+
+.exam-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.exam-header {
+    padding: 24px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9fafb;
+    flex-shrink: 0;
+}
+
+.exam-patient-profile {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.avatar-circle {
+    width: 50px;
+    height: 50px;
+    background: #45C3D2;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.exam-patient-profile h2 {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+}
+
+.exam-patient-profile p {
+    margin: 0;
+    color: #4b5563;
+    font-size: 14px;
+}
+
+.exam-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #374151;
+}
+
+.form-control {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+}
+
+.form-control:focus {
+    border-color: #45C3D2;
+    box-shadow: 0 0 0 3px rgba(69, 195, 210, 0.1);
+}
+
+.exam-footer {
+    padding: 20px 24px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+.btn-primary,
+.btn-outline,
+.btn-outline-danger,
+.btn-sm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: 0.2s;
+    width: fit-content;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background-color: #45C3D2;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+}
+
+.btn-primary:hover {
+    background-color: #3ba3b0;
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 1px solid #d1d5db;
+    padding: 8px 16px;
+    color: #374151;
+}
+
+.btn-outline:hover {
+    background-color: #f3f4f6;
+}
+
+.btn-outline-danger {
+    background-color: transparent;
+    border: 1px solid #fecaca;
+    padding: 10px 20px;
+    color: #dc2626;
+}
+
+.btn-outline-danger:hover {
+    background-color: #fee2e2;
+}
+
+.btn-outline-danger:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #45C3D2;
+    border-color: #45C3D2;
+}
+
+svg {
+    flex-shrink: 0;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    text-align: center;
+}
+
+.empty-state.fill-height {
+    height: 100%;
+}
+
+.prescription-group {
+    background: #f9fafb;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.prescription-search {
+    position: relative;
+}
+
+.autocomplete-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 50;
+    padding: 0;
+    margin: 4px 0 0 0;
+    list-style: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.autocomplete-list li {
+    padding: 10px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.autocomplete-list li:hover {
+    background: #f0fbFC;
+    color: #00838f;
+}
+
+.drug-name-text {
+    font-weight: 500;
+    color: #111827;
+}
+
+.drug-func-text {
+    font-size: 12px;
+    color: #6b7280;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    margin-top: 16px;
+    background: white;
+    border-radius: 8px;
+}
+
+.prescription-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.prescription-table th,
+.prescription-table td {
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.prescription-table th {
+    background: #f3f4f6;
+    font-weight: 600;
+    text-align: left;
+    color: #374151;
+}
+
+.drug-name-cell {
+    font-weight: 600;
+    color: #111827;
+}
+
+.btn-delete {
+    color: #dc2626;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.slide-up {
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(17, 24, 39, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+.modal-lg {
+    width: 700px;
+    max-width: 95%;
+}
+
+.modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+}
+
+.modal-header h2 {
+    font-size: 18px;
+    margin: 0;
+    color: #111827;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #6b7280;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    color: #111827;
+}
+
+.modal-body {
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.bg-gray-50 {
+    background-color: #f9fafb;
+}
+
+.history-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.history-card-header {
+    padding: 16px;
+    background: #f0fbfc;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.date-badge {
+    background: #45C3D2;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.date-badge .day {
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.date-badge .month {
+    font-size: 11px;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+.history-meta h4 {
+    margin: 0 0 4px 0;
+    color: #111827;
+    font-size: 15px;
+}
+
+.history-meta p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.history-card-body {
+    padding: 16px;
+    font-size: 14px;
+    color: #374151;
+}
+
+.info-block {
+    margin-bottom: 8px;
+}
+
+.info-block strong {
+    color: #111827;
+}
+
+.drug-list-simple {
+    list-style: none;
+    padding: 0;
+    margin: 4px 0 0 0;
+    color: #4b5563;
+}
+
+.drug-list-simple li {
+    margin-bottom: 4px;
+    padding-left: 8px;
+}
+
+.mt-2 {
+    margin-top: 8px;
+}
+
+.mb-4 {
+    margin-bottom: 16px;
+}
+
+.py-8 {
+    padding-top: 32px;
+    padding-bottom: 32px;
+}
+
+.slide-down {
+    animation: slideDown 0.3s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 </style>

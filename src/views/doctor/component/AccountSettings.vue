@@ -130,7 +130,6 @@ const doctorProfile = inject('doctorProfile')
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-/* Left Sidebar */
 .settings-sidebar {
     padding: 24px 0;
     display: flex;
@@ -145,7 +144,6 @@ const doctorProfile = inject('doctorProfile')
     border-bottom: 1px solid #e5e7eb;
 }
 
-/* --------- BỘ CSS CHO AVATAR MỚI --------- */
 .avatar-wrapper {
     position: relative;
     width: 100px;
@@ -225,7 +223,6 @@ const doctorProfile = inject('doctorProfile')
     font-weight: 600;
 }
 
-/* Right Content */
 .settings-content {
     padding: 32px;
     min-height: 500px;
@@ -252,19 +249,13 @@ const doctorProfile = inject('doctorProfile')
     margin-bottom: 24px;
 }
 
-/* CSS MỚI CHO FIX LỆCH */
 .centered-form-wrapper {
     max-width: 500px;
-    /* Giới hạn độ rộng để block element có thể căn giữa */
     margin: 0 auto;
-    /* Căn giữa block element trong container cha */
     padding: 20px;
-    background: #f9fafb;
     border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-/* Tiện ích form */
 .form-grid {
     display: flex;
     flex-direction: column;

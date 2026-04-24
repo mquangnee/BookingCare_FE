@@ -1,5 +1,5 @@
-import { doCancelAppointment, doChangeAppointmentStatus, doCompleteAppointment, doCreateAppointment, doGetAppointmentHistory, doGetAppointmentsByWorkSessionId, doGetAppointmentsToday, doGetMedicalReport } from "../api/appointment"
-import type { CreateAppointmentModel, PagedResult, BookingHistoryModel, GetBookingHistoryModel, AppointmentModel, ChangeAppointmentStatusModel, PaymentResponseModel, PrescriptionModel } from "../types/index"
+import { doCancelAppointment, doChangeAppointmentStatus, doCompleteAppointment, doCreateAppointment, doExportMedicalReport, doGetAppointmentHistory, doGetAppointmentsByWorkSessionId, doGetAppointmentsToday, doGetMedicalHistory, doGetMedicalReportDoctor, doGetMedicalReportPatient } from "../api/appointment"
+import type { CreateAppointmentModel, PagedResult, BookingHistoryModel, GetBookingHistoryModel, AppointmentModel, ChangeAppointmentStatusModel, PaymentResponseModel, PrescriptionModel, MedicalHistoryModel } from "../types/index"
 import { SendMedicalReportModel } from "../types/prescription.type"
 
 async function createAppointment(appointmentData: CreateAppointmentModel): Promise<PaymentResponseModel> {
@@ -30,8 +30,20 @@ async function changeAppointmentStatus(payload: ChangeAppointmentStatusModel): P
     return await doChangeAppointmentStatus(payload)
 }
 
-async function getMedicalReport(appointmentId: string): Promise<PrescriptionModel> {
-    return await doGetMedicalReport(appointmentId)
+async function getMedicalReportPatient(appointmentId: string): Promise<PrescriptionModel> {
+    return await doGetMedicalReportPatient(appointmentId)
+}
+
+async function getMedicalHistory(keyword?: string, fromDate?: string, toDate?: string): Promise<MedicalHistoryModel[]> {
+    return await doGetMedicalHistory(keyword, fromDate, toDate)
+}
+
+async function getMedicalReportDoctor(appointmentId: string): Promise<PrescriptionModel> {
+    return await doGetMedicalReportDoctor(appointmentId)
+}
+
+async function exportMedicalReport(appointmentId: string): Promise<Blob> {
+    return await doExportMedicalReport(appointmentId)
 }
 
 export const useAppointmentStore = () => ({
@@ -42,5 +54,8 @@ export const useAppointmentStore = () => ({
     completeAppointment,
     getAppointmentsByWorkSessionId,
     changeAppointmentStatus,
-    getMedicalReport
+    getMedicalReportPatient,
+    getMedicalReportDoctor,
+    getMedicalHistory,
+    exportMedicalReport
 });

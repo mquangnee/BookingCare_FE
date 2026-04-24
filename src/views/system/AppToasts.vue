@@ -6,14 +6,8 @@ import { toastState, dismissNotify } from '../../utils/notify'
   <Teleport to="body">
     <div class="app-toasts" aria-live="polite" aria-relevant="additions text">
       <TransitionGroup name="toast-slide">
-        <button
-          v-for="t in toastState.items"
-          :key="t.id"
-          type="button"
-          class="toast"
-          :class="t.type"
-          @click="dismissNotify(t.id)"
-        >
+        <button v-for="t in toastState.items" :key="t.id" type="button" class="toast" :class="t.type"
+          @click="dismissNotify(t.id)">
           {{ t.message }}
         </button>
       </TransitionGroup>

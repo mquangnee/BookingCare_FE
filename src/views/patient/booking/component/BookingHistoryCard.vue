@@ -165,7 +165,6 @@ const formatDate = (dateStr) => {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
-    /* Khoảng cách giữa các nút nếu có nhiều nút */
 }
 
 .btn-outline-danger {
@@ -186,7 +185,6 @@ const formatDate = (dateStr) => {
     border-color: #ef4444;
 }
 
-/* Thêm style cho nút Xem kết quả */
 .btn-primary {
     padding: 6px 16px;
     border: 1px solid #45C3D2;
