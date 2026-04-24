@@ -107,6 +107,12 @@ export enum EnumAppointmentType
   Offline = 1
 }
 
+export enum EnumShift {
+  Morning = 0,
+  Afternoon = 1,
+  Evening = 2
+}
+
 // === HELPER FUNCTIONS ===
 export const getGenderName = (gender: EnumGender): string => {
   switch (gender) {
@@ -188,6 +194,15 @@ export const getMedicineUnitName = (unit: EnumMedicineUnit): string => {
     case EnumMedicineUnit.Ampule: return 'Ống tiêm';
     case EnumMedicineUnit.Sachet: return 'Gói';
     case EnumMedicineUnit.Tube: return 'Tuýp';
+    default: return '';
+  }
+}
+
+export const getShiftName = (shift: EnumShift): string => {
+  switch (shift) {
+    case EnumShift.Morning: return 'Ca Sáng';
+    case EnumShift.Afternoon: return 'Ca Chiều';
+    case EnumShift.Evening: return 'Ca Tối';
     default: return '';
   }
 }

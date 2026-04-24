@@ -67,3 +67,20 @@ export type PaymentResponseModel = {
     paymentCode: string
     formFields: Record<string, string>
 }
+
+export type MedicalHistoryModel = {
+    appointmentId: string
+    workSessionId: string
+    patientProfileId: string
+    appointmentCode: string
+    patientProfileCode: string
+    doctorName: string
+    patientName: string
+    age?: number
+    diagnosis?: string
+    gender?: EnumGender
+    type?: EnumAppointmentType
+    date: string
+    startTime?: string
+    endTime?: string
+}

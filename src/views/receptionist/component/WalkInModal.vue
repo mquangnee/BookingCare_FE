@@ -69,7 +69,8 @@
                                     <div>
                                         <strong>{{ selectedPatient.fullName }}</strong>
                                         <p>SĐT: {{ selectedPatient.phoneNumber }} | {{
-                                            getGenderName(selectedPatient.gender) }} - {{ selectedPatient.dateOfBirth.substring(0, 4) }}
+                                            getGenderName(selectedPatient.gender) }} - {{
+                                            selectedPatient.dateOfBirth.substring(0, 4) }}
                                         </p>
                                     </div>
                                 </div>
@@ -196,7 +197,7 @@
                                 <span class="label">Bệnh nhân:</span>
                                 <span class="value font-bold">{{ activeTab === 'existing' ? selectedPatient?.fullName :
                                     newPatient.fullName
-                                    }}</span>
+                                }}</span>
                             </div>
                             <div class="summary-row">
                                 <span class="label">Bác sĩ phụ trách:</span>
@@ -285,7 +286,7 @@ const doctors = ref([]);
 const services = ref([]);
 const isFetchingData = ref(false);
 const isFetchingSlots = ref(false);
-const isSubmittingProfile = ref(false); // Thêm dòng này dưới các biến ref()
+const isSubmittingProfile = ref(false);
 
 const step = ref(1);
 const activeTab = ref('existing');
@@ -294,16 +295,13 @@ const selectedPatient = ref(null);
 const searchResults = ref([]);
 const newPatient = ref({ fullName: '', phoneNumber: '', gender: 0, dob: '', citizenId: '' });
 
-// Cập nhật state quản lý form
 const appointmentData = ref({ mode: 'doctor', doctorId: '', serviceId: '', slotId: '', timeString: '', reason: '' });
-const rawAvailableSlots = ref([]); // Chứa toàn bộ slot gọi từ API
+const rawAvailableSlots = ref([]);
 const paymentMethod = ref('cash');
 
-// Lọc ra danh sách Bác sĩ từ các Slot của Dịch vụ
 const serviceDoctors = computed(() => {
     if (appointmentData.value.mode !== 'service') return [];
 
-    // Dùng Map để lọc các bác sĩ trùng lặp
     const map = new Map();
     rawAvailableSlots.value.forEach(slot => {
         if (slot.doctorId && !map.has(slot.doctorId)) {
@@ -316,13 +314,11 @@ const serviceDoctors = computed(() => {
     return Array.from(map.values());
 });
 
-// Lọc ra các Slot để hiển thị (dựa trên bác sĩ đã chọn)
 const displaySlots = computed(() => {
     if (!appointmentData.value.doctorId) return [];
     return rawAvailableSlots.value.filter(s => s.doctorId === appointmentData.value.doctorId);
 });
 
-// Tính toán tên Bác sĩ cho phần Tóm tắt
 const selectedDoctorName = computed(() => {
     if (!appointmentData.value.doctorId) return '';
     if (appointmentData.value.mode === 'doctor') {
@@ -345,9 +341,8 @@ const fetchInitialData = async () => {
         ]);
         services.value = servicesRes || [];
         if (sessionsRes) {
-            // SỬA Ở ĐÂY: Dùng Map để lọc bỏ các bác sĩ bị trùng ID (Do có nhiều ca trong ngày)
             const uniqueDoctorsMap = new Map();
-            
+
             sessionsRes.forEach(session => {
                 if (!uniqueDoctorsMap.has(session.doctorId)) {
                     uniqueDoctorsMap.set(session.doctorId, {
@@ -360,8 +355,7 @@ const fetchInitialData = async () => {
                     });
                 }
             });
-            
-            // Chuyển Map trở lại thành Array để hiển thị lên UI
+
             doctors.value = Array.from(uniqueDoctorsMap.values());
         }
     } catch (error) {
@@ -390,12 +384,10 @@ watch(searchQuery, (keyword) => {
 });
 
 const fetchAvailableSlots = async () => {
-    // Reset lại lựa chọn khi fetch data mới
     appointmentData.value.slotId = '';
     appointmentData.value.timeString = '';
     rawAvailableSlots.value = [];
 
-    // Nếu đang ở mode Service, khi đổi dịch vụ phải bắt chọn lại Bác sĩ
     if (appointmentData.value.mode === 'service') {
         appointmentData.value.doctorId = '';
     }
@@ -452,7 +444,7 @@ const handleNextStep = async () => {
         try {
             const response = await profileStore.createPatientProfileByReceptionist(newPatient.value);
             selectedPatient.value = {
-                id: response.id, // Thay bằng trường ID trả về từ API của bạn
+                id: response.id,
                 fullName: newPatient.value.fullName,
                 phoneNumber: newPatient.value.phoneNumber,
                 gender: newPatient.value.gender,
@@ -474,8 +466,6 @@ const handleNextStep = async () => {
     }
 }
 
-
-// Theo dõi khi đổi Mode khám -> Reset sạch dữ liệu ở Bước 2
 watch(() => appointmentData.value.mode, () => {
     appointmentData.value.doctorId = '';
     appointmentData.value.serviceId = '';
@@ -518,7 +508,7 @@ const canSubmit = computed(() => true);
 
 const submit = () => {
     const payload = {
-        patient: { ...selectedPatient.value, isNew: false }, // Luôn là false vì đã tạo ở Bước 1
+        patient: { ...selectedPatient.value, isNew: false },
         appointment: { ...appointmentData.value },
         payment: { method: paymentMethod.value, amount: calculatedPrice.value }
     };
@@ -544,7 +534,6 @@ watch(() => props.isOpen, (newVal) => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Đảm bảo Font Inter áp dụng triệt để */
 .modal-overlay,
 .modal-content,
 input,
@@ -589,7 +578,6 @@ div {
     max-width: 680px;
 }
 
-/* Header */
 .modal-header {
     padding: 24px;
     border-bottom: 1px solid #e5e7eb;
@@ -626,7 +614,6 @@ div {
     color: #111827;
 }
 
-/* Stepper */
 .stepper-container {
     display: flex;
     align-items: center;
@@ -697,7 +684,6 @@ div {
     background: #45C3D2;
 }
 
-/* Body */
 .modal-body {
     padding: 24px;
     overflow-y: auto;
@@ -713,7 +699,6 @@ div {
     background: #fff;
 }
 
-/* Common Elements */
 .section-title {
     font-size: 16px;
     font-weight: 600;
@@ -797,7 +782,6 @@ div {
     box-shadow: 0 0 0 3px rgba(69, 195, 210, 0.15);
 }
 
-/* Step 1: Patient Search */
 .no-result {
     padding: 16px;
     text-align: center;
@@ -906,7 +890,6 @@ div {
     color: #fff;
 }
 
-/* Step 2: Time Slots */
 .slots-container label {
     display: block;
     font-size: 14px;
@@ -959,7 +942,6 @@ div {
     color: #fff;
 }
 
-/* Slot đã qua */
 .slot-btn.past {
     background-color: #f9fafb;
     border-color: #e5e7eb;
@@ -971,7 +953,6 @@ div {
     color: #9ca3af;
 }
 
-/* Step 3: Payment */
 .summary-box {
     background: #f9fafb;
     padding: 20px;
@@ -1105,7 +1086,6 @@ div {
     text-align: center;
 }
 
-/* Utils & Animations */
 .btn-primary {
     background: #45C3D2;
     color: #fff;

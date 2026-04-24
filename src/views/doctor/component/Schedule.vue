@@ -2,7 +2,24 @@
     <div class="schedule-page slide-up">
         <div class="card schedule-layout">
             <div class="panel-header">
-                <h2>Lịch làm việc tuần này</h2>
+                <div class="header-left">
+                    <h2>Lịch làm việc</h2>
+                    <div class="week-controls">
+                        <button class="btn-icon" @click="prevWeek" title="Tuần trước">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+                        <button class="btn-outline" @click="currentWeek">Tuần này</button>
+                        <button class="btn-icon" @click="nextWeek" title="Tuần sau">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                        <span class="week-label">{{ weekRangeLabel }}</span>
+                    </div>
+                </div>
+
                 <button class="btn-primary" @click="openRegisterModal">
                     <svg class="fixed-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -13,7 +30,11 @@
             </div>
 
             <div class="calendar-wrapper">
-                <table class="gcal-table">
+                <div v-if="isLoading" class="loading-container">
+                    <div class="spinner"></div>
+                    <p>Đang tải dữ liệu lịch làm việc...</p>
+                </div>
+                <table v-else class="gcal-table">
                     <thead>
                         <tr>
                             <th class="gcal-time-header">Ca trực</th>
@@ -30,9 +51,13 @@
                                 <span>{{ shift.time }}</span>
                             </td>
                             <td v-for="day in weekDays" :key="day.date" class="gcal-cell">
-                                <div v-if="isRegistered(day.date, shift.id)" class="gcal-event">
+                                <div v-if="getRegisteredShift(day.date, shift.id)" class="gcal-event"
+                                    :class="shift.cssClass">
                                     <div class="event-title">Ca {{ shift.name }}</div>
-                                    <div class="event-time">{{ shift.time }}</div>
+                                    <div class="event-time">
+                                        {{ formatTime(getRegisteredShift(day.date, shift.id).startTime) }} -
+                                        {{ formatTime(getRegisteredShift(day.date, shift.id).endTime) }}
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -74,39 +99,123 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useWorkSessionStore } from '../../../stores/workSessionStore'
+import { EnumShift } from '../../../constants/enum'
+import { notifyError, notifySuccess } from '../../../utils/notify'
 
-// Dữ liệu khung Lịch (Shifts)
+const workSessionStore = useWorkSessionStore()
+
 const shifts = [
-    { id: 'morning', name: 'Sáng', time: '08:00 - 12:00' },
-    { id: 'afternoon', name: 'Chiều', time: '13:30 - 17:30' },
-    { id: 'evening', name: 'Tối', time: '18:00 - 21:00' }
+    { id: EnumShift.Morning, name: 'Ca Sáng', time: '07:30 - 12:00', cssClass: 'shift-morning' },
+    { id: EnumShift.Afternoon, name: 'Ca Chiều', time: '13:30 - 17:30', cssClass: 'shift-afternoon' },
+    { id: EnumShift.Evening, name: 'Ca Tối', time: '18:00 - 21:00', cssClass: 'shift-evening' }
 ]
 
-// Dữ liệu Ngày trong tuần
-const weekDays = [
-    { dayName: 'Thứ 2', dateNumber: '10', date: '2026-04-10', isToday: false },
-    { dayName: 'Thứ 3', dateNumber: '11', date: '2026-04-11', isToday: false },
-    { dayName: 'Thứ 4', dateNumber: '12', date: '2026-04-12', isToday: false },
-    { dayName: 'Thứ 5', dateNumber: '13', date: '2026-04-13', isToday: false },
-    { dayName: 'Thứ 6', dateNumber: '14', date: '2026-04-14', isToday: true }, // Giả lập hôm nay
-    { dayName: 'Thứ 7', dateNumber: '15', date: '2026-04-15', isToday: false },
-    { dayName: 'CN', dateNumber: '16', date: '2026-04-16', isToday: false }
-]
+const currentDate = ref(new Date())
+const registeredShifts = ref([])
+const isLoading = ref(false)
 
-// Dữ liệu lịch đã đăng ký (Mock)
-const registeredShifts = ref([
-    { date: '2026-04-10', shiftId: 'morning' },
-    { date: '2026-04-10', shiftId: 'afternoon' },
-    { date: '2026-04-12', shiftId: 'morning' },
-    { date: '2026-04-14', shiftId: 'evening' }
-])
-
-const isRegistered = (date, shiftId) => {
-    return registeredShifts.value.some(s => s.date === date && s.shiftId === shiftId)
+const getMonday = (d) => {
+    const date = new Date(d)
+    const day = date.getDay()
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1)
+    return new Date(date.setDate(diff))
 }
 
-// --- LOGIC MODAL ĐĂNG KÝ ---
+const weekDays = computed(() => {
+    const monday = getMonday(currentDate.value)
+    const days = []
+    const dayNames = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN']
+
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(monday)
+        date.setDate(monday.getDate() + i)
+
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+
+        days.push({
+            dayName: dayNames[i],
+            dateNumber: date.getDate(),
+            date: `${year}-${month}-${day}`,
+            isToday: date.toDateString() === new Date().toDateString()
+        })
+    }
+    return days
+})
+
+const weekRangeLabel = computed(() => {
+    if (weekDays.value.length === 0) return ''
+    const start = weekDays.value[0].date.split('-').reverse().join('/')
+    const end = weekDays.value[6].date.split('-').reverse().join('/')
+    return `${start} - ${end}`
+})
+
+const fetchSchedules = async () => {
+    const startDate = weekDays.value[0].date
+    isLoading.value = true
+
+    try {
+        const response = await workSessionStore.getSchedules(startDate)
+
+        registeredShifts.value = response.map(item => {
+            const datePart = item.date.split('T')[0]
+            const startTimeStr = item.startTime.split('T')[1]
+            const hour = parseInt(startTimeStr.split(':')[0])
+
+            let mappedShiftId = EnumShift.Morning
+            if (hour >= 13 && hour < 18) {
+                mappedShiftId = EnumShift.Afternoon
+            } else if (hour >= 18) {
+                mappedShiftId = EnumShift.Evening
+            }
+
+            return {
+                ...item,
+                mappedDate: datePart,
+                mappedShiftId: mappedShiftId
+            }
+        })
+    } catch (error) {
+        console.error(error)
+        notifyError('Không thể tải lịch làm việc. Vui lòng thử lại sau.')
+    } finally {
+        isLoading.value = false
+    }
+}
+
+const changeWeek = (daysOffset) => {
+    const newDate = new Date(currentDate.value)
+    newDate.setDate(newDate.getDate() + daysOffset)
+    currentDate.value = newDate
+    fetchSchedules()
+}
+
+const nextWeek = () => changeWeek(7)
+const prevWeek = () => changeWeek(-7)
+const currentWeek = () => {
+    currentDate.value = new Date()
+    fetchSchedules()
+}
+
+const shiftsMap = computed(() => {
+    const map = {}
+    registeredShifts.value.forEach(shift => {
+        map[`${shift.mappedDate}_${shift.mappedShiftId}`] = shift
+    })
+    return map
+})
+
+const getRegisteredShift = (date, shiftId) => shiftsMap.value[`${date}_${shiftId}`]
+
+const formatTime = (dateTimeString) => {
+    if (!dateTimeString) return ''
+    const time = dateTimeString.split('T')[1]
+    return time.substring(0, 5)
+}
+
 const isRegModalOpen = ref(false)
 const regForm = ref({ date: '', shiftId: '' })
 
@@ -119,26 +228,26 @@ const closeRegModal = () => {
     isRegModalOpen.value = false
 }
 
-const submitRegistration = () => {
-    if (!regForm.value.date || !regForm.value.shiftId) {
-        alert('Vui lòng chọn đầy đủ Ngày và Ca trực!')
+const submitRegistration = async () => {
+    if (!regForm.value.date || regForm.value.shiftId === '') {
+        notifyError('Vui lòng chọn đầy đủ Ngày và Ca trực!')
         return
     }
 
-    // Kiểm tra trùng lặp
-    if (isRegistered(regForm.value.date, regForm.value.shiftId)) {
-        alert('Bạn đã đăng ký ca trực này rồi!')
-        return
+    try {
+        await workSessionStore.registerWorkSession(regForm.value.date, regForm.value.shiftId)
+        notifySuccess('Đăng ký lịch làm việc thành công!')
+        fetchSchedules()
+        closeRegModal()
+    } catch (error) {
+        console.error(error);
+        notifyError(error?.response?.data?.message || error?.message || 'Có lỗi xảy ra, vui lòng thử lại');
     }
-
-    // Đẩy vào mảng (Mô phỏng API)
-    registeredShifts.value.push({
-        date: regForm.value.date,
-        shiftId: regForm.value.shiftId
-    })
-
-    closeRegModal()
 }
+
+onMounted(() => {
+    fetchSchedules()
+})
 </script>
 
 <style scoped>
@@ -166,10 +275,70 @@ const submitRegistration = () => {
     background: #fff;
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
 .panel-header h2 {
     font-size: 18px;
     margin: 0;
     color: #111827;
+}
+
+.week-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f3f4f6;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.btn-icon,
+.btn-outline {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4b5563;
+    transition: 0.2s;
+    font-family: inherit;
+}
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.btn-outline {
+    padding: 0 12px;
+    height: 32px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.btn-icon:hover,
+.btn-outline:hover {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.btn-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.week-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-left: 12px;
+    margin-right: 8px;
 }
 
 .btn-primary {
@@ -186,7 +355,7 @@ const submitRegistration = () => {
     border: none;
     padding: 8px 16px;
     font-size: 13px;
-    width: fit-content !important; 
+    width: fit-content !important;
     white-space: nowrap;
 }
 
@@ -200,12 +369,40 @@ const submitRegistration = () => {
     flex-shrink: 0;
 }
 
-/* ================= GIAO DIỆN GOOGLE CALENDAR ================= */
 .calendar-wrapper {
     flex: 1;
     overflow-y: auto;
     background: #f9fafb;
     padding: 24px;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #6b7280;
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border-left-color: #45C3D2;
+    animation: spin 1s ease infinite;
+    margin-bottom: 12px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .gcal-table {
@@ -223,7 +420,6 @@ const submitRegistration = () => {
     border: 1px solid #e5e7eb;
 }
 
-/* Phần Header Ngày */
 .gcal-table th {
     padding: 12px;
     text-align: center;
@@ -256,7 +452,6 @@ const submitRegistration = () => {
     margin: 0 auto;
 }
 
-/* Hiệu ứng nổi bật ngày hiện tại */
 .gcal-day-date.today {
     background: #45C3D2;
     color: #fff;
@@ -264,7 +459,6 @@ const submitRegistration = () => {
     font-weight: 600;
 }
 
-/* Phần Cột Thời Gian */
 .gcal-time-cell {
     text-align: center;
     padding: 16px;
@@ -283,7 +477,6 @@ const submitRegistration = () => {
     color: #6b7280;
 }
 
-/* Phần Lưới Ô (Cells) */
 .gcal-cell {
     height: 120px;
     vertical-align: top;
@@ -296,21 +489,46 @@ const submitRegistration = () => {
     background: #f9fafb;
 }
 
-/* Khối Sự Kiện (Event Blocks) */
 .gcal-event {
-    background-color: #45C3D2;
     color: white;
     padding: 8px 12px;
     border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(69, 195, 210, 0.2);
     cursor: pointer;
     transition: 0.2s;
-    border-left: 4px solid #00838f;
 }
 
 .gcal-event:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(69, 195, 210, 0.3);
+}
+
+.shift-morning {
+    background-color: #10B981;
+    border-left: 4px solid #047857;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.shift-morning:hover {
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+}
+
+.shift-afternoon {
+    background-color: #F59E0B;
+    border-left: 4px solid #D97706;
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+}
+
+.shift-afternoon:hover {
+    box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);
+}
+
+.shift-evening {
+    background-color: #6366F1;
+    border-left: 4px solid #4F46E5;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+}
+
+.shift-evening:hover {
+    box-shadow: 0 4px 6px rgba(99, 102, 241, 0.3);
 }
 
 .event-title {
@@ -324,7 +542,6 @@ const submitRegistration = () => {
     opacity: 0.9;
 }
 
-/* ================= MODAL ĐĂNG KÝ CSS ================= */
 .modal-overlay {
     position: fixed;
     top: 0;

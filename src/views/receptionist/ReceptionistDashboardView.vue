@@ -40,7 +40,6 @@ const selectedDate = ref(new Date().toISOString().split('T')[0]);
 const selectedWorkSession = ref(null);
 const isWalkInModalOpen = ref(false);
 
-// --- BỔ SUNG CÁC BIẾN CÒN THIẾU ---
 const selectedDoctor = ref(null);
 
 const allServices = ref([]);
@@ -56,9 +55,7 @@ onMounted(async () => {
     }
 });
 
-// --- BỔ SUNG HÀM XỬ LÝ LOAD WORK SESSION ---
 const handleWorkSessionsLoaded = (data) => {
-    // Hàm này được trigger từ WorkSessionListPanel, bạn có thể để trống hoặc log ra
     console.log("Đã tải xong danh sách ca làm việc:", data);
 }
 
@@ -168,12 +165,10 @@ const handleNoShow = async (appt) => {
     }
 }
 
-// --- BỔ SUNG HÀM UNDO CHECK-IN ---
 const undoCheckIn = async (appt) => {
     if (confirm(`Bạn muốn hủy trạng thái chờ khám (Check-in) của ${appt.patientName}?`)) {
         const payload = {
             appointmentId: appt.id,
-            // Đưa về trạng thái Approved/Booked ban đầu tùy thuộc Enum của bạn (Ví dụ 1 là Approved)
             status: EnumAppointmentStatus.Approved
         };
         try {

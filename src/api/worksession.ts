@@ -1,6 +1,7 @@
 import { buildApiUrl } from '../utils/apiConfig'
 import { ErrorMessageDictionary } from "../constants/errorMessageDictionary"
 import { AvailableDayModel, WorkSessionModel } from '../types/index'
+import { EnumShift } from '../constants/enum'
 
 // === Constants ===
 const getAccessToken = (): string | null => {
@@ -54,4 +55,43 @@ export async function doGetDoctorWorkSessions(date: string): Promise<WorkSession
         throw new Error(errorMessage)
     }
     return (await res.json()).result as WorkSessionModel[]
+}
+
+export async function doGetSchedules(startDate: string): Promise<WorkSessionModel[]> {
+    const url = buildApiUrl(`doctor/schedule/${startDate}`)
+
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    })
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return (await res.json()).result as WorkSessionModel[]
+}
+
+export async function doRegisterWorkSession(payload: { date: string; shift: EnumShift }): Promise<WorkSessionModel> {
+    const url = buildApiUrl('doctor/schedule/register')
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+        },
+        body: JSON.stringify(payload)
+    })
+
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+
+    return (await res.json()).result as WorkSessionModel
 }

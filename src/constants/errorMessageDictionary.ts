@@ -29,4 +29,5 @@ export const ErrorMessageDictionary: Record<string, string> = {
   "CitizenIdAlreadyExists": "Số căn cước công dân đã tồn tại trong hệ thống. Vui lòng sử dụng số khác.",
   "PrescriptionNotFound": "Không tìm thấy đơn thuốc. Vui lòng kiểm tra lại thông tin và thử lại.",
   "PrescriptionDetailNotFound": "Không tìm thấy chi tiết đơn thuốc. Vui lòng kiểm tra lại thông tin và thử lại.",
+  "WorkSessionExisted": "Lịch làm việc đã tồn tại. Vui lòng chọn ngày hoặc ca khác.",
 };

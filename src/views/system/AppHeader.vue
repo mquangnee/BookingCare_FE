@@ -300,7 +300,6 @@ onUnmounted(() => {
     font-family: 'Inter', -apple-system, sans-serif;
 }
 
-/* Style cho nút Trợ lý AI */
 .ai-assistant-btn {
     display: flex;
     align-items: center;
@@ -318,14 +317,12 @@ onUnmounted(() => {
 
 .ai-assistant-btn.active {
     background: #ef4444;
-    /* Màu đỏ khi đang nghe để nhấn mạnh */
 }
 
 .ai-assistant-btn i {
     font-size: 16px;
 }
 
-/* Hiệu ứng vòng tròn tỏa ra khi AI đang hoạt động */
 .pulse-ring {
     position: absolute;
     width: 100%;
@@ -352,7 +349,6 @@ onUnmounted(() => {
 @media (max-width: 768px) {
     .ai-assistant-btn .btn-text {
         display: none;
-        /* Ẩn chữ trên mobile, chỉ hiện icon */
     }
 }
 

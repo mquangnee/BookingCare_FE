@@ -325,7 +325,6 @@ const selectedDate = ref(getLocalToday())
 const selectedSlot = ref(null)
 const selectedProfile = ref(null)
 
-// --- COMPUTED LOGIC ---
 const filteredDoctors = computed(() => doctorsBySpecialty.value || []);
 
 const canProceedToStep2 = computed(() => {
@@ -355,9 +354,6 @@ const filteredSlots = computed(() => {
     return availableSlots.value.filter(s => s.doctorId === selectedDoctorInStep2.value.id);
 });
 
-// --- WATCHERS (CHỈNH SỬA QUAN TRỌNG TẠI ĐÂY) ---
-
-// Chỉ reset bác sĩ và giờ khi NGÀY thay đổi
 watch(selectedDate, () => {
     if (step.value === 2) {
         selectedDoctorInStep2.value = null;
@@ -366,31 +362,24 @@ watch(selectedDate, () => {
     }
 });
 
-// Theo dõi chuyển bước
 watch(step, (newStep, oldStep) => {
-    // Nếu quay lại bước 1, reset toàn bộ
     if (newStep === 1) {
         resetSelections();
     }
-    // Khi sang bước 2, lấy lịch
     if (newStep === 2 && oldStep === 1) {
         fetchWeeklySchedule();
     }
-    // Khi sang bước 3, lấy hồ sơ
     if (newStep === 3) {
         fetchPatientProfiles();
     }
-    // LƯU Ý: Không làm gì khi newStep === 4 để giữ selectedSlot
 });
 
-// Reset giờ khi đổi bác sĩ ở bước 2
 watch(selectedDoctorInStep2, () => {
     if (step.value === 2) {
         selectedSlot.value = null;
     }
 });
 
-// --- METHODS ---
 const fetchPatientProfiles = async () => {
     if (!selectedSlot.value) return;
     isLoadingProfiles.value = true;

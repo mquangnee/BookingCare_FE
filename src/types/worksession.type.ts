@@ -10,9 +10,11 @@ export type WorkSessionModel = {
     specialtyName?: string
     avatarUrl?: string
     position?: EnumPosition
-    startTime?: string
     durationInMinutes?: number
     doctorPrice?: number
+    date?: string
+    startTime?: string
+    endTime?: string
 }
 
 export type AvailableDayModel = {
@@ -21,6 +23,7 @@ export type AvailableDayModel = {
 }
 
 export type AvailableTimeSlotModel = {
+    workSessionId: string
     startTime: string
     endTime: string
     timeString: string

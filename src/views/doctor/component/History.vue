@@ -11,12 +11,12 @@
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                    <input type="text" v-model="searchQuery" placeholder="Nhập tên bệnh nhân hoặc mã BN..." />
+                    <input type="text" v-model="searchQuery" @keyup.enter="handleSearch" placeholder="Nhập tên bệnh nhân hoặc mã BN..." />
                 </div>
                 <div class="filter-group">
-                    <input type="date" class="form-control" title="Từ ngày" />
-                    <input type="date" class="form-control" title="Đến ngày" />
-                    <button class="btn-primary">Lọc kết quả</button>
+                    <input type="date" v-model="fromDate" class="form-control" title="Từ ngày" />
+                    <input type="date" v-model="toDate" class="form-control" title="Đến ngày" />
+                    <button class="btn-primary" @click="handleSearch">Lọc kết quả</button>
                 </div>
             </div>
 
@@ -24,21 +24,27 @@
                 <table class="history-table">
                     <thead>
                         <tr>
-                            <th>Mã BN</th>
+                            <th>Mã lịch hẹn</th>
                             <th>Tên bệnh nhân</th>
                             <th>Ngày khám</th>
-                            <th>Chẩn đoán</th>
-                            <th>Chuyên khoa</th>
+                            <th>Ca khám</th>
+                            <th>Chuẩn đoán</th>
                             <th class="text-center" style="width: 120px">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="record in records" :key="record.id">
+                        <tr v-if="isLoadingRecords">
+                            <td colspan="6" class="text-center py-4">Đang tải dữ liệu...</td>
+                        </tr>
+                        <tr v-else-if="records.length === 0">
+                            <td colspan="6" class="text-center py-4">Không có dữ liệu lịch sử khám bệnh.</td>
+                        </tr>
+                        <tr v-else v-for="record in records" :key="record.appointmentId">
                             <td class="text-gray">{{ record.patientId }}</td>
                             <td class="font-semibold">{{ record.patientName }}</td>
                             <td>{{ record.date }}</td>
-                            <td>{{ record.diagnosis }}</td>
-                            <td>{{ record.specialty }}</td>
+                            <td>{{ record.timeRange }}</td>
+                            <td>{{ record.diagnosis || 'Chưa chẩn đoán' }}</td>
                             <td class="text-center">
                                 <button class="btn-sm btn-outline-primary" @click="openDetailModal(record)">
                                     Xem chi tiết
@@ -56,8 +62,7 @@
                     <div class="modal-header bg-primary-light">
                         <div>
                             <h2 class="text-primary-dark">Chi tiết Bệnh án</h2>
-                            <p class="mb-0 text-sm mt-1">Ngày khám: {{ selectedRecord?.date }} | BS. {{
-                                selectedRecord?.doctorName || 'Phạm Như Hải' }}</p>
+                            <p class="mb-0 text-sm mt-1">Ngày khám: {{ selectedRecord?.date }}</p>
                         </div>
                         <button class="close-btn" @click="closeDetailModal">&times;</button>
                     </div>
@@ -67,29 +72,30 @@
                             <div class="avatar-circle">{{ selectedRecord?.patientName.charAt(0) }}</div>
                             <div class="ps-info">
                                 <h3>{{ selectedRecord?.patientName }}</h3>
-                                <p>Mã BN: {{ selectedRecord?.patientId }} | Giới tính: {{ selectedRecord?.gender ||
-                                    'Nam' }}</p>
+                                <p>Mã hồ sơ: {{ selectedRecord?.profileCode }} | Giới tính: {{ selectedRecord?.gender }}</p>
                             </div>
                         </div>
 
                         <div class="detail-section mt-4">
                             <h4 class="section-title">1. Chẩn đoán lâm sàng</h4>
                             <div class="info-box">
-                                {{ selectedRecord?.diagnosis }}
+                                <div v-if="isLoadingDetail" class="text-sm italic text-gray">Đang tải chi tiết đơn thuốc...</div>
+                                <div v-else>{{ selectedRecord?.diagnosis }}</div>
                             </div>
                         </div>
 
                         <div class="detail-section mt-4">
                             <h4 class="section-title">2. Lời khuyên & Chỉ định</h4>
                             <div class="info-box bg-yellow-50 text-yellow-900">
-                                {{ selectedRecord?.instructions || 'Không có chỉ định đặc biệt. Theo dõi thêm tại nhà.'
-                                }}
+                                <div v-if="isLoadingDetail" class="text-sm italic">Đang tải...</div>
+                                <div v-else>{{ selectedRecord?.instructions || 'Không có chỉ định đặc biệt. Theo dõi thêm tại nhà.' }}</div>
                             </div>
                         </div>
 
                         <div class="detail-section mt-4">
                             <h4 class="section-title">3. Đơn thuốc (Kê toa)</h4>
-                            <div v-if="selectedRecord?.prescriptions?.length > 0" class="prescription-wrapper">
+                            <div v-if="isLoadingDetail" class="info-box text-center italic text-gray">Đang tải đơn thuốc...</div>
+                            <div v-else-if="selectedRecord?.prescriptions?.length > 0" class="prescription-wrapper">
                                 <table class="prescription-table">
                                     <thead>
                                         <tr>
@@ -133,48 +139,87 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useAppointmentStore } from "../../../stores/appointmentStore"
+import { notifyError } from "../../../utils/notify"
+import { getGenderName, getMedicineUnitName } from '../../../constants/enum'
+
+const appointmentStore = useAppointmentStore()
 
 const searchQuery = ref('')
+const fromDate = ref('')
+const toDate = ref('')
 const isDetailModalOpen = ref(false)
 const selectedRecord = ref(null)
+const isLoadingRecords = ref(false)
+const isLoadingDetail = ref(false)
 
-const records = ref([
-    {
-        id: 1,
-        patientId: 'BN-10023',
-        patientName: 'Nguyễn Văn Anh',
-        gender: 'Nam',
-        date: '05/04/2026',
-        diagnosis: 'Đau dạ dày cấp',
-        specialty: 'Tiêu hóa',
-        doctorName: 'Trần B',
-        instructions: 'Tránh ăn đồ chua cay, thức khuya. Ăn uống đúng giờ.',
-        prescriptions: [
-            { name: 'Omeprazole 20mg', quantity: '14 viên', usage: 'Ngày 1 viên trước ăn sáng 30p' },
-            { name: 'Phosphalugel 20% 20g', quantity: '14 gói', usage: 'Ngày 2 gói sau ăn trưa/tối 1h' }
-        ]
-    },
-    {
-        id: 2,
-        patientId: 'BN-10045',
-        patientName: 'Trần Thị Bé',
-        gender: 'Nữ',
-        date: '08/04/2026',
-        diagnosis: 'Viêm khớp dạng thấp',
-        specialty: 'Cơ Xương Khớp',
-        doctorName: 'Phạm Như Hải',
-        instructions: 'Hạn chế vận động mạnh. Chườm ấm vùng khớp đau mỗi tối 15 phút.',
-        prescriptions: [
-            { name: 'Ibuprofen 400mg', quantity: '20 viên', usage: 'Ngày 2 viên sáng/tối sau ăn no' },
-            { name: 'Glucosamine Sulfate 1500mg', quantity: '30 viên', usage: 'Ngày 1 viên sau ăn sáng' }
-        ]
-    },
-])
+const records = ref([])
 
-const openDetailModal = (record) => {
-    selectedRecord.value = record
+const fetchHistory = async () => {
+    isLoadingRecords.value = true
+    try {
+        if (fromDate.value && toDate.value && fromDate.value > toDate.value) {
+            notifyError('Ngày lọc không hợp lệ.')
+            isLoadingRecords.value = false
+            return
+        }
+        const response = await appointmentStore.getMedicalHistory(searchQuery.value, fromDate.value, toDate.value)
+        records.value = response.map(item => {
+            let timeRange = 'N/A';
+            if (item.startTime && item.endTime) {
+                const start = item.startTime.substring(0, 5);
+                const end = item.endTime.substring(0, 5);
+                timeRange = `${start} - ${end}`;
+            }
+
+            return {
+                ...item,
+                patientId: item.appointmentCode || 'N/A', 
+                gender: getGenderName(item.gender),
+                date: item.date ? new Date(item.date).toLocaleDateString('vi-VN') : 'N/A',
+                timeRange: timeRange,
+                instructions: '',
+                prescriptions: []
+            };
+        })
+    } catch (error) {
+        console.error(error)
+        notifyError('Lỗi khi tải lịch sử khám bệnh.')
+    } finally {
+        isLoadingRecords.value = false
+    }
+}
+
+const handleSearch = () => {
+    fetchHistory()
+}
+
+const openDetailModal = async (record) => {
     isDetailModalOpen.value = true
+    selectedRecord.value = { ...record, prescriptions: [] }
+    isLoadingDetail.value = true
+    
+    try {
+        const report = await appointmentStore.getMedicalReportDoctor(record.appointmentId)
+        
+        if (report) {
+            selectedRecord.value.diagnosis = report.diagnosis || record.diagnosis
+            selectedRecord.value.instructions = report.instructions || 'Không có chỉ định đặc biệt. Theo dõi thêm tại nhà.'
+            
+            if (report.prescriptionDetails && report.prescriptionDetails.length > 0) {
+                selectedRecord.value.prescriptions = report.prescriptionDetails.map(detail => ({
+                    name: detail.medicineName,
+                    quantity: `${detail.dosage || ''} ${getMedicineUnitName(detail.medicineUnit)}`,
+                    usage: detail.usage
+                }))
+            }
+        }
+    } catch (error) {
+        console.error('Không tải được báo cáo y tế.', error)
+    } finally {
+        isLoadingDetail.value = false
+    }
 }
 
 const closeDetailModal = () => {
@@ -182,13 +227,30 @@ const closeDetailModal = () => {
     selectedRecord.value = null
 }
 
-const printPrescription = () => {
-    alert("Chức năng in đơn thuốc đang được phát triển.");
+const printPrescription = async () => {
+    try {
+        const response = await appointmentStore.exportMedicalReport(selectedRecord.value.appointmentId)
+        const blob = new Blob([response], { type: 'application/pdf' })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', `DonThuoc_${selectedRecord.value.appointmentId}.pdf`)
+        document.body.appendChild(link)
+        link.click()
+        link.parentNode.removeChild(link)
+        window.URL.revokeObjectURL(url)
+    } catch (error) {
+        console.error('Lỗi khi tải đơn thuốc:', error)
+        notifyError('Không thể tải đơn thuốc.')
+    }
 }
+
+onMounted(() => {
+    fetchHistory()
+})
 </script>
 
 <style scoped>
-/* Base Styles for History List */
 .history-page {
     height: calc(100vh - 120px);
 }
@@ -320,7 +382,11 @@ const printPrescription = () => {
     text-align: center !important;
 }
 
-/* CSS Mới cho Nút Xem chi tiết */
+.py-4 {
+    padding-top: 16px;
+    padding-bottom: 16px;
+}
+
 .btn-sm {
     padding: 6px 12px;
     font-size: 13px;
@@ -343,7 +409,6 @@ const printPrescription = () => {
     border-color: #00838f;
 }
 
-/* CSS CHO MODAL CHI TIẾT BỆNH ÁN */
 .modal-overlay {
     position: fixed;
     top: 0;
