@@ -10,6 +10,7 @@ export * from './patient.type'
 export * from './dashboard.type'
 export * from './medicine.type'
 export * from './prescription.type'
+export * from './receptionist.type'
 
 export type PagedResult<T> = {
     items: T[]

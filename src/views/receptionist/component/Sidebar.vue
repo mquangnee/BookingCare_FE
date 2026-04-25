@@ -34,9 +34,30 @@
                     <span>Đang làm việc</span>
                 </div>
             </div>
+            <button class="logout-btn" @click="handleLogout">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Đăng xuất
+            </button>
         </div>
     </aside>
 </template>
+
+<script setup>
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
+
+const router = useRouter()
+const authStore = useAuthStore()
+
+const handleLogout = () => {
+    authStore.logout()
+    router.push('/login')
+}
+</script>
 
 <style scoped>
 .sidebar {
@@ -114,6 +135,9 @@
 .sidebar-footer {
     padding: 20px;
     border-top: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .user-profile {
@@ -143,5 +167,33 @@
 .user-profile .info span {
     font-size: 12px;
     color: #10b981;
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    width: 100%;
+    background: transparent;
+    border: 0px #fee2e2;
+    border-radius: 8px;
+    color: #ef4444;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.logout-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.logout-btn:hover {
+    background: #fef2f2;
+    border-color: #ef4444;
 }
 </style>

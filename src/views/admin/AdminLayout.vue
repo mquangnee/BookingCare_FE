@@ -414,6 +414,7 @@ onUnmounted(() => {
 
 .logout-btn {
     color: #ef4444 !important;
+    font-family: inherit;
 }
 
 .logout-btn:hover {

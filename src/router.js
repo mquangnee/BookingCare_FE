@@ -73,13 +73,18 @@ const routes = [
         path: 'doctors', 
         name: 'admin-doctors',
         component: () => import('@/views/admin/component/doctormanagement/ManageDoctors.vue') 
+      },
+      {
+        path: 'receptionists', 
+        name: 'admin-receptionists',
+        component: () => import('@/views/admin/component/receptionistmanagement/ManageReceptionists.vue') 
       }
     ]
   },
   {
     path: '/doctor',
     component: () => import('@/views/doctor/DoctorLayout.vue'),
-    // meta: { requiresAuth: true, allowedRoles: ['Doctor'] },
+    meta: { requiresAuth: true, allowedRoles: ['Doctor'] },
     children: [
       {
         path: '', 
@@ -112,8 +117,7 @@ const routes = [
     path: '/receptionist',
     name: 'receptionist-dashboard',
     component: () => import('@/views/receptionist/ReceptionistDashboardView.vue'),
-    
-    // meta: { requiresAuth: true, allowedRoles: ['Receptionist'] } 
+    meta: { requiresAuth: true, allowedRoles: ['Receptionist'] } 
   }
 ]
 

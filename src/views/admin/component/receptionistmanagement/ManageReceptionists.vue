@@ -2,28 +2,23 @@
     <div class="manage-page slide-up">
         <div class="page-header">
             <div>
-                <h1>Quản lý Bác sĩ</h1>
-                <p>Xem, thêm, sửa, xóa danh sách bác sĩ trên hệ thống</p>
+                <h1>Quản lý Lễ tân</h1>
+                <p>Xem, thêm, sửa, khóa danh sách lễ tân trên hệ thống</p>
             </div>
             <button class="btn-primary" @click="openAddModal">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
-                Thêm bác sĩ mới
+                Thêm lễ tân mới
             </button>
         </div>
 
         <div class="card-container">
             <div class="table-toolbar">
                 <div class="filter-group">
-                    <select class="filter-select" v-model="filterSpecialty">
-                        <option value="">Tất cả chuyên khoa</option>
-                        <option v-for="specialty in allSpecialties" :key="specialty.id" :value="specialty.id">{{
-                            specialty.name }}</option>
-                    </select>
                     <select class="filter-select" v-model="filterStatus">
-                        <option value="">Trạng thái</option>
+                        <option value="">Tất cả trạng thái</option>
                         <option value="0">Đang hoạt động</option>
                         <option value="1">Đã khóa</option>
                     </select>
@@ -33,7 +28,7 @@
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                    <input type="text" v-model="searchQuery" placeholder="Tìm theo tên, mã BS..." />
+                    <input type="text" v-model="searchQuery" placeholder="Tìm theo tên, mã Lễ tân..." />
                 </div>
             </div>
 
@@ -41,46 +36,51 @@
                 <table class="admin-table">
                     <thead>
                         <tr>
-                            <th>Thông tin Bác sĩ</th>
-                            <th>Chuyên khoa</th>
-                            <th>Chức danh</th>
+                            <th>Thông tin Lễ tân</th>
+                            <th>Liên hệ</th>
+                            <th>Sinh nhật</th>
                             <th>Trạng thái</th>
                             <th class="text-center">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="doctor in paginatedDoctors" :key="doctor.id">
+                        <tr v-for="receptionist in paginatedReceptionists" :key="receptionist.id">
                             <td>
                                 <div class="user-cell">
-                                    <img :src="doctor.avatarUrl || defaultAvatar" :alt="doctor.fullName"
+                                    <img :src="receptionist.avatarUrl || defaultAvatar" :alt="receptionist.fullName"
                                         class="avatar" />
                                     <div>
-                                        <div class="user-name">{{ doctor.fullName }}</div>
-                                        <div class="user-code">{{ doctor.doctorCode }}</div>
+                                        <div class="user-name">{{ receptionist.fullName }}</div>
+                                        <div class="user-code">{{ receptionist.receptionistCode }}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td>{{ doctor.specialtyName }}</td>
-                            <td>{{ getPositionName(doctor.position) }}</td>
                             <td>
-                                <span class="status-badge" :class="doctor.status === 0 ? 'st-active' : 'st-inactive'">
-                                    {{ doctor.status === 0 ? 'Hoạt động' : 'Đã khóa' }}
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span v-if="receptionist.phoneNumber">{{ receptionist.phoneNumber }}</span>
+                                    <span v-else class="text-gray" style="font-size: 12px;">Đang cập nhật</span>
+                                </div>
+                            </td>
+                            <td>{{ formatDate(receptionist.dateOfBirth) }}</td>
+                            <td>
+                                <span class="status-badge" :class="receptionist.status === 0 ? 'st-active' : 'st-inactive'">
+                                    {{ receptionist.status === 0 ? 'Hoạt động' : 'Đã khóa' }}
                                 </span>
                             </td>
                             <td>
                                 <div class="action-group">
                                     <button class="action-btn text-blue" title="Chỉnh sửa"
-                                        @click="openEditModal(doctor)">
+                                        @click="openEditModal(receptionist)">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                         </svg>
                                     </button>
 
-                                    <button class="action-btn" :class="doctor.status === 0 ? 'text-red' : 'text-green'"
-                                        :title="doctor.status === 0 ? 'Khóa tài khoản' : 'Mở khóa tài khoản'"
-                                        @click="openLockModal(doctor)">
-                                        <svg v-if="doctor.status === 0" viewBox="0 0 24 24" fill="none"
+                                    <button class="action-btn" :class="receptionist.status === 0 ? 'text-red' : 'text-green'"
+                                        :title="receptionist.status === 0 ? 'Khóa tài khoản' : 'Mở khóa tài khoản'"
+                                        @click="openLockModal(receptionist)">
+                                        <svg v-if="receptionist.status === 0" viewBox="0 0 24 24" fill="none"
                                             stroke="currentColor" stroke-width="2">
                                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                                             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
@@ -95,10 +95,10 @@
                             </td>
                         </tr>
                         <tr v-if="isLoading">
-                            <td colspan="5" class="empty-table">Đang tải dữ liệu bác sĩ...</td>
+                            <td colspan="5" class="empty-table">Đang tải dữ liệu lễ tân...</td>
                         </tr>
-                        <tr v-else-if="paginatedDoctors.length === 0">
-                            <td colspan="5" class="empty-table">Không tìm thấy bác sĩ nào phù hợp.</td>
+                        <tr v-else-if="paginatedReceptionists.length === 0">
+                            <td colspan="5" class="empty-table">Không tìm thấy lễ tân nào phù hợp.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -106,7 +106,7 @@
 
             <div class="pagination">
                 <span class="page-info">
-                    Hiển thị {{ displayRange }} trên {{ filteredDoctors.length }} bác sĩ
+                    Hiển thị {{ displayRange }} trên {{ filteredReceptionists.length }} lễ tân
                 </span>
                 <div class="page-controls">
                     <button class="page-btn" :disabled="currentPage === 1" @click="currentPage--">Trước</button>
@@ -123,103 +123,63 @@
             <div v-if="isEditModalOpen" class="modal-overlay" @click.self="closeEditModal">
                 <div class="modal-content modal-lg slide-down">
                     <div class="modal-header">
-                        <h2>Chỉnh sửa thông tin Bác sĩ</h2>
+                        <h2>Chỉnh sửa thông tin Lễ tân</h2>
                         <button class="close-btn" @click="closeEditModal">&times;</button>
                     </div>
                     <div class="modal-body">
                         <div class="form-grid">
-                            <div class="form-section-title">Thông tin cơ bản (Chỉ xem)</div>
+                            <div class="form-section-title">Thông tin cơ bản</div>
                             <div class="avatar-upload-section mb-3">
                                 <div class="avatar-edit-wrapper">
                                     <img :src="previewImage || editForm.avatarUrl || defaultAvatar" class="avatar-big-preview" />
-                                    <label for="doctor-edit-avatar-input" class="edit-icon-overlay" title="Tải ảnh mới lên">
+                                    <label for="receptionist-edit-avatar-input" class="edit-icon-overlay" title="Tải ảnh mới lên">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                                             <circle cx="12" cy="13" r="4"></circle>
                                         </svg>
                                     </label>
-                                    <input type="file" id="doctor-edit-avatar-input" ref="fileInputEditRef" @change="handleFileChange" accept="image/*" hidden />
+                                    <input type="file" id="receptionist-edit-avatar-input" ref="fileInputEditRef" @change="handleFileChange" accept="image/*" hidden />
                                 </div>
                                 <div class="upload-hint">Cập nhật ảnh đại diện</div>
                             </div>
-                            <div class="form-group">
-                                <label>Họ và tên</label>
-                                <input type="text" v-model="editForm.fullName" disabled class="input-disabled" />
-                            </div>
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" v-model="editForm.email" disabled class="input-disabled" />
-                            </div>
+
                             <div class="form-group">
                                 <label>Số CCCD</label>
                                 <input type="text" v-model="editForm.citizenId" disabled class="input-disabled" />
                             </div>
-                            <div class="form-row-2">
-                                <div class="form-group">
-                                    <label>Giới tính</label>
-                                    <input type="text" :value="editForm.gender === 0 ? 'Nam' : 'Nữ'" disabled
-                                        class="input-disabled" />
-                                </div>
-                                <div class="form-group">
-                                    <label>Ngày sinh</label>
-                                    <input type="text" :value="formatDate(editForm.dateOfBirth)" disabled
-                                        class="input-disabled" />
-                                </div>
-                            </div>
 
-                            <div class="form-section-title mt-4">Thông tin chuyên môn</div>
                             <div class="form-row-2">
                                 <div class="form-group">
-                                    <label>Chuyên khoa</label>
-                                    <select v-model="editForm.specialtyId" class="form-control">
-                                        <option v-for="spec in allSpecialties" :key="spec.id" :value="spec.id">{{ spec.name }}</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Dịch vụ khám</label>
-                                    <select v-model="editForm.serviceId" class="form-control" :class="{'input-disabled': !editForm.specialtyId}" :disabled="!editForm.specialtyId">
-                                        <option value="">{{ editForm.specialtyId ? '-- Chọn dịch vụ khám --' : '-- Vui lòng chọn chuyên khoa trước --' }}</option>
-                                        <option v-for="svc in availableServices" :key="svc.id" :value="svc.id">{{ svc.name }}</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-row-2">
-                                <div class="form-group">
-                                    <label>Chức danh</label>
-                                    <select v-model="editForm.position" class="form-control">
-                                        <option :value="0">Bác sĩ</option>
-                                        <option :value="1">Thạc sĩ</option>
-                                        <option :value="2">Tiến sĩ</option>
-                                        <option :value="3">Phó Giáo sư</option>
-                                        <option :value="4">Giáo sư</option>
-                                    </select>
+                                    <label>Họ và tên</label>
+                                    <input type="text" v-model="editForm.fullName" class="form-control" />
                                 </div>
                                 <div class="form-group">
                                     <label>Số điện thoại liên hệ</label>
                                     <input type="text" v-model="editForm.phoneNumber" class="form-control" />
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label>Số năm kinh nghiệm</label>
-                                <input type="number" v-model="editForm.experienceYears" class="form-control" />
-                            </div>
-                            <div class="form-group">
-                                <label>Mô tả ngắn</label>
-                                <textarea v-model="editForm.description" class="form-control" rows="3"></textarea>
-                            </div>
 
-                            <div class="form-section-title mt-4">Lịch sử làm việc</div>
-                            <div class="form-group">
-                                <label>Lịch sử làm việc / Quá trình công tác</label>
-                                <textarea v-model="editForm.workingHistory" class="form-control"
-                                    placeholder="Nhập quá trình công tác (VD: Bệnh viện ABC 2018-2022, Bệnh viện XYZ 2022-nay)"
-                                    rows="4"></textarea>
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Giới tính</label>
+                                    <select v-model="editForm.gender" class="form-control">
+                                        <option :value="0">Nam</option>
+                                        <option :value="1">Nữ</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Ngày sinh</label>
+                                    <input type="date" v-model="editForm.dateOfBirth" class="form-control" />
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn-cancel" @click="closeEditModal">Hủy</button>
-                        <button class="btn-submit" @click="handleSaveEdit">Lưu thay đổi</button>
+                        <button class="btn-cancel" @click="closeEditModal" :disabled="isSubmitting">Hủy</button>
+                        <button class="btn-submit" @click="handleSaveEdit" :disabled="isSubmitting">
+                            <span v-if="isSubmitting" class="spinner"></span> 
+                            Lưu thay đổi
+                        </button>
                     </div>
                 </div>
             </div>
@@ -229,24 +189,21 @@
             <div v-if="isLockModalOpen" class="modal-overlay" @click.self="closeLockModal">
                 <div class="modal-content modal-sm slide-down">
                     <div class="modal-header">
-                        <h2 :class="selectedDoctor.status === 0 ? 'text-red' : 'text-green'">
-                            {{ selectedDoctor.status === 0 ? 'Xác nhận khóa tài khoản' : 'Xác nhận mở khóa' }}
+                        <h2 :class="selectedReceptionist.status === 0 ? 'text-red' : 'text-green'">
+                            {{ selectedReceptionist.status === 0 ? 'Xác nhận khóa tài khoản' : 'Xác nhận mở khóa' }}
                         </h2>
                         <button class="close-btn" @click="closeLockModal">&times;</button>
                     </div>
                     <div class="modal-body text-center py-4">
-                        <p>Bạn có chắc chắn muốn <strong>{{ selectedDoctor.status === 0 ? 'khóa' : 'mở khóa' }}</strong>
-                            tài
-                            khoản của bác sĩ <strong>{{ selectedDoctor.fullName }}</strong> không?</p>
-                        <p v-if="selectedDoctor.status === 0" class="text-sm text-gray mt-2">Bác sĩ này sẽ không thể
-                            đăng
-                            nhập vào hệ thống nữa.</p>
+                        <p>Bạn có chắc chắn muốn <strong>{{ selectedReceptionist.status === 0 ? 'khóa' : 'mở khóa' }}</strong>
+                            tài khoản của lễ tân <strong>{{ selectedReceptionist.fullName }}</strong> không?</p>
+                        <p v-if="selectedReceptionist.status === 0" class="text-sm text-gray mt-2">Lễ tân này sẽ không thể đăng nhập vào hệ thống nữa.</p>
                     </div>
                     <div class="modal-footer justify-center">
                         <button class="btn-cancel" @click="closeLockModal">Hủy</button>
-                        <button class="btn-submit" :class="selectedDoctor.status === 0 ? 'bg-red' : 'bg-green'"
+                        <button class="btn-submit" :class="selectedReceptionist.status === 0 ? 'bg-red' : 'bg-green'"
                             @click="handleConfirmLock">
-                            {{ selectedDoctor.status === 0 ? 'Khóa tài khoản' : 'Mở khóa' }}
+                            {{ selectedReceptionist.status === 0 ? 'Khóa tài khoản' : 'Mở khóa' }}
                         </button>
                     </div>
                 </div>
@@ -257,7 +214,7 @@
             <div v-if="isAddModalOpen" class="modal-overlay" @click.self="closeAddModal">
                 <div class="modal-content modal-lg slide-down">
                     <div class="modal-header">
-                        <h2>Thêm tài khoản Bác sĩ mới</h2>
+                        <h2>Thêm tài khoản Lễ tân mới</h2>
                         <button class="close-btn" @click="closeAddModal">&times;</button>
                     </div>
                     <div class="modal-body">
@@ -266,29 +223,24 @@
                             <div class="avatar-upload-section">
                                 <div class="avatar-edit-wrapper">
                                     <img :src="previewImage || defaultAvatar" class="avatar-big-preview" />
-                                    <label for="doctor-avatar-input" class="edit-icon-overlay" title="Tải ảnh lên">
+                                    <label for="receptionist-avatar-input" class="edit-icon-overlay" title="Tải ảnh lên">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path
-                                                d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
-                                            </path>
+                                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                                             <circle cx="12" cy="13" r="4"></circle>
                                         </svg>
                                     </label>
-                                    <input type="file" id="doctor-avatar-input" ref="fileInputRef" @change="handleFileChange"
-                                        accept="image/*" hidden />
+                                    <input type="file" id="receptionist-avatar-input" ref="fileInputRef" @change="handleFileChange" accept="image/*" hidden />
                                 </div>
-                                <div class="upload-hint">Tải lên ảnh chân dung bác sĩ</div>
+                                <div class="upload-hint">Tải lên ảnh nhận diện (tùy chọn)</div>
                             </div>
                             <div class="form-row-2">
                                 <div class="form-group">
                                     <label>Họ và tên <span class="text-red">*</span></label>
-                                    <input type="text" v-model="addForm.fullName" class="form-control"
-                                        placeholder="Nguyễn Văn A" />
+                                    <input type="text" v-model="addForm.fullName" class="form-control" placeholder="Nguyễn Văn A" />
                                 </div>
                                 <div class="form-group">
                                     <label>Email <span class="text-red">*</span></label>
-                                    <input type="email" v-model="addForm.email" class="form-control"
-                                        placeholder="example@gmail.com" />
+                                    <input type="email" v-model="addForm.email" class="form-control" placeholder="example@gmail.com" />
                                 </div>
                             </div>
                             <div class="form-row-2">
@@ -296,7 +248,7 @@
                                     <label>Mật khẩu mặc định</label>
                                     <input type="text" v-model="addForm.password" class="input-disabled" disabled />
                                     <small style="color: #6b7280; font-size: 11px; margin-top: 4px;">
-                                        * Bác sĩ sẽ dùng mật khẩu này cho lần đăng nhập đầu tiên.
+                                        * Lễ tân sẽ dùng mật khẩu này cho lần đăng nhập đầu tiên.
                                     </small>
                                 </div>
                                 <div class="form-group">
@@ -317,64 +269,17 @@
                                     <input type="date" v-model="addForm.dateOfBirth" class="form-control" />
                                 </div>
                             </div>
-
-                            <div class="form-section-title mt-4">Thông tin chuyên môn</div>
-                            <div class="form-row-2">
-                                <div class="form-group">
-                                    <label>Chuyên khoa</label>
-                                    <select v-model="addForm.specialtyId" class="form-control">
-                                        <option value="">Chọn chuyên khoa</option>
-                                        <option v-for="spec in allSpecialties" :key="spec.id" :value="spec.id">
-                                            {{ spec.name }}
-                                        </option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Dịch vụ khám</label>
-                                    <select v-model="addForm.serviceId" class="form-control" :class="{'input-disabled': !addForm.specialtyId}" :disabled="!addForm.specialtyId">
-                                        <option value="">{{ addForm.specialtyId ? '-- Chọn dịch vụ khám --' : '-- Vui lòng chọn chuyên khoa trước --' }}</option>
-                                        <option v-for="svc in availableServices" :key="svc.id" :value="svc.id">{{ svc.name }}</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-row-2">
-                                <div class="form-group">
-                                    <label>Chức danh</label>
-                                    <select v-model="addForm.position" class="form-control">
-                                        <option :value="0">Bác sĩ</option>
-                                        <option :value="1">Thạc sĩ</option>
-                                        <option :value="2">Tiến sĩ</option>
-                                        <option :value="3">Phó Giáo sư</option>
-                                        <option :value="4">Giáo sư</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Số điện thoại liên hệ</label>
-                                    <input type="text" v-model="addForm.phoneNumber" class="form-control" />
-                                </div>
-                            </div>
                             <div class="form-group">
-                                <label>Số năm kinh nghiệm</label>
-                                <input type="number" v-model="addForm.experienceYears" class="form-control" />
-                            </div>
-                            <div class="form-group">
-                                <label>Lịch sử làm việc</label>
-                                <textarea v-model="addForm.workingHistory" class="form-control" rows="3"
-                                    placeholder="Quá trình công tác..."></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label>Mô tả ngắn</label>
-                                <textarea v-model="addForm.description" class="form-control" rows="2"></textarea>
+                                <label>Số điện thoại liên hệ</label>
+                                <input type="text" v-model="addForm.phoneNumber" class="form-control" />
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button class="btn-cancel" @click="closeAddModal" :disabled="isSubmitting">Hủy</button>
-
-                        <button class="btn-submit" @click="handleAddDoctor" :disabled="isSubmitting">
+                        <button class="btn-submit" @click="handleAddReceptionist" :disabled="isSubmitting">
                             <template v-if="isSubmitting">
-                                <span class="spinner"></span>
-                                Đang xử lý...
+                                <span class="spinner"></span> Đang xử lý...
                             </template>
                             <template v-else>
                                 Tạo tài khoản
@@ -390,32 +295,26 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useDashboardStore } from '@/stores/dashboardStore'
-import { getPositionName } from '@/constants/enum'
-import { useSpecialtyStore } from '@/stores/specialtyStore'
 import { notifyError, notifySuccess, messageFromCaught } from '@/utils/notify'
 
 const DEFAULT_PASSWORD = 'BookingCare123@';
 
 const dashboardStore = useDashboardStore()
-const specialtyStore = useSpecialtyStore()
 
 const fileInputRef = ref(null);
 const fileInputEditRef = ref(null);
-const allDoctors = ref([])
-const allSpecialties = ref([])
-const availableServices = ref([])
+const allReceptionists = ref([])
 const isLoading = ref(true)
 const searchQuery = ref('')
-const filterSpecialty = ref('')
 const filterStatus = ref('')
 const currentPage = ref(1)
 const pageSize = ref(8)
-const defaultAvatar = 'https://ui-avatars.com/api/?name=BS&background=e5e7eb&color=6b7280'
+const defaultAvatar = 'https://ui-avatars.com/api/?name=LT&background=e5e7eb&color=6b7280'
 const isSubmitting = ref(false);
 
 const isEditModalOpen = ref(false)
 const isLockModalOpen = ref(false)
-const selectedDoctor = ref(null)
+const selectedReceptionist = ref(null)
 const editForm = ref({})
 const isAddModalOpen = ref(false)
 const addForm = ref({
@@ -425,62 +324,21 @@ const addForm = ref({
     citizenId: '',
     gender: 0,
     dateOfBirth: '',
-    specialtyId: '',
-    serviceId: '',
-    position: 0,
-    phoneNumber: '',
-    experienceYears: 0,
-    workingHistory: '',
-    description: ''
+    phoneNumber: ''
 })
 const selectedFile = ref(null);
 const previewImage = ref(null);
 
-watch(() => addForm.value.specialtyId, async (newVal) => {
-    if (newVal) {
-        try {
-            availableServices.value = await dashboardStore.GetServicesBySpecialty(newVal);
-        } catch (error) {
-            availableServices.value = [];
-        }
-    } else {
-        availableServices.value = [];
-    }
-    // Only reset serviceId if it's not the first load
-    addForm.value.serviceId = '';
-});
-
-watch(() => editForm.value.specialtyId, async (newVal, oldVal) => {
-    if (newVal) {
-        try {
-            availableServices.value = await dashboardStore.GetServicesBySpecialty(newVal);
-        } catch (error) {
-            availableServices.value = [];
-        }
-    } else {
-        availableServices.value = [];
-    }
-    // Don't reset when merely opening edit modal and initializing old value
-    if (oldVal !== undefined) {
-         // Reset serviceId only if specialty actually changed
-         const currentDoctorSpecialty = allDoctors.value.find(d => d.id === editForm.value.id)?.specialtyId;
-         if (newVal !== currentDoctorSpecialty) {
-             editForm.value.serviceId = '';
-         }
-    }
-});
-
-watch([searchQuery, filterSpecialty, filterStatus], () => {
+watch([searchQuery, filterStatus], () => {
     currentPage.value = 1
 })
 
-const filteredDoctors = computed(() => {
-    return allDoctors.value.filter(doc => {
-        const nameMatch = doc.fullName?.toLowerCase().includes(searchQuery.value.toLowerCase()) || false
-        const codeMatch = doc.doctorCode?.toLowerCase().includes(searchQuery.value.toLowerCase()) || false
-        const specialtyMatch = !filterSpecialty.value || doc.specialtyId === filterSpecialty.value
-        const statusMatch = filterStatus.value === '' || doc.status === Number(filterStatus.value)
-        return (nameMatch || codeMatch) && specialtyMatch && statusMatch
+const filteredReceptionists = computed(() => {
+    return allReceptionists.value.filter(rec => {
+        const nameMatch = rec.fullName?.toLowerCase().includes(searchQuery.value.toLowerCase()) || false
+        const codeMatch = rec.receptionistCode?.toLowerCase().includes(searchQuery.value.toLowerCase()) || false
+        const statusMatch = filterStatus.value === '' || rec.status === Number(filterStatus.value)
+        return (nameMatch || codeMatch) && statusMatch
     })
 })
 
@@ -492,18 +350,11 @@ const openAddModal = () => {
         citizenId: '',
         gender: 0,
         dateOfBirth: '',
-        specialtyId: '',
-        serviceId: '',
-        position: 0,
-        phoneNumber: '',
-        experienceYears: 0,
-        workingHistory: '',
-        description: ''
+        phoneNumber: ''
     };
     
     selectedFile.value = null;
     previewImage.value = null;
-    availableServices.value = [];
     
     if (fileInputRef.value) {
         fileInputRef.value.value = '';
@@ -516,11 +367,11 @@ const closeAddModal = () => {
     isAddModalOpen.value = false
 }
 
-const totalPages = computed(() => Math.ceil(filteredDoctors.value.length / pageSize.value) || 1)
-const paginatedDoctors = computed(() => {
+const totalPages = computed(() => Math.ceil(filteredReceptionists.value.length / pageSize.value) || 1)
+const paginatedReceptionists = computed(() => {
     const start = (currentPage.value - 1) * pageSize.value
     const end = start + pageSize.value
-    return filteredDoctors.value.slice(start, end)
+    return filteredReceptionists.value.slice(start, end)
 })
 
 const handleFileChange = (event) => {
@@ -532,29 +383,30 @@ const handleFileChange = (event) => {
 };
 
 const displayRange = computed(() => {
-    const total = filteredDoctors.value.length
+    const total = filteredReceptionists.value.length
     if (total === 0) return '0'
     const start = (currentPage.value - 1) * pageSize.value + 1
     const end = Math.min(currentPage.value * pageSize.value, total)
     return `${start}-${end}`
 })
 
-onMounted(async () => {
+const loadReceptionists = async () => {
     try {
         isLoading.value = true
-        const [doctorsRes, specialtiesRes] = await Promise.all([
-            dashboardStore.GetTotalDoctors(),
-            specialtyStore.getSpecialties()
-        ])
-
-        if (doctorsRes && doctorsRes.data) allDoctors.value = doctorsRes.data
-        if (specialtiesRes) allSpecialties.value = specialtiesRes.data || specialtiesRes
+        const response = await dashboardStore.GetAllReceptionists()
+        if (response && response.data) {
+            allReceptionists.value = response.data
+        }
     } catch (error) {
         console.error(error);
         notifyError(messageFromCaught(error));
     } finally {
         isLoading.value = false
     }
+}
+
+onMounted(() => {
+    loadReceptionists()
 })
 
 const formatDate = (dateString) => {
@@ -563,23 +415,18 @@ const formatDate = (dateString) => {
     return date.toLocaleDateString('vi-VN')
 }
 
-const openEditModal = async (doctor) => {
-    editForm.value = JSON.parse(JSON.stringify(doctor))
+const openEditModal = async (receptionist) => {
+    editForm.value = JSON.parse(JSON.stringify(receptionist))
+    
+    if (editForm.value.dateOfBirth) {
+        editForm.value.dateOfBirth = editForm.value.dateOfBirth.split('T')[0];
+    }
+    
     selectedFile.value = null;
     previewImage.value = null;
 
     if (fileInputEditRef.value) {
         fileInputEditRef.value.value = '';
-    }
-
-    if (editForm.value.specialtyId) {
-        try {
-            availableServices.value = await dashboardStore.GetServicesBySpecialty(editForm.value.specialtyId);
-        } catch (error) {
-            availableServices.value = [];
-        }
-    } else {
-        availableServices.value = [];
     }
 
     isEditModalOpen.value = true
@@ -590,35 +437,34 @@ const closeEditModal = () => {
     editForm.value = {}
     selectedFile.value = null;
     previewImage.value = null;
-    availableServices.value = [];
 }
 
 const handleSaveEdit = async () => {
     try {
+        if (!editForm.value.fullName) {
+            notifyError("Vui lòng điền đầy đủ họ và tên");
+            return;
+        }
+
         isSubmitting.value = true;
         const formData = new FormData();
         
-        formData.append('doctorId', editForm.value.id);
+        formData.append('receptionistId', editForm.value.id);
         
-        if (editForm.value.serviceId) formData.append('serviceId', editForm.value.serviceId);
-        if (editForm.value.specialtyId) formData.append('specialtyId', editForm.value.specialtyId);
+        if (editForm.value.fullName) formData.append('fullName', editForm.value.fullName);
         if (editForm.value.phoneNumber) formData.append('phoneNumber', editForm.value.phoneNumber);
-        if (editForm.value.experienceYears !== null) formData.append('experienceYears', editForm.value.experienceYears);
-        if (editForm.value.description) formData.append('description', editForm.value.description);
-        if (editForm.value.workingHistory) formData.append('workingHistory', editForm.value.workingHistory);
-        if (editForm.value.position !== null) formData.append('position', editForm.value.position);
+        if (editForm.value.gender !== undefined) formData.append('gender', editForm.value.gender);
+        if (editForm.value.dateOfBirth) {
+            formData.append('dateOfBirth', new Date(editForm.value.dateOfBirth).toISOString());
+        }
         
         if (selectedFile.value) {
             formData.append('avatar', selectedFile.value);
         }
 
-        await dashboardStore.UpdateDoctorInfor(formData)
+        await dashboardStore.UpdateReceptionistInfo(formData)
         
-        // Refresh the doctors list to get the updated avatar and other details
-        const response = await dashboardStore.GetTotalDoctors();
-        if (response && response.data) {
-            allDoctors.value = response.data;
-        }
+        await loadReceptionists();
 
         notifySuccess('Cập nhật thông tin thành công!');
         closeEditModal();
@@ -629,16 +475,18 @@ const handleSaveEdit = async () => {
     }
 }
 
-const handleAddDoctor = async () => {
+const handleAddReceptionist = async () => {
     try {
-        if (!addForm.value.email || !addForm.value.fullName || !selectedFile.value) {
-            notifyError("Vui lòng điền đầy đủ thông tin bắt buộc và chọn ảnh đại diện");
+        if (!addForm.value.email || !addForm.value.fullName) {
+            notifyError("Vui lòng điền đầy đủ thông tin bắt buộc");
             return;
         }
         isSubmitting.value = true;
 
         const formData = new FormData();
-        formData.append('Avatar', selectedFile.value);
+        if (selectedFile.value) {
+             formData.append('Avatar', selectedFile.value);
+        }
 
         Object.keys(addForm.value).forEach(key => {
             let value = addForm.value[key];
@@ -647,15 +495,13 @@ const handleAddDoctor = async () => {
             }
             formData.append(key, value !== null ? value : '');
         });
-        await dashboardStore.CreateDoctorAccount(formData);
+        
+        await dashboardStore.CreateReceptionistAccount(formData);
 
-        notifySuccess('Tạo tài khoản bác sĩ thành công!');
+        notifySuccess('Tạo tài khoản lễ tân thành công!');
         closeAddModal();
 
-        const response = await dashboardStore.GetTotalDoctors();
-        if (response && response.data) {
-            allDoctors.value = response.data;
-        }
+        await loadReceptionists();
     } catch (error) {
         notifyError(messageFromCaught(error));
     } finally {
@@ -663,27 +509,27 @@ const handleAddDoctor = async () => {
     }
 };
 
-const openLockModal = (doctor) => {
-    selectedDoctor.value = doctor
+const openLockModal = (receptionist) => {
+    selectedReceptionist.value = receptionist
     isLockModalOpen.value = true
 }
 
 const closeLockModal = () => {
     isLockModalOpen.value = false
-    selectedDoctor.value = null
+    selectedReceptionist.value = null
 }
 
 const handleConfirmLock = async () => {
     try {
-        const newStatus = selectedDoctor.value.status === 0 ? 1 : 0
+        const newStatus = selectedReceptionist.value.status === 0 ? 1 : 0
         const payload = {
-            userId: selectedDoctor.value.userId,
+            userId: selectedReceptionist.value.userId,
             newStatus: newStatus
         }
-        await dashboardStore.UpdateAccountStatus(payload)
-        const index = allDoctors.value.findIndex(d => d.id === selectedDoctor.value.id)
+        await dashboardStore.LockUnlockAccount(payload)
+        const index = allReceptionists.value.findIndex(d => d.id === selectedReceptionist.value.id)
         if (index !== -1) {
-            allDoctors.value[index].status = newStatus
+            allReceptionists.value[index].status = newStatus
         }
         notifySuccess(newStatus === 1 ? 'Đã khóa tài khoản!' : 'Đã mở khóa tài khoản!');
         closeLockModal();

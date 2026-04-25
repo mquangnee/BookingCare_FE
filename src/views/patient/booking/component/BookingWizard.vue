@@ -158,13 +158,43 @@
                                         Ca khám trống của {{ bookingMode === 'doctor' ? selectedDoctor?.fullName :
                                         selectedDoctorInStep2?.name }}
                                     </h3>
-                                    <div class="time-slots">
-                                        <button v-for="slot in filteredSlots" :key="slot.id"
-                                            :class="['slot-btn', { selected: selectedSlot?.id === slot.id, full: slot.isFull }]"
-                                            :disabled="slot.isFull" @click="selectedSlot = slot">
-                                            <span class="time">{{ slot.time }}</span>
-                                            <span v-if="slot.isFull" class="status-full">Đã kín lịch</span>
-                                        </button>
+                                    
+                                    <div class="grouped-time-slots">
+                                        <div v-if="groupedSlots.morning.length > 0" class="time-group">
+                                            <h4 class="time-group-title title-morning">Ca sáng</h4>
+                                            <div class="time-slots">
+                                                <button v-for="slot in groupedSlots.morning" :key="slot.id"
+                                                    :class="['slot-btn slot-morning', { selected: selectedSlot?.id === slot.id, full: slot.isFull }]"
+                                                    :disabled="slot.isFull" @click="selectedSlot = slot">
+                                                    <span class="time">{{ slot.time }}</span>
+                                                    <span v-if="slot.isFull" class="status-full">Đã kín lịch</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div v-if="groupedSlots.afternoon.length > 0" class="time-group">
+                                            <h4 class="time-group-title title-afternoon">Ca chiều</h4>
+                                            <div class="time-slots">
+                                                <button v-for="slot in groupedSlots.afternoon" :key="slot.id"
+                                                    :class="['slot-btn slot-afternoon', { selected: selectedSlot?.id === slot.id, full: slot.isFull }]"
+                                                    :disabled="slot.isFull" @click="selectedSlot = slot">
+                                                    <span class="time">{{ slot.time }}</span>
+                                                    <span v-if="slot.isFull" class="status-full">Đã kín lịch</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div v-if="groupedSlots.evening.length > 0" class="time-group">
+                                            <h4 class="time-group-title title-evening">Ca tối</h4>
+                                            <div class="time-slots">
+                                                <button v-for="slot in groupedSlots.evening" :key="slot.id"
+                                                    :class="['slot-btn slot-evening', { selected: selectedSlot?.id === slot.id, full: slot.isFull }]"
+                                                    :disabled="slot.isFull" @click="selectedSlot = slot">
+                                                    <span class="time">{{ slot.time }}</span>
+                                                    <span v-if="slot.isFull" class="status-full">Đã kín lịch</span>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </transition>
@@ -352,6 +382,31 @@ const filteredSlots = computed(() => {
     if (bookingMode.value === 'doctor') return availableSlots.value;
     if (!selectedDoctorInStep2.value) return [];
     return availableSlots.value.filter(s => s.doctorId === selectedDoctorInStep2.value.id);
+});
+
+const groupedSlots = computed(() => {
+    const slots = filteredSlots.value;
+    const morning = [];
+    const afternoon = [];
+    const evening = [];
+
+    slots.forEach(slot => {
+        if (!slot.time) return;
+        const timeStr = slot.time.split(' - ')[0]; // Extract start time
+        if (!timeStr) return;
+        
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        
+        if (hours < 12) {
+            morning.push(slot);
+        } else if (hours >= 12 && hours < 18) {
+            afternoon.push(slot);
+        } else {
+            evening.push(slot);
+        }
+    });
+
+    return { morning, afternoon, evening };
 });
 
 watch(selectedDate, () => {
@@ -938,6 +993,49 @@ const next7Days = computed(() => {
     color: #ffffff;
 }
 
+.grouped-time-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.time-group-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #4b5563;
+    margin: 0 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.title-morning::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 16px;
+    background-color: #10B981;
+    border-radius: 4px;
+}
+
+.title-afternoon::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 16px;
+    background-color: #F59E0B;
+    border-radius: 4px;
+}
+
+.title-evening::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 16px;
+    background-color: #6366F1;
+    border-radius: 4px;
+}
+
 .time-slots {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -961,29 +1059,57 @@ const next7Days = computed(() => {
     font-family: 'Inter', sans-serif;
 }
 
-.slot-btn:hover:not(.full):not(.selected) {
-    border-color: #45C3D2;
-    color: #45C3D2;
-    background: #f0fbf9;
-}
-
-.slot-btn.selected {
-    background-color: #45C3D2;
-    border-color: #45C3D2;
-    color: #ffffff;
-}
-
-.slot-btn.selected:hover {
-    background-color: #3ba3b0;
-    border-color: #3ba3b0;
-    color: #ffffff;
-}
-
 .slot-btn.full {
-    background-color: #f9fafb;
-    color: #9ca3af;
+    background-color: #f9fafb !important;
+    color: #9ca3af !important;
+    border-color: #e5e7eb !important;
     cursor: not-allowed;
     opacity: 0.7;
+}
+
+.slot-morning:hover:not(.full):not(.selected) {
+    border-color: #10B981;
+    color: #10B981;
+    background: #ecfdf5;
+}
+.slot-morning.selected {
+    background-color: #10B981;
+    border-color: #10B981;
+    color: #ffffff;
+}
+.slot-morning.selected:hover {
+    background-color: #059669;
+    border-color: #059669;
+}
+
+.slot-afternoon:hover:not(.full):not(.selected) {
+    border-color: #F59E0B;
+    color: #F59E0B;
+    background: #fffbeb;
+}
+.slot-afternoon.selected {
+    background-color: #F59E0B;
+    border-color: #F59E0B;
+    color: #ffffff;
+}
+.slot-afternoon.selected:hover {
+    background-color: #d97706;
+    border-color: #d97706;
+}
+
+.slot-evening:hover:not(.full):not(.selected) {
+    border-color: #6366F1;
+    color: #6366F1;
+    background: #eef2ff;
+}
+.slot-evening.selected {
+    background-color: #6366F1;
+    border-color: #6366F1;
+    color: #ffffff;
+}
+.slot-evening.selected:hover {
+    background-color: #4f46e5;
+    border-color: #4f46e5;
 }
 
 .doctor-hint {
