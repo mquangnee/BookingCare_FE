@@ -48,6 +48,7 @@ export interface LiveClientEventTypes {
     toolcallCancellation: LiveServerToolCallCancellation
   ) => void;
   turncomplete: () => void;
+  transcript: (text: string) => void;
 }
 
 export class GenAILiveClient extends EventEmitter<LiveClientEventTypes> {
@@ -174,6 +175,13 @@ export class GenAILiveClient extends EventEmitter<LiveClientEventTypes> {
         this.log("server.content", "turnComplete");
         this.emit("turncomplete");
       }
+
+      const outputTranscription = (serverContent as any).outputTranscription;
+      if (outputTranscription?.text) {
+        this.log("server.transcript", outputTranscription.text);
+        this.emit("transcript", outputTranscription.text);
+      }
+
       if ("modelTurn" in serverContent) {
         let parts: Part[] = serverContent.modelTurn?.parts || [];
 
@@ -232,7 +240,6 @@ export class GenAILiveClient extends EventEmitter<LiveClientEventTypes> {
   send(parts: Part | Part[], turnComplete: boolean = true) {
     const partsArray = Array.isArray(parts) ? parts : [parts];
 
-    // Bọc parts vào đúng cấu trúc Content của Gemini
     this.session?.sendClientContent({
       turns: [{ role: "user", parts: partsArray }],
       turnComplete
