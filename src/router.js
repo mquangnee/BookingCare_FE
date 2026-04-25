@@ -4,6 +4,7 @@ import Login from '@/views/auth/Login.vue'
 import Register from '@/views/auth/Register.vue'
 import ForgotPassword from '@/views/auth/ForgotPassword.vue'
 import Home from '@/views/system/Home.vue'
+import DetailView from '@/views/system/DetailView.vue'
 import Profile from '@/views/patient/profile/Profile.vue'
 import BookingView from '@/views/patient/booking/BookingView.vue'
 import BookingHistoryView from '@/views/patient/booking/BookingHistoryView.vue'
@@ -21,7 +22,13 @@ const routes = [
     path: '/home',
     name: 'home',
     component: Home,
-    meta: { requiresAuth: false } 
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/detail/:type/:id',
+    name: 'Detail',
+    component: DetailView,
+    meta: { requiresAuth: false }
   },
   {
     path: '/login',
@@ -65,19 +72,19 @@ const routes = [
     meta: { requiresAuth: true, allowedRoles: ['Admin'] },
     children: [
       {
-        path: '', 
+        path: '',
         name: 'admin-dashboard',
-        component: () => import('@/views/admin/component/dashboard/Dashboard.vue') 
+        component: () => import('@/views/admin/component/dashboard/Dashboard.vue')
       },
       {
-        path: 'doctors', 
+        path: 'doctors',
         name: 'admin-doctors',
-        component: () => import('@/views/admin/component/doctormanagement/ManageDoctors.vue') 
+        component: () => import('@/views/admin/component/doctormanagement/ManageDoctors.vue')
       },
       {
-        path: 'receptionists', 
+        path: 'receptionists',
         name: 'admin-receptionists',
-        component: () => import('@/views/admin/component/receptionistmanagement/ManageReceptionists.vue') 
+        component: () => import('@/views/admin/component/receptionistmanagement/ManageReceptionists.vue')
       }
     ]
   },
@@ -87,17 +94,17 @@ const routes = [
     meta: { requiresAuth: true, allowedRoles: ['Doctor'] },
     children: [
       {
-        path: '', 
+        path: '',
         name: 'examination',
         component: ExamRoom
       },
       {
-        path: 'examination', 
+        path: 'examination',
         name: 'examination',
         component: ExamRoom
       },
       {
-        path: 'schedule', 
+        path: 'schedule',
         name: 'doctor-schedule',
         component: Schedule
       },
@@ -111,13 +118,13 @@ const routes = [
         name: 'doctor-history',
         component: History
       }
-    ] 
+    ]
   },
   {
     path: '/receptionist',
     name: 'receptionist-dashboard',
     component: () => import('@/views/receptionist/ReceptionistDashboardView.vue'),
-    meta: { requiresAuth: true, allowedRoles: ['Receptionist'] } 
+    meta: { requiresAuth: true, allowedRoles: ['Receptionist'] }
   }
 ]
 
@@ -128,8 +135,31 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
-  
-  const isLoggedIn = authStore.isAuthenticated.value 
+  const token = localStorage.getItem('token')
+
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      const isExpired = payload.exp * 1000 < Date.now()
+
+      if (isExpired) {
+        if (typeof authStore.logout === 'function') {
+          authStore.logout()
+        } else {
+          localStorage.removeItem('token')
+        }
+
+        alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!')
+        return next({ name: 'login', query: { redirect: to.fullPath } })
+      }
+    } catch (error) {
+      console.error('Lỗi kiểm tra token:', error)
+      localStorage.removeItem('token')
+      return next({ name: 'login' })
+    }
+  }
+
+  const isLoggedIn = authStore.isAuthenticated.value
 
   if (to.meta.requiresGuest && isLoggedIn) {
     return next({ name: 'home' })
@@ -141,13 +171,14 @@ router.beforeEach((to, from, next) => {
     }
 
     const claims = authStore.getClaimsModel()
-    const userRole = claims.role 
+    const userRole = claims.role
 
     if (to.meta.allowedRoles && (!userRole || !to.meta.allowedRoles.includes(userRole))) {
       console.warn(`Truy cập bị từ chối. Role hiện tại: ${userRole}`)
-      return next({ name: 'home' }) 
+      return next({ name: 'home' })
     }
   }
+
   next()
 })
 

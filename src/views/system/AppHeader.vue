@@ -303,8 +303,10 @@ onUnmounted(() => {
 .ai-assistant-btn {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    padding: 8px 16px;
+    padding: 0 16px;
+    height: 40px;
     border-radius: 20px;
     border: none;
     background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
@@ -313,6 +315,8 @@ onUnmounted(() => {
     cursor: pointer;
     position: relative;
     transition: all 0.3s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .ai-assistant-btn.active {

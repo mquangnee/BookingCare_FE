@@ -17,7 +17,7 @@ export const createWorketFromSrc = (
     {
       type: "application/javascript",
     },
-  );    
+  );
 
   return URL.createObjectURL(script);
 };
