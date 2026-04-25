@@ -30,12 +30,14 @@ export type SpecialtyDistributionModel = {
 
 export type UpdateDoctorModel = {
     doctorId: string
+    serviceId: string
     specialtyId: string
     position: EnumPosition
     phoneNumber?: string
     experienceYears: number
     description?: string
     workingHistory?: string
+    avatar?: File
 }
 
 export type LockUnlockAccountModel = {
@@ -52,9 +54,30 @@ export type CreateDoctorAccountModel = {
     gender: EnumGender
     dateOfBirth: Date
     specialtyId: string
+    serviceId: string
     position: EnumPosition
     phoneNumber?: string
     experienceYears: number
     workingHistory?: string
     description?: string
+}
+
+export type CreateReceptionistAccountModel = {
+    avatar?: File
+    fullName: string
+    email: string
+    password: string
+    citizenId: string
+    gender: EnumGender
+    dateOfBirth: Date
+    phoneNumber?: string
+}
+
+export type UpdateReceptionistAccountModel = {
+    receptionistId: string
+    avatar?: File
+    fullName?: string
+    dateOfBirth?: Date
+    gender?: EnumGender
+    phoneNumber?: string
 }

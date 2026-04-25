@@ -298,6 +298,9 @@ export const useAiStore = defineStore('ai', () => {
     // Thêm state lưu lịch sử chat
     const chatHistory = ref<ChatMessage[]>([]);
 
+    const userTranscript = ref(''); // State lưu text user đang nói realtime
+    let recognition: any = null;
+
     let isDisconnecting = false;
 
     // ... (Giữ nguyên phần 2. STORES & SERVICES) ...
@@ -313,6 +316,49 @@ export const useAiStore = defineStore('ai', () => {
     const audioStreamer = new AudioStreamer(new AudioContext());
 
     // ==========================================
+    // SPEECH RECOGNITION SETUP
+    // ==========================================
+    const setupSpeechRecognition = () => {
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            console.warn("Trình duyệt không hỗ trợ nhận diện giọng nói (Web Speech API).");
+            return null;
+        }
+
+        const rec = new SpeechRecognition();
+        rec.continuous = true;
+        rec.interimResults = true;
+        rec.lang = 'vi-VN';
+
+        rec.onresult = (event: any) => {
+            let interim = '';
+            let finalStr = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalStr += event.results[i][0].transcript;
+                } else {
+                    interim += event.results[i][0].transcript;
+                }
+            }
+            userTranscript.value += finalStr; 
+            
+            const displayedText = userTranscript.value + interim;
+            const currentLen = chatHistory.value.length;
+            if (currentLen > 0 && chatHistory.value[currentLen - 1].role === 'user' && chatHistory.value[currentLen - 1].type === 'audio') {
+                chatHistory.value[currentLen - 1].text = displayedText;
+            } else {
+                chatHistory.value.push({ role: 'user', text: displayedText, type: 'audio' });
+            }
+        };
+
+        rec.onerror = (event: any) => {
+            console.error("Lỗi nhận diện giọng nói:", event.error);
+        };
+
+        return rec;
+    };
+
+    // ==========================================
     // 3. CLEANUP
     // ==========================================
     const cleanupConnection = async () => {
@@ -323,6 +369,11 @@ export const useAiStore = defineStore('ai', () => {
         isSetupComplete.value = false;
         // Xóa lịch sử khi ngắt kết nối
         chatHistory.value = [];
+
+        if (recognition) {
+            recognition.stop();
+        }
+        userTranscript.value = '';
 
         try { audioRecorder.stop(); } catch (_) { }
         try { audioStreamer.stop(); } catch (_) { }
@@ -361,9 +412,8 @@ export const useAiStore = defineStore('ai', () => {
         isSetupComplete.value = true;
         aiMessage.value = "Sẵn sàng trò chuyện";
 
-        // Push tin nhắn giả định ban đầu vào chat
-        const initText = 'Vậy hãy lấy danh sách hồ sơ người thân của tài khoản tôi đang có';
-        chatHistory.value.push({ role: 'user', text: initText, type: 'text' });
+        // Tự động yêu cầu AI chào và gợi ý lấy danh sách user
+        const initText = 'Chào tôi và gợi ý lấy hồ sơ bệnh nhân khi cần đặt lịch khám';
 
         setTimeout(() => {
             client.send([{ text: initText }], true);
@@ -512,20 +562,56 @@ export const useAiStore = defineStore('ai', () => {
         }
         aiTextResponse.value = '';
         isRecording.value = true;
+        userTranscript.value = '';
 
-        await audioRecorder.start();
+        if (!recognition) {
+            recognition = setupSpeechRecognition();
+        }
+
+        if (recognition) {
+            try {
+                recognition.start();
+            } catch (e) {
+                console.error("Không thể start recognition", e);
+            }
+        } else {
+            // fallback
+            await audioRecorder.start();
+        }
     };
 
     const stopSpeaking = async () => {
         if (!isRecording.value) return;
-        audioRecorder.stop();
         isRecording.value = false;
 
-        // Thêm thông báo vào khung chat cho biết user vừa thu âm xong
-        chatHistory.value.push({ role: 'user', text: '🎤 [Đã gửi tin nhắn thoại]', type: 'audio' });
+        if (recognition) {
+            recognition.stop();
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            const textToSend = userTranscript.value.trim();
+            userTranscript.value = '';
 
-        await new Promise(resolve => setTimeout(resolve, 300));
-        client.sendEndOfTurn();
+            if (textToSend) {
+                const len = chatHistory.value.length;
+                if (len > 0 && chatHistory.value[len - 1].type === 'audio') {
+                    chatHistory.value[len - 1].text = textToSend; 
+                    chatHistory.value[len - 1].type = 'text'; 
+                }
+                client.send([{ text: textToSend }], true);
+            } else {
+                const len = chatHistory.value.length;
+                if (len > 0 && chatHistory.value[len - 1].type === 'audio') {
+                    chatHistory.value.pop();
+                }
+                chatHistory.value.push({ role: 'user', text: '🎤 [Không nhận diện được giọng nói]', type: 'text' });
+            }
+        } else {
+            audioRecorder.stop();
+            chatHistory.value.push({ role: 'user', text: '🎤 [Đã gửi tin nhắn thoại]', type: 'audio' });
+            await new Promise(resolve => setTimeout(resolve, 300));
+            client.sendEndOfTurn();
+        }
     };
 
     // HÀM MỚI: GỬI TIN NHẮN TEXT

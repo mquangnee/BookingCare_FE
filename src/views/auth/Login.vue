@@ -88,9 +88,9 @@ const handleLogin = async () => {
       case 'Doctor':
         router.push('/doctor/examination')
         break
-      // case 'Receptionist':
-      //   router.push('/receptionist/dashboard')
-      //   break
+      case 'Receptionist':
+        router.push('/receptionist')
+        break
       case 'Patient':
         router.push('/home')
         break
