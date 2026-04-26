@@ -85,7 +85,12 @@ const routes = [
         path: 'receptionists',
         name: 'admin-receptionists',
         component: () => import('@/views/admin/component/receptionistmanagement/ManageReceptionists.vue')
-      }
+      },
+      {
+        path: 'jobs',
+        name: 'admin-jobs',
+        component: () => import('@/views/admin/component/jobmanagement/JobManagement.vue')
+      },
     ]
   },
   {
