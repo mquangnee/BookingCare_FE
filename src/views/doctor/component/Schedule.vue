@@ -162,8 +162,7 @@ const fetchSchedules = async () => {
 
         registeredShifts.value = response.map(item => {
             const datePart = item.date.split('T')[0]
-            const startTimeStr = item.startTime.split('T')[1]
-            const hour = parseInt(startTimeStr.split(':')[0])
+            const hour = parseInt(item.startTime.split(':')[0])
 
             let mappedShiftId = EnumShift.Morning
             if (hour >= 13 && hour < 18) {
@@ -212,7 +211,9 @@ const getRegisteredShift = (date, shiftId) => shiftsMap.value[`${date}_${shiftId
 
 const formatTime = (dateTimeString) => {
     if (!dateTimeString) return ''
-    const time = dateTimeString.split('T')[1]
+    const time = dateTimeString.includes('T') 
+        ? dateTimeString.split('T')[1] 
+        : dateTimeString
     return time.substring(0, 5)
 }
 

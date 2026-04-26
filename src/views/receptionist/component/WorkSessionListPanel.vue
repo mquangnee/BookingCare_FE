@@ -123,32 +123,26 @@ watch(() => props.date, (newDate) => {
 
 const morningDoctorWorkSessions = computed(() => {
     return workSessions.value.filter(ws => {
-        if (ws.startTime) {
-            const hour = new Date(ws.startTime).getHours();
-            return hour < 12;
-        }
-        return false;
-    });
+        if (!ws.startTime) return false
+        const hour = parseInt(ws.startTime.split(':')[0])
+        return hour < 12
+    })
 })
 
 const afternoonDoctorWorkSessions = computed(() => {
     return workSessions.value.filter(ws => {
-        if (ws.startTime) {
-            const hour = new Date(ws.startTime).getHours();
-            return hour >= 12 && hour < 18;
-        }
-        return false;
-    });
+        if (!ws.startTime) return false
+        const hour = parseInt(ws.startTime.split(':')[0])
+        return hour >= 12 && hour < 18
+    })
 })
 
 const eveningDoctorWorkSessions = computed(() => {
     return workSessions.value.filter(ws => {
-        if (ws.startTime) {
-            const hour = new Date(ws.startTime).getHours();
-            return hour >= 18;
-        }
-        return false;
-    });
+        if (!ws.startTime) return false
+        const hour = parseInt(ws.startTime.split(':')[0])
+        return hour >= 18
+    })
 })
 </script>
 

@@ -31,7 +31,7 @@ import WorkSessionListPanel from './component/WorkSessionListPanel.vue'
 import AppointmentTablePanel from './component/AppointmentTablePanel.vue'
 import WalkInModal from './component/WalkInModal.vue'
 import { EnumAppointmentPriority, EnumAppointmentStatus } from '../../constants/enum'
-import { notify } from '../../utils/notify'
+import { notifySuccess, notifyError } from '@/utils/notify'
 
 const appointmentStore = useAppointmentStore()
 const serviceStore = useServiceStore()
