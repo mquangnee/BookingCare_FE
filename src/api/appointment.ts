@@ -8,7 +8,7 @@ const getAccessToken = (): string | null => {
 }
 
 // === API ===
-export async function doCreateAppointment(body: CreateAppointmentModel): Promise<PaymentResponseModel> {
+export async function doCreateAppointment(body: CreateAppointmentModel): Promise<boolean> {
     const url = buildApiUrl('patient/appointment/create')
 
     const res = await fetch(url, {
@@ -24,8 +24,7 @@ export async function doCreateAppointment(body: CreateAppointmentModel): Promise
         const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
         throw new Error(errorMessage)
     }
-    const data = await res.json()
-    return data.result as PaymentResponseModel
+    return (await res.json()).result as boolean
 }
 
 export async function doGetAppointmentHistory(payload?: GetBookingHistoryModel): Promise<PagedResult<BookingHistoryModel>> {

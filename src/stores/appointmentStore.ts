@@ -2,7 +2,7 @@ import { doCancelAppointment, doChangeAppointmentStatus, doCompleteAppointment, 
 import type { CreateAppointmentModel, PagedResult, BookingHistoryModel, GetBookingHistoryModel, AppointmentModel, ChangeAppointmentStatusModel, PaymentResponseModel, PrescriptionModel, MedicalHistoryModel } from "../types/index"
 import { SendMedicalReportModel } from "../types/prescription.type"
 
-async function createAppointment(appointmentData: CreateAppointmentModel): Promise<PaymentResponseModel> {
+async function createAppointment(appointmentData: CreateAppointmentModel): Promise<boolean> {
     return await doCreateAppointment(appointmentData)
 }
 

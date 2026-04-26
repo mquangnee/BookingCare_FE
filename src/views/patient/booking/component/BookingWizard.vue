@@ -156,9 +156,9 @@
                                 <div v-if="bookingMode === 'doctor' || selectedDoctorInStep2" class="time-slot-wrapper">
                                     <h3 class="section-title mt-24">
                                         Ca khám trống của {{ bookingMode === 'doctor' ? selectedDoctor?.fullName :
-                                        selectedDoctorInStep2?.name }}
+                                            selectedDoctorInStep2?.name }}
                                     </h3>
-                                    
+
                                     <div class="grouped-time-slots">
                                         <div v-if="groupedSlots.morning.length > 0" class="time-group">
                                             <h4 class="time-group-title title-morning">Ca sáng</h4>
@@ -273,7 +273,7 @@
                                         <span class="label">Bác sĩ thực hiện:</span>
                                         <span class="value">
                                             {{ getPositionName(selectedSlot.doctorPosition) }} {{
-                                            selectedSlot.doctorName }}
+                                                selectedSlot.doctorName }}
                                         </span>
                                     </div>
                                 </template>
@@ -392,11 +392,11 @@ const groupedSlots = computed(() => {
 
     slots.forEach(slot => {
         if (!slot.time) return;
-        const timeStr = slot.time.split(' - ')[0]; // Extract start time
+        const timeStr = slot.time.split(' - ')[0];
         if (!timeStr) return;
-        
+
         const [hours, minutes] = timeStr.split(':').map(Number);
-        
+
         if (hours < 12) {
             morning.push(slot);
         } else if (hours >= 12 && hours < 18) {
@@ -484,11 +484,27 @@ const fetchWeeklySchedule = async () => {
         date: selectedDate.value,
         durationInMinutes: bookingMode.value === 'service' ? (selectedService.value?.durationInMinutes || 30) : 30
     };
-    if (bookingMode.value === 'doctor') payload.doctorId = selectedDoctor.value.id;
-    else payload.serviceId = selectedService.value.id;
-
+    if (bookingMode.value === 'doctor') {
+        payload.doctorId = selectedDoctor.value.id;
+    } else {
+        payload.serviceId = selectedService.value.id;
+    }
     try {
         weeklySchedule.value = await workSessionStore.getAvailableTimeSlots(payload) || [];
+        const currentHasSlots = weeklySchedule.value.find(
+            d => d.date.split('T')[0] === selectedDate.value
+        )?.availableTimeSlots?.length > 0;
+
+        if (!currentHasSlots) {
+            const firstAvailable = weeklySchedule.value.find(
+                d => d.availableTimeSlots?.length > 0
+            );
+            if (firstAvailable) {
+                selectedDate.value = firstAvailable.date.split('T')[0];
+                return;
+            }
+        }
+
         extractSlotsForSelectedDate();
     } catch (e) { console.error(e); }
     finally { isLoadingSlots.value = false; }
@@ -498,7 +514,7 @@ const extractSlotsForSelectedDate = () => {
     const dayData = weeklySchedule.value.find(d => d.date.split('T')[0] === selectedDate.value);
     if (dayData?.availableTimeSlots) {
         availableSlots.value = dayData.availableTimeSlots.map(s => ({
-            id: `${s.startTime}_${s.doctorId}`,
+            id: `${s.workSessionId}_${s.startTime}`,
             time: s.timeString,
             isFull: s.isFull,
             doctorId: s.doctorId,
@@ -521,12 +537,11 @@ const submitBooking = async () => {
             endTime: timeParts[1] + ":00"
         };
         const response = await appointmentStore.createAppointment(payload);
-        isSuccess.value = true;
-        // if (response?.checkoutUrl && response?.formFields) {
-        //     submitToSePay(response.checkoutUrl, response.formFields);
-        // } else {
-        //     isSuccess.value = true;
-        // }
+        if (response) {
+            isSuccess.value = true;
+        } else {
+            notifyError('Đặt lịch thất bại. Vui lòng thử lại.');
+        }
     } catch (error) {
         notifyError(messageFromCaught(error) || 'Lỗi đặt lịch');
     } finally { isSubmitting.value = false; }
@@ -1072,11 +1087,13 @@ const next7Days = computed(() => {
     color: #10B981;
     background: #ecfdf5;
 }
+
 .slot-morning.selected {
     background-color: #10B981;
     border-color: #10B981;
     color: #ffffff;
 }
+
 .slot-morning.selected:hover {
     background-color: #059669;
     border-color: #059669;
@@ -1087,11 +1104,13 @@ const next7Days = computed(() => {
     color: #F59E0B;
     background: #fffbeb;
 }
+
 .slot-afternoon.selected {
     background-color: #F59E0B;
     border-color: #F59E0B;
     color: #ffffff;
 }
+
 .slot-afternoon.selected:hover {
     background-color: #d97706;
     border-color: #d97706;
@@ -1102,11 +1121,13 @@ const next7Days = computed(() => {
     color: #6366F1;
     background: #eef2ff;
 }
+
 .slot-evening.selected {
     background-color: #6366F1;
     border-color: #6366F1;
     color: #ffffff;
 }
+
 .slot-evening.selected:hover {
     background-color: #4f46e5;
     border-color: #4f46e5;

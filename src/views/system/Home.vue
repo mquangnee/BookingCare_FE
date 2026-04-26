@@ -285,6 +285,8 @@ const translatePosition = (pos) => {
     padding: 100px 0 80px;
     text-align: center;
     background: linear-gradient(180deg, #e0f7fa 0%, #ffffff 100%);
+    position: relative;
+    z-index: 10;
 }
 
 .hero-title {
@@ -361,7 +363,7 @@ const translatePosition = (pos) => {
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
     border: 1px solid var(--border-color);
     overflow: hidden;
-    z-index: 100;
+    z-index: 1000;
     text-align: left;
 }
 
@@ -412,6 +414,7 @@ const translatePosition = (pos) => {
 
 .highlight-section {
     padding: 80px 0;
+    isolation: isolate;
 }
 
 .bg-light {

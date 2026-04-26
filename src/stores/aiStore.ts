@@ -128,7 +128,7 @@ export const useAiStore = defineStore('ai', () => {
         const initText = 'Chào tôi và gợi ý lấy hồ sơ bệnh nhân khi cần đặt lịch khám';
         setTimeout(() => {
             client.send([{ text: initText }], true);
-        }, 100);
+        }, 10);
     });
 
     client.on('content', (content) => {
