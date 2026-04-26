@@ -4,9 +4,10 @@
 #
 # VITE_* URLs: define in .env.production in the repo; `vite build` loads them automatically.
 #
-# Required GitHub secret:
+# Required GitHub secrets:
 #   FIREBASE_TOKEN — create locally: npm i -g firebase-tools && firebase login:ci
 #   (paste the token in Repo → Settings → Secrets and variables → Actions)
+#   VITE_GEMINI_API_KEY — Gemini API key for AI features
 
 name: Deploy to Firebase Hosting
 
@@ -46,6 +47,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
 
       - name: Deploy to Firebase Hosting
         run: npx firebase-tools@latest deploy --only hosting --non-interactive
