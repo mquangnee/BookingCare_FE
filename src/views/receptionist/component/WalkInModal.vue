@@ -4,7 +4,7 @@
             <div class="modal-content modal-xl slide-down">
                 <div class="modal-header">
                     <div>
-                        <h2 class="modal-title">Tiếp nhận Khách vãng lai</h2>
+                        <h2 class="modal-title">Tiếp nhận Bệnh nhân</h2>
                         <p class="modal-subtitle">Hoàn tất thủ tục đăng ký và check-in</p>
                     </div>
                     <button type="button" class="close-btn" @click="$emit('close')">&times;</button>
@@ -170,13 +170,42 @@
 
                             <div v-if="appointmentData.doctorId" class="slots-container slide-down mt-4">
                                 <label>Khung giờ trống hiện tại <span class="text-red">*</span></label>
-                                <div class="time-slots">
-                                    <button type="button" v-for="slot in displaySlots" :key="slot.id"
-                                        :class="['slot-btn', { selected: appointmentData.slotId === slot.id, past: slot.isPast }]"
-                                        :disabled="slot.isPast"
-                                        @click="appointmentData.slotId = slot.id; appointmentData.timeString = slot.time">
-                                        <span class="time">{{ slot.time }}</span>
-                                    </button>
+                                <div class="grouped-time-slots">
+                                    <div v-if="groupedSlots.morning.length > 0" class="time-group">
+                                        <h4 class="time-group-title title-morning">Ca sáng</h4>
+                                        <div class="time-slots">
+                                            <button type="button" v-for="slot in groupedSlots.morning" :key="slot.id"
+                                                :class="['slot-btn', { selected: appointmentData.slotId === slot.id, past: slot.isPast }]"
+                                                :disabled="slot.isPast"
+                                                @click="appointmentData.slotId = slot.id; appointmentData.timeString = slot.time">
+                                                <span class="time">{{ slot.time }}</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div v-if="groupedSlots.afternoon.length > 0" class="time-group mt-3">
+                                        <h4 class="time-group-title title-afternoon">Ca chiều</h4>
+                                        <div class="time-slots">
+                                            <button type="button" v-for="slot in groupedSlots.afternoon" :key="slot.id"
+                                                :class="['slot-btn', { selected: appointmentData.slotId === slot.id, past: slot.isPast }]"
+                                                :disabled="slot.isPast"
+                                                @click="appointmentData.slotId = slot.id; appointmentData.timeString = slot.time">
+                                                <span class="time">{{ slot.time }}</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div v-if="groupedSlots.evening.length > 0" class="time-group mt-3">
+                                        <h4 class="time-group-title title-evening">Ca tối</h4>
+                                        <div class="time-slots">
+                                            <button type="button" v-for="slot in groupedSlots.evening" :key="slot.id"
+                                                :class="['slot-btn', { selected: appointmentData.slotId === slot.id, past: slot.isPast }]"
+                                                :disabled="slot.isPast"
+                                                @click="appointmentData.slotId = slot.id; appointmentData.timeString = slot.time">
+                                                <span class="time">{{ slot.time }}</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <p v-if="displaySlots.length === 0 && !isFetchingSlots" class="text-sm text-gray mt-2">
                                     Không còn ca trống, vui lòng chọn bác sĩ/dịch vụ khác.
@@ -266,15 +295,17 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue'
-import { getPositionName, getGenderName } from '../../../constants/enum'
+import { getPositionName, getGenderName, EnumAppointmentType } from '../../../constants/enum'
 import { useServiceStore } from '@/stores/serviceStore'
 import { useWorkSessionStore } from '@/stores/workSessionStore'
 import { useProfileStore } from '@/stores/profileStore'
+import { useAppointmentStore } from '@/stores/appointmentStore'
 import { notifyError, notifySuccess } from '@/utils/notify'
 
 const serviceStore = useServiceStore();
 const workSessionStore = useWorkSessionStore();
 const profileStore = useProfileStore();
+const appointmentStore = useAppointmentStore();    
 
 const props = defineProps({
     isOpen: Boolean,
@@ -319,6 +350,15 @@ const displaySlots = computed(() => {
     return rawAvailableSlots.value.filter(s => s.doctorId === appointmentData.value.doctorId);
 });
 
+const groupedSlots = computed(() => {
+    const slots = displaySlots.value;
+    return {
+        morning: slots.filter(slot => slot.time.substring(0, 2) < "12"),
+        afternoon: slots.filter(slot => slot.time.substring(0, 2) >= "12" && slot.time.substring(0, 2) < "18"),
+        evening: slots.filter(slot => slot.time.substring(0, 2) >= "18")
+    };
+});
+
 const selectedDoctorName = computed(() => {
     if (!appointmentData.value.doctorId) return '';
     if (appointmentData.value.mode === 'doctor') {
@@ -334,7 +374,7 @@ const selectedDoctorName = computed(() => {
 const fetchInitialData = async () => {
     isFetchingData.value = true;
     try {
-        const today = new Date('2026-04-11').toISOString().split('T')[0];
+        const today = new Date().toISOString().split('T')[0];
         const [servicesRes, sessionsRes] = await Promise.all([
             serviceStore.getServices(),
             workSessionStore.getDoctorWorkSessions(today)
@@ -392,7 +432,7 @@ const fetchAvailableSlots = async () => {
         appointmentData.value.doctorId = '';
     }
 
-    const today = new Date('2026-04-11').toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0];
     const payload = { date: today };
 
     if (appointmentData.value.mode === 'doctor') {
@@ -506,13 +546,25 @@ const canProceed = computed(() => {
 
 const canSubmit = computed(() => true);
 
-const submit = () => {
+const submit = async () => {
+    const timePart = appointmentData.value.timeString.split(' - ');
     const payload = {
-        patient: { ...selectedPatient.value, isNew: false },
-        appointment: { ...appointmentData.value },
-        payment: { method: paymentMethod.value, amount: calculatedPrice.value }
+        patientProfileId: selectedPatient.value.id,
+        doctorId: appointmentData.value.doctorId,
+        serviceId: appointmentData.value.mode === 'service' ? appointmentData.value.serviceId : null,
+        date: new Date().toISOString().split('T')[0],
+        startTime: timePart[0] + ":00",
+        endTime: timePart[1] + ":00",
+        type: EnumAppointmentType.Offline
     };
-    emit('submit', payload);
+    try {
+        const res = await appointmentStore.createAppointment(payload);
+        emit('submit', payload);
+        notifySuccess("Tạo lịch hẹn và check-in thành công!");
+    } catch (error) {
+        console.error("Lỗi khi tạo lịch hẹn:", error);
+        notifyError(error.message || "Có lỗi xảy ra khi tạo lịch hẹn. Vui lòng kiểm tra lại!");
+    }
 }
 
 watch(() => props.isOpen, (newVal) => {
@@ -896,6 +948,49 @@ div {
     font-weight: 500;
     color: #374151;
     margin-bottom: 12px;
+}
+
+.grouped-time-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.time-group-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #4b5563;
+    margin: 0 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.title-morning::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 14px;
+    background-color: #10B981;
+    border-radius: 4px;
+}
+
+.title-afternoon::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 14px;
+    background-color: #F59E0B;
+    border-radius: 4px;
+}
+
+.title-evening::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 14px;
+    background-color: #6366F1;
+    border-radius: 4px;
 }
 
 .time-slots {

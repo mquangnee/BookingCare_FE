@@ -317,7 +317,7 @@ import { useWorkSessionStore } from '../../../../stores/workSessionStore'
 import { useProfileStore } from '../../../../stores/profileStore'
 import { useServiceStore } from '../../../../stores/serviceStore'
 import { useAppointmentStore } from '../../../../stores/appointmentStore'
-import { getRelationshipName, getPositionName } from '../../../../constants/enum'
+import { getRelationshipName, getPositionName, EnumAppointmentType } from '../../../../constants/enum'
 import { notifyError, messageFromCaught } from '../../../../utils/notify'
 
 const specialtyStore = useSpecialtyStore()
@@ -534,7 +534,8 @@ const submitBooking = async () => {
             serviceId: bookingMode.value === 'service' ? selectedService.value?.id : null,
             date: selectedDate.value,
             startTime: timeParts[0] + ":00",
-            endTime: timeParts[1] + ":00"
+            endTime: timeParts[1] + ":00",
+            type: EnumAppointmentType.Online
         };
         const response = await appointmentStore.createAppointment(payload);
         if (response) {

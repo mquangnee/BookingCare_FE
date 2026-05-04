@@ -26,6 +26,7 @@ export type CreateAppointmentModel = {
     date: string
     startTime: string
     endTime: string
+    type: EnumAppointmentType
 }
 
 export type BookingHistoryModel = {
