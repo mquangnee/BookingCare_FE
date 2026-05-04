@@ -1,5 +1,5 @@
-import { doGetUserProfile, doUpdateUserProfile, doGetUserProfiles, doCreateUserProfile, doShareUserProfile, doGetSharedProfiles, doCancelSharedProfile, doGetUserProfileForBooking, doSearchPatientProfiles, doCreatePatientProfileByReceptionist, doGetDoctorProfile } from "../api/profile"
-import type { UpdateUserProfileModel, CreateUserProfileModel, ShareProfileModel, SharedProfileModel, GetUserProfileForBookingModel, PatientProfileModel, DoctorModel } from "../types/index"
+import { doGetUserProfile, doUpdateUserProfile, doGetUserProfiles, doCreateUserProfile, doShareUserProfile, doGetSharedProfiles, doCancelSharedProfile, doGetUserProfileForBooking, doSearchPatientProfiles, doCreatePatientProfileByReceptionist, doGetDoctorProfile, doGetReceptionistProfile } from "../api/profile"
+import type { UpdateUserProfileModel, CreateUserProfileModel, ShareProfileModel, SharedProfileModel, GetUserProfileForBookingModel, PatientProfileModel, DoctorModel, ReceptionistModel } from "../types/index"
 
 async function getUserProfile() : Promise<PatientProfileModel> {
     return doGetUserProfile()
@@ -45,6 +45,10 @@ async function getDoctorProfile() : Promise<DoctorModel> {
     return doGetDoctorProfile()
 }
 
+async function getReceptionistProfile() : Promise<ReceptionistModel> {
+    return doGetReceptionistProfile()
+}
+
 export const useProfileStore = () => ({
     getUserProfile,
     updateUserProfile,
@@ -56,5 +60,6 @@ export const useProfileStore = () => ({
     getUserProfileForBooking,
     searchPatientProfiles,
     createPatientProfileByReceptionist,
-    getDoctorProfile
+    getDoctorProfile,
+    getReceptionistProfile
 })

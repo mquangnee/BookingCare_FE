@@ -1,7 +1,7 @@
 import { ErrorMessageDictionary } from '../constants/errorMessageDictionary'
 import { buildApiUrl } from "../utils/apiConfig"
 import { CreateUserProfileModel, GetUserProfileForBookingModel, ShareProfileModel, SharedProfileModel, UpdateUserProfileModel, PatientProfileModel } from "../types/profile.type"
-import { DoctorModel } from '../types'
+import { DoctorModel, ReceptionistModel } from '../types'
 
 // === Constants ===
 const getAccessToken = (): string | null => {
@@ -215,4 +215,22 @@ export async function doGetDoctorProfile(): Promise<DoctorModel> {
         throw new Error(errorMessage)
     }
     return (await res.json()).result as DoctorModel
+}
+
+export async function doGetReceptionistProfile(): Promise<ReceptionistModel> {
+    const url = buildApiUrl(`receptionist/profile`)
+
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    })
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return (await res.json()).result as ReceptionistModel
 }

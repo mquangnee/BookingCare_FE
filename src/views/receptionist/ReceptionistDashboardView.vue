@@ -125,10 +125,10 @@ const handleCheckIn = async (appt) => {
     try {
         await appointmentStore.changeAppointmentStatus(payload)
         await fetchAppointments(selectedWorkSession.value.id);
-        notify.success("Check-in thành công!");
+        notifySuccess("Check-in thành công!");
     } catch (error) {
         console.error("Lỗi khi check-in:", error);
-        notify.error("Có lỗi xảy ra khi check-in.");
+        notifyError("Có lỗi xảy ra khi check-in.");
     }
 }
 
@@ -141,10 +141,10 @@ const handleStandby = async (appt) => {
     try {
         await appointmentStore.changeAppointmentStatus(payload)
         await fetchAppointments(selectedWorkSession.value.id);
-        notify.success("Chuyển chờ gọi thành công!");
+        notifySuccess("Chuyển chờ gọi thành công!");
     } catch (error) {
         console.error("Lỗi khi chuyển chờ:", error);
-        notify.error("Có lỗi xảy ra.");
+        notifyError("Có lỗi xảy ra.");
     }
 }
 
@@ -157,10 +157,10 @@ const handleNoShow = async (appt) => {
         try {
             await appointmentStore.changeAppointmentStatus(payload);
             await fetchAppointments(selectedWorkSession.value.id);
-            notify.success("Cập nhật trạng thái thành công!");
+            notifySuccess("Cập nhật trạng thái thành công!");
         } catch (error) {
             console.error("Lỗi khi cập nhật trạng thái:", error);
-            notify.error("Có lỗi xảy ra khi cập nhật trạng thái.");
+            notifyError("Có lỗi xảy ra khi cập nhật trạng thái.");
         }
     }
 }
@@ -174,36 +174,21 @@ const undoCheckIn = async (appt) => {
         try {
             await appointmentStore.changeAppointmentStatus(payload);
             await fetchAppointments(selectedWorkSession.value.id);
-            notify.success("Đã hoàn tác Check-in!");
+            notifySuccess("Đã hoàn tác Check-in!");
         } catch (error) {
             console.error("Lỗi khi hoàn tác:", error);
-            notify.error("Có lỗi xảy ra khi hoàn tác Check-in.");
+            notifyError("Có lỗi xảy ra khi hoàn tác Check-in.");
         }
     }
 }
 
 const submitWalkIn = async (payload) => {
-    const timeParts = payload.appointment.timeString.split(' - ');
-    const startTime = timeParts[0] + ":00";
-    const endTime = timeParts[1] + ":00";
-
-    const newId = Math.floor(Math.random() * 1000) + 500;
-
-    appointments.value.push({
-        id: newId,
-        doctorId: payload.appointment.doctorId,
-        appointmentCode: `WLK-${newId}`,
-        patientName: payload.patient.name,
-        age: payload.patient.dob ? (new Date().getFullYear() - new Date(payload.patient.dob).getFullYear()) : 0,
-        gender: payload.patient.gender,
-        expectedTime: payload.appointment.timeString,
-        checkInTime: payload.appointment.timeString.substring(0, 5),
-        type: 'WalkIn',
-        status: 'Waiting'
-    });
-
     isWalkInModalOpen.value = false;
-    notify.success(`Tiếp nhận thành công! Khách hàng chọn thanh toán: ${payload.payment.method === 'qr' ? 'Chuyển khoản' : 'Tiền mặt'}`);
+    notifySuccess('Tiếp nhận và check-in thành công!');
+    
+    if (selectedWorkSession.value && selectedWorkSession.value.doctorId === payload.doctorId) {
+        await fetchAppointments(selectedWorkSession.value.id);
+    }
 }
 </script>
 

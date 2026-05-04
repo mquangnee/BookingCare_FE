@@ -179,7 +179,7 @@ export const getAppointmentStatusName = (status: EnumAppointmentStatus): string 
 export const getAppointmentTypeName = (type: EnumAppointmentType): string => {
   switch (type) {
     case EnumAppointmentType.Online: return 'Đặt trước';
-    case EnumAppointmentType.Offline: return 'Vãng lai';
+    case EnumAppointmentType.Offline: return 'Đặt tại quầy';
     default: return 'Đặt trước';
   }
 }

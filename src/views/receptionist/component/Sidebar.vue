@@ -15,7 +15,7 @@
                 </svg>
                 Điều phối lịch
             </a>
-            <a href="#" class="nav-item">
+            <!-- <a href="#" class="nav-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                     <circle cx="9" cy="7" r="4"></circle>
@@ -23,14 +23,14 @@
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                 </svg>
                 Bệnh nhân
-            </a>
+            </a> -->
         </nav>
 
         <div class="sidebar-footer">
             <div class="user-profile">
                 <div class="avatar">LT</div>
                 <div class="info">
-                    <strong>Lễ tân 01</strong>
+                    <strong>Lễ tân {{ receptionistProfile?.fullName }}</strong>
                     <span>Đang làm việc</span>
                 </div>
             </div>
@@ -47,11 +47,27 @@
 </template>
 
 <script setup>
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { useProfileStore } from '@/stores/profileStore'
+import { notifyError } from '@/utils/notify'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const profileStore = useProfileStore()
+
+const receptionistProfile = ref(null)
+
+onMounted(async () => {
+    try {
+        const res = await profileStore.getReceptionistProfile()
+        receptionistProfile.value = res
+    } catch (error) {
+        console.error("Lỗi lấy thông tin lễ tân:", error)
+        notifyError("Có lỗi xảy ra khi lấy thông tin lễ tân.")
+    }
+})
 
 const handleLogout = () => {
     authStore.logout()
