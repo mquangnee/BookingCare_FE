@@ -1,6 +1,6 @@
 import { buildApiUrl } from '../utils/apiConfig'
 import { ErrorMessageDictionary } from "../constants/errorMessageDictionary"
-import { DoctorModel } from '../types/index'
+import { DoctorModel, ServiceModel } from '../types/index'
 
 // === Constants ===
 const getAccessToken = (): string | null => {
@@ -24,4 +24,22 @@ export async function doGetDoctorsBySpecialty(specialtyId: string): Promise<Doct
         throw new Error(errorMessage)
     }
     return (await res.json()).result as DoctorModel[]
+}
+
+export async function doGetDoctorsByService(serviceId: string): Promise<ServiceModel> {
+    const url = buildApiUrl(`admin/doctor/service/${serviceId}`)
+
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    })
+    if (!res.ok) {
+        const errorData = await res.json()
+        const errorMessage = ErrorMessageDictionary[errorData.errorMessages[0].errorCode]
+        throw new Error(errorMessage)
+    }
+    return (await res.json()).result as ServiceModel
 }
