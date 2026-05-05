@@ -6,6 +6,7 @@ import { useWorkSessionStore } from './workSessionStore';
 import { useAppointmentStore } from './appointmentStore';
 import { useProfileStore } from './profileStore';
 import { GEMINI_LIVE_MODEL, getToolDeclarations, getSystemPrompt } from '../services/ai/ai-config';
+import { notifyError } from '../utils/notify';
 
 export interface ChatMessage {
     role: 'user' | 'model';
@@ -74,6 +75,9 @@ export const useAiStore = defineStore('ai', () => {
         speechRec.onerror = (event: any) => {
             console.error("Lỗi nhận diện giọng nói:", event.error);
             isRecording.value = false;
+            if (event.error !== 'aborted') {
+                chatHistory.value.push({ role: 'model', text: 'Tôi không nghe rõ, bạn có thể nói lại hoặc gõ văn bản được không?' });
+            }
         };
 
         return speechRec;
@@ -100,6 +104,11 @@ export const useAiStore = defineStore('ai', () => {
     };
 
     const connectToAI = async () => {
+        const apiKey = (import.meta as any).env.VITE_GEMINI_API_KEY;
+        if (!apiKey) {
+            notifyError("Lỗi: API Key không hợp lệ hoặc chưa được cấu hình. Không thể khởi tạo trợ lý AI.");
+            return;
+        }
         await audioStreamer.resume();
         const success = await client.connect(GEMINI_LIVE_MODEL, {
             tools: [getToolDeclarations() as any],
@@ -280,6 +289,7 @@ export const useAiStore = defineStore('ai', () => {
                 if (len > 0 && chatHistory.value[len - 1].type === 'audio') {
                     chatHistory.value.pop();
                 }
+                chatHistory.value.push({ role: 'model', text: 'Tôi chưa nghe được thông tin, bạn có thể thử lại nhé.' });
             }
         }
     };

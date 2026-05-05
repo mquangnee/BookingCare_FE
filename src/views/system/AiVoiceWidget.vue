@@ -1,4 +1,6 @@
 <template>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  
   <div v-if="aiStore.isConnected" class="ai-widget-wrapper">
     <div class="ai-widget-box">
 
@@ -17,7 +19,7 @@
           </div>
         </div>
         <button class="close-btn" @click="aiStore.toggleAssistant">
-          <i class="fas fa-times">✖</i>
+          <i class="fas fa-times"></i>
         </button>
       </div>
 
@@ -51,7 +53,7 @@
 
         <div class="button-group">
           <button v-if="textInput.trim()" class="circle-btn send-btn" @click="handleSend">
-            <i class="fas fa-arrow-right send-icon">➤</i>
+            <i class="fas fa-arrow-right send-icon"></i>
           </button>
 
           <button v-else class="pill-btn mic-btn"
@@ -60,7 +62,7 @@
             @mouseleave="aiStore.isRecording && aiStore.stopSpeaking()" @touchstart.prevent="aiStore.startSpeaking"
             @touchend.prevent="aiStore.stopSpeaking">
             <i v-if="aiStore.isRecording" class="fas fa-microphone-lines icon-pulse"></i>
-            <i v-else class="fas fa-microphone">🎤</i>
+            <i v-else class="fas fa-microphone"></i>
             <span class="btn-text">{{ aiStore.isRecording ? 'Đang nghe...' : 'Giữ để nói' }}</span>
           </button>
         </div>
@@ -109,9 +111,13 @@ const statusClass = computed(() => {
 </script>
 
 <style scoped>
-.ai-widget-wrapper,
-.ai-widget-wrapper * {
+.ai-widget-wrapper {
   font-family: inherit;
+}
+
+.ai-widget-wrapper *,
+.ai-widget-wrapper *::before,
+.ai-widget-wrapper *::after {
   box-sizing: border-box;
 }
 

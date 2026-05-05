@@ -4,6 +4,7 @@ import Login from '@/views/auth/Login.vue'
 import Register from '@/views/auth/Register.vue'
 import ForgotPassword from '@/views/auth/ForgotPassword.vue'
 import Home from '@/views/system/Home.vue'
+import DoctorDetailView from '@/views/system/DoctorDetailView.vue'
 import DetailView from '@/views/system/DetailView.vue'
 import Profile from '@/views/patient/profile/Profile.vue'
 import BookingView from '@/views/patient/booking/BookingView.vue'
@@ -22,6 +23,12 @@ const routes = [
     path: '/home',
     name: 'home',
     component: Home,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/doctordetail/:type/:id',
+    name: 'DoctorDetail',
+    component: DoctorDetailView,
     meta: { requiresAuth: false }
   },
   {
