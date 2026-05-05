@@ -376,7 +376,7 @@ const fetchInitialData = async () => {
     try {
         const today = new Date().toISOString().split('T')[0];
         const [servicesRes, sessionsRes] = await Promise.all([
-            serviceStore.getServices(),
+            serviceStore.getServicesPatient(),
             workSessionStore.getDoctorWorkSessions(today)
         ]);
         services.value = servicesRes || [];

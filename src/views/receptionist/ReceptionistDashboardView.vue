@@ -48,7 +48,7 @@ const isLoadingAppointments = ref(false);
 
 onMounted(async () => {
     try {
-        const res = await serviceStore.getServices();
+        const res = await serviceStore.getServicesPatient();
         allServices.value = res || [];
     } catch (error) {
         console.error("Lỗi lấy danh sách dịch vụ", error);

@@ -460,7 +460,7 @@ onMounted(async () => {
     try {
         const [dataSpec, dataSvc] = await Promise.all([
             specialtyStore.getSpecialties(),
-            serviceStore.getServices()
+            serviceStore.getServicesPatient()
         ]);
         specialties.value = dataSpec || [];
         services.value = dataSvc || [];
