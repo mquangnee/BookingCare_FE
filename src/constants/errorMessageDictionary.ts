@@ -30,4 +30,6 @@ export const ErrorMessageDictionary: Record<string, string> = {
   "PrescriptionNotFound": "Không tìm thấy đơn thuốc. Vui lòng kiểm tra lại thông tin và thử lại.",
   "PrescriptionDetailNotFound": "Không tìm thấy chi tiết đơn thuốc. Vui lòng kiểm tra lại thông tin và thử lại.",
   "WorkSessionExisted": "Lịch làm việc đã tồn tại. Vui lòng chọn ngày hoặc ca khác.",
+  "DurationInMinutesOrPriceInvalid": "Giá hoặc thời gian khám không hợp lệ. Vui lòng nhập giá và thời gian khám hợp lệ.",
+  "ServiceHasDoctorsCannotDeactivate": "Dịch vụ này đang có bác sĩ liên kết và không thể cập nhật. Vui lòng gỡ liên kết bác sĩ khỏi dịch vụ trước khi cập nhật.",
 };

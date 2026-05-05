@@ -446,7 +446,6 @@ watch(() => addForm.value.specialtyId, async (newVal) => {
     } else {
         availableServices.value = [];
     }
-    // Only reset serviceId if it's not the first load
     addForm.value.serviceId = '';
 });
 
@@ -460,9 +459,7 @@ watch(() => editForm.value.specialtyId, async (newVal, oldVal) => {
     } else {
         availableServices.value = [];
     }
-    // Don't reset when merely opening edit modal and initializing old value
     if (oldVal !== undefined) {
-         // Reset serviceId only if specialty actually changed
          const currentDoctorSpecialty = allDoctors.value.find(d => d.id === editForm.value.id)?.specialtyId;
          if (newVal !== currentDoctorSpecialty) {
              editForm.value.serviceId = '';
@@ -614,7 +611,6 @@ const handleSaveEdit = async () => {
 
         await dashboardStore.UpdateDoctorInfor(formData)
         
-        // Refresh the doctors list to get the updated avatar and other details
         const response = await dashboardStore.GetTotalDoctors();
         if (response && response.data) {
             allDoctors.value = response.data;

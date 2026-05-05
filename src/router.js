@@ -91,6 +91,11 @@ const routes = [
         name: 'admin-jobs',
         component: () => import('@/views/admin/component/jobmanagement/JobManagement.vue')
       },
+      {
+        path: 'services',
+        name: 'admin-services',
+        component: () => import('@/views/admin/component/servicemanagement/ManageServices.vue')
+      }
     ]
   },
   {

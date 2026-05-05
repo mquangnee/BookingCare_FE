@@ -37,15 +37,16 @@
                 </router-link>
 
                 <p class="nav-label">QUẢN LÝ DỊCH VỤ</p>
-                <router-link to="/admin/specialties" class="nav-item">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
+                <router-link to="/admin/services" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path
+                            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                        </path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
                     </svg>
-                    Chuyên khoa
+                    Dịch vụ khám
                 </router-link>
 
                 <p class="nav-label">HỆ THỐNG</p>
@@ -378,7 +379,7 @@ onUnmounted(() => {
     background-color: var(--bg-white);
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     padding: 8px;
     z-index: 1000;
 }
@@ -437,9 +438,11 @@ onUnmounted(() => {
 .slide-fade-enter-active {
     transition: all 0.2s ease-out;
 }
+
 .slide-fade-leave-active {
     transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
 }
+
 .slide-fade-enter-from,
 .slide-fade-leave-to {
     transform: translateY(-10px);
