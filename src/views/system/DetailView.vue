@@ -1,454 +1,643 @@
 <template>
-    <div class="detail-container" v-if="doctor">
+    <div class="detail-container bg-light">
         <AppHeader />
 
-        <div class="container">
-            <nav class="breadcrumb">
-            </nav>
+        <section class="detail-main">
+            <div class="container">
+                <div class="content-grid">
 
-            <div class="doctor-header-card">
-                <div class="doc-main-info">
-                    <div class="doc-avatar-large">
-                        <img :src="doctor.AvatarUrl" :alt="doctor.FullName" />
-                    </div>
-                    <div class="doc-text">
-                        <span class="badge">{{ translatePosition(doctor.Position) }}</span>
-                        <h1>{{ doctor.FullName }}</h1>
-                        <p class="doc-intro">{{ doctor.Description }}</p>
-                        <div class="doc-stats">
-                            <div class="stat-item">
-                                <strong>{{ doctor.ExperienceYears }}+</strong>
-                                <span>Năm kinh nghiệm</span>
+                    <div class="main-column">
+
+                        <div class="header-card box-style">
+                            <div class="header-image" :class="{ 'is-service': pageType === 'service' }">
+                                <img v-if="pageType === 'specialty'" :src="pageData.ImageUrl" :alt="pageData.Name" />
+                                <div v-else class="srv-icon-large">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                                    </svg>
+                                </div>
                             </div>
-                            <div class="stat-item">
-                                <strong>1000+</strong>
-                                <span>Bệnh nhân</span>
+                            <div class="header-info">
+                                <h1 class="title">{{ pageData.Name }}</h1>
+                                <p class="short-desc">{{ pageData.ShortDescription }}</p>
+
+                                <div class="service-meta" v-if="pageType === 'service'">
+                                    <div class="meta-item">
+                                        <span class="meta-label">Giá dịch vụ:</span>
+                                        <span class="meta-value price">{{ formatPrice(pageData.Price) }}</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="meta-label">Thời gian thực hiện:</span>
+                                        <span class="meta-value time">{{ pageData.DurationInMinutes }} phút</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="article-box box-style mt-30">
+                            <h2 class="section-title">Thông tin chi tiết</h2>
+
+                            <div class="rich-text" v-html="pageData.FullDescription"></div>
+
+                            <div v-if="pageType === 'service'" class="process-section">
+                                <h3>Quy trình thực hiện</h3>
+                                <ul class="process-list">
+                                    <li v-for="(step, index) in pageData.ProcessSteps" :key="index">
+                                        <div class="step-number">{{ index + 1 }}</div>
+                                        <div class="step-content">{{ step }}</div>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
+
+                    <div class="sidebar">
+                        <div class="sticky-box box-style">
+                            <h3 class="sidebar-title">Bác sĩ phụ trách</h3>
+                            <p class="sidebar-subtitle">Chọn bác sĩ để đặt lịch khám nhanh chóng</p>
+
+                            <div class="doctor-list">
+                                <div class="doctor-item" v-for="doc in relatedDoctors" :key="doc.Id">
+                                    <div class="doc-item-header">
+                                        <img :src="doc.AvatarUrl" :alt="doc.FullName" class="doc-avt" />
+                                        <div class="doc-basic-info">
+                                            <span class="doc-pos">{{ translatePosition(doc.Position) }}</span>
+                                            <h4 class="doc-name">{{ doc.FullName }}</h4>
+                                        </div>
+                                    </div>
+                                    <div class="doc-schedule">
+                                        <span class="schedule-title"><i class="far fa-calendar-alt"></i> Lịch khám sắp
+                                            tới:</span>
+                                        <div class="time-slots">
+                                            <button class="time-slot" v-for="time in doc.AvailableTimes" :key="time"
+                                                @click="goToBooking(doc.Id, time)">
+                                                {{ time }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button v-if="pageType === 'service'" class="btn-book-large"
+                                @click="goToBooking(null, null)">
+                                Đặt lịch dịch vụ này ngay
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
+        </section>
 
-            <div class="detail-grid">
-                <div class="main-column">
-                    <section class="info-section">
-                        <h2><i class="icon">👨‍⚕️</i> Giới thiệu bác sĩ</h2>
-                        <div class="biography-content" v-html="doctor.DetailedBiography"></div>
-                    </section>
-
-                    <section class="info-section">
-                        <h2><i class="icon">📜</i> Quá trình công tác</h2>
-                        <div class="history-list">
-                            <div v-for="(job, i) in doctor.WorkingHistory.split(';')" :key="i" class="history-item">
-                                {{ job.trim() }}
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="info-section">
-                        <h2><i class="icon">🏥</i> Chuyên khoa đảm nhiệm</h2>
-                        <div class="specialty-tag">{{ getSpecialtyName(doctor.SpecialtyId) }}</div>
-                    </section>
-                </div>
-
-                <div class="sidebar-column">
-                    <div class="booking-widget">
-                        <h3>Lịch khám & Giá dịch vụ</h3>
-                        <div class="service-info" v-if="relatedService">
-                            <p class="service-name">{{ relatedService.Name }}</p>
-                            <p class="service-price">{{ formatPrice(relatedService.Price) }}</p>
-                            <p class="service-note">*Giá đã bao gồm phí khám lâm sàng</p>
-                        </div>
-                        <button class="btn-book-now" @click="goToBooking">ĐẶT LỊCH KHÁM NGAY</button>
-                        <p class="booking-tip">Hỗ trợ đặt lịch nhanh qua hotline: <strong>1900 1234</strong></p>
-                    </div>
-                </div>
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; 2026 Nền tảng y tế BookingCare. All rights reserved.</p>
             </div>
-        </div>
-    </div>
-    <div v-else class="not-found">
-        <p>Không tìm thấy thông tin bác sĩ.</p>
-        <button @click="$router.push('/')">Quay lại</button>
+        </footer>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppHeader from '@/views/system/AppHeader.vue'
 
 const route = useRoute()
 const router = useRouter()
-const doctor = ref(null)
-const relatedService = ref(null)
 
-const doctorsData = [
-    {
-        "Id": "33333333-1111-1111-1111-111111111111",
-        "SpecialtyId": "11111111-1111-1111-1111-111111111101",
-        "ServiceId": "22222222-3333-3333-3333-111111111101",
-        "AvatarUrl": "https://storage.googleapis.com/bookingcare-resources/static/doctor/Nam_BacSi_2.jpg",
-        "FullName": "Nguyễn Trọng Hưng",
-        "ExperienceYears": 25,
-        "Position": "AssociateProfessor",
-        "WorkingHistory": "Bệnh viện Bạch Mai (2000-2015); Bệnh viện Đại học Y Hà Nội (2015-Nay)",
-        "Description": "Chuyên gia hàng đầu về các bệnh lý Cơ xương khớp. Nguyên Trưởng khoa Cơ xương khớp Bệnh viện Bạch Mai.",
-        "DetailedBiography": `
-        <p>Phó Giáo sư, Tiến sĩ, Bác sĩ <strong>Nguyễn Trọng Hưng</strong> là một trong những chuyên gia đầu ngành tại Việt Nam trong lĩnh vực Nội Cơ xương khớp. Với hơn 25 năm cống hiến, bác sĩ đã thăm khám và điều trị thành công cho hàng chục ngàn bệnh nhân mắc các bệnh lý xương khớp từ cơ bản đến phức tạp.</p>
-        <p>Bên cạnh công tác khám chữa bệnh, ông còn là Giảng viên cao cấp tại Đại học Y Hà Nội, trực tiếp tham gia đào tạo nhiều thế hệ bác sĩ trẻ và đóng góp nhiều công trình nghiên cứu khoa học có giá trị cao.</p>
-        <p><strong>Thế mạnh chuyên môn:</strong></p>
+const pageType = ref(route.params.type || 'specialty')
+const detailId = ref(route.params.id)
+
+const specialtiesList = [
+    { "Id": "11111111-1111-1111-1111-111111111101", "SpecialtyCode": "CK-001", "Name": "Cơ Xương Khớp", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/specialty/CoXuongKhop.png", "Description": "Khám và điều trị các bệnh lý về hệ vận động, xương khớp." },
+    { "Id": "11111111-1111-1111-1111-111111111102", "SpecialtyCode": "CK-002", "Name": "Tiêu hóa", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/specialty/TieuHoa.png", "Description": "Chuyên khoa dạ dày, đại tràng, gan mật và nội soi tiêu hóa." },
+    { "Id": "11111111-1111-1111-1111-111111111103", "SpecialtyCode": "CK-003", "Name": "Tim mạch", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/specialty/TimMach.png", "Description": "Điều trị cao huyết áp, suy tim và các bệnh lý mạch vành." },
+    { "Id": "11111111-1111-1111-1111-111111111104", "SpecialtyCode": "CK-004", "Name": "Sản Phụ khoa", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/specialty/SanPhuKhoa.png", "Description": "Chăm sóc thai kỳ, sinh sản và các bệnh lý phụ khoa nữ giới." },
+    { "Id": "11111111-1111-1111-1111-111111111105", "SpecialtyCode": "CK-005", "Name": "Nhi khoa", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/specialty/NhiKhoa.png", "Description": "Khám và điều trị các bệnh lý thường gặp ở trẻ sơ sinh và trẻ nhỏ." },
+    { "Id": "11111111-1111-1111-1111-111111111106", "SpecialtyCode": "CK-006", "Name": "Da liễu", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/specialty/DaLieu.png", "Description": "Điều trị mụn, nám, dị ứng da và thẩm mỹ công nghệ cao." },
+    { "Id": "11111111-1111-1111-1111-111111111107", "SpecialtyCode": "CK-007", "Name": "Tai Mũi Họng", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/specialty/TaiMuiHong.png", "Description": "Khám và điều trị viêm xoang, viêm họng, các bệnh lý tai mũi họng." },
+    { "Id": "11111111-1111-1111-1111-111111111108", "SpecialtyCode": "CK-008", "Name": "Mắt", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/specialty/Mat.png", "Description": "Khám mắt tổng quát, đo thị lực và điều trị tật khúc xạ." },
+    { "Id": "11111111-1111-1111-1111-111111111109", "SpecialtyCode": "CK-009", "Name": "Thần kinh", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/specialty/ThanKinh.png", "Description": "Chẩn đoán rối loạn thần kinh, đau đầu, tiền đình và não bộ." },
+    { "Id": "11111111-1111-1111-1111-111111111110", "SpecialtyCode": "CK-010", "Name": "Răng Hàm Mặt", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/specialty/RangHamMat.png", "Description": "Nha khoa tổng quát, nhổ răng khôn và thẩm mỹ răng sứ." }
+];
+
+const detailedContentMap = {
+    "CK-001": `
+        <p>Chuyên khoa <strong>Cơ Xương Khớp</strong> chuyên tiếp nhận khám, chẩn đoán và điều trị các bệnh lý liên quan đến hệ thống cơ, xương, khớp và dây chằng. Việc phát hiện sớm sẽ giúp hạn chế tối đa nguy cơ tàn phế và cải thiện chất lượng cuộc sống.</p>
+        <h3>Các bệnh lý thường gặp:</h3>
         <ul>
-            <li>Khám, tư vấn và điều trị chuyên sâu các bệnh lý thoái hóa khớp, viêm khớp dạng thấp, gout.</li>
-            <li>Điều trị các bệnh lý cột sống: thoái hóa cột sống cổ, thắt lưng, thoát vị đĩa đệm.</li>
-            <li>Thực hiện an toàn các thủ thuật lâm sàng: tiêm chất nhờn khớp, hút dịch khớp, tiêm điểm bám gân.</li>
+            <li><strong>Bệnh lý về khớp:</strong> Thoái hóa khớp gối/háng, viêm khớp dạng thấp, viêm cột sống dính khớp, bệnh Gout (gút).</li>
+            <li><strong>Bệnh lý cột sống:</strong> Thoát vị đĩa đệm, thoái hóa cột sống cổ, đau thần kinh tọa, vẹo cột sống.</li>
+            <li><strong>Bệnh lý xương và cơ:</strong> Loãng xương, viêm gân, hội chứng ống cổ tay, đứt dây chằng chéo.</li>
         </ul>
-      `
-    },
-    {
-        "Id": "33333333-2222-2222-2222-222222222222",
-        "SpecialtyId": "11111111-1111-1111-1111-111111111102",
-        "ServiceId": "22222222-3333-3333-3333-111111111102",
-        "AvatarUrl": "https://storage.googleapis.com/bookingcare-resources/static/doctor/Nu_BacSi_1.jpg",
-        "FullName": "Đỗ Thị Tường Vân",
-        "ExperienceYears": 18,
-        "Position": "Master",
-        "WorkingHistory": "Bệnh viện Việt Đức (2006-Nay)",
-        "Description": "Có nhiều năm kinh nghiệm trong lĩnh vực nội soi tiêu hóa không đau. Đã tu nghiệp chuyên sâu tại Nhật Bản.",
-        "DetailedBiography": `
-        <p>Thạc sĩ, Bác sĩ <strong>Đỗ Thị Tường Vân</strong> là bác sĩ chuyên khoa Nội Tiêu hóa - Gan mật với hơn 18 năm kinh nghiệm thực tiễn. Bác sĩ nổi tiếng với sự tận tâm, chu đáo và khả năng chẩn đoán hình ảnh nội soi chính xác.</p>
-        <p>Bác sĩ Tường Vân từng có 3 năm tu nghiệp chuyên sâu về nội soi can thiệp đường tiêu hóa tại Bệnh viện Đại học Tokyo (Nhật Bản). Kể từ khi về nước, bác sĩ luôn ứng dụng các công nghệ tiên tiến nhất để mang lại trải nghiệm khám chữa bệnh nhẹ nhàng cho người bệnh.</p>
-        <p><strong>Thế mạnh chuyên môn:</strong></p>
+        <h3>Trang thiết bị hỗ trợ chẩn đoán:</h3>
+        <p>Cơ sở y tế được trang bị hệ thống chụp X-quang kỹ thuật số, Máy đo mật độ xương DEXA, và Máy cộng hưởng từ (MRI) 1.5 - 3.0 Tesla giúp phát hiện chính xác các tổn thương sụn khớp và dây chằng ẩn sâu.</p>
+    `,
+    "CK-002": `
+        <p>Chuyên khoa <strong>Tiêu hóa - Gan Mật</strong> chuyên chẩn đoán và điều trị các bệnh lý đường tiêu hóa trên (thực quản, dạ dày), đường tiêu hóa dưới (đại trực tràng) và các bệnh lý về gan, mật, tụy.</p>
+        <h3>Các dịch vụ và bệnh lý chuyên sâu:</h3>
         <ul>
-            <li>Thực hiện Nội soi dạ dày, đại tràng công nghệ NBI gây mê (không đau, không khó chịu).</li>
-            <li>Tầm soát và phát hiện sớm ung thư thực quản, dạ dày, đại trực tràng.</li>
-            <li>Khám và điều trị viêm loét dạ dày nhiễm vi khuẩn HP, trào ngược dạ dày thực quản (GERD).</li>
-            <li>Can thiệp cắt polyp ống tiêu hóa qua nội soi an toàn.</li>
+            <li>Khám và điều trị trào ngược dạ dày thực quản (GERD), viêm loét dạ dày tá tràng.</li>
+            <li>Tầm soát và diệt vi khuẩn HP (Helicobacter Pylori) gây viêm loét và ung thư dạ dày.</li>
+            <li>Điều trị hội chứng ruột kích thích (IBS), viêm đại tràng mãn tính, trĩ nội/ngoại.</li>
+            <li>Tầm soát ung thư đường tiêu hóa sớm bằng kỹ thuật nội soi hiện đại.</li>
         </ul>
-      `
-    },
-    {
-        "Id": "33333333-3333-3333-3333-333333333333",
-        "SpecialtyId": "11111111-1111-1111-1111-111111111103",
-        "ServiceId": "22222222-3333-3333-3333-111111111103",
-        "AvatarUrl": "https://storage.googleapis.com/bookingcare-resources/static/doctor/Nam_BacSi_3.jpg",
-        "FullName": "Lê Ngọc Thành",
-        "ExperienceYears": 20,
-        "Position": "DoctorOfPhilosophy",
-        "WorkingHistory": "Bệnh viện Tim Hà Nội (2005-Nay)",
-        "Description": "Bác sĩ chuyên khoa sâu về can thiệp tim mạch và điều trị các bệnh lý tăng huyết áp, suy tim.",
-        "DetailedBiography": `
-        <p>Tiến sĩ, Bác sĩ <strong>Lê Ngọc Thành</strong> hiện là một trong những chuyên gia uy tín trong lĩnh vực chẩn đoán và điều trị các bệnh lý Tim mạch. Với 20 năm công tác tại Bệnh viện Tim Hà Nội, bác sĩ đã cứu sống vô số ca bệnh hiểm nghèo liên quan đến nhồi máu cơ tim và suy tim cấp.</p>
-        <p>Phong cách làm việc khoa học, tỉ mỉ cùng y đức trong sáng giúp Tiến sĩ Lê Ngọc Thành luôn nhận được sự tin yêu tuyệt đối từ phía bệnh nhân và người nhà.</p>
-        <p><strong>Thế mạnh chuyên môn:</strong></p>
+        <h3>Hệ thống nội soi công nghệ cao:</h3>
+        <p>Ứng dụng công nghệ Nội soi NBI (Narrow Band Imaging) phóng đại, nội soi không đau (tiền mê), giúp bệnh nhân trải qua quá trình thăm khám nhẹ nhàng và an toàn nhất.</p>
+    `,
+    "CK-003": `
+        <p>Chuyên khoa <strong>Tim mạch</strong> là nơi quy tụ các chuyên gia hàng đầu trong việc phòng ngừa, chẩn đoán và điều trị các bệnh lý liên quan đến hệ tuần hoàn và tim mạch.</p>
+        <h3>Các bệnh lý trọng điểm:</h3>
         <ul>
-            <li>Tầm soát, chẩn đoán sớm và điều trị các bệnh lý mạch vành, thiếu máu cơ tim.</li>
-            <li>Điều trị chuyên sâu cao huyết áp, rối loạn nhịp tim và rối loạn mỡ máu.</li>
-            <li>Siêu âm tim Doppler màu, đọc và phân tích điện tâm đồ phức tạp.</li>
-            <li>Tư vấn phác đồ điều trị sau can thiệp đặt stent mạch vành.</li>
+            <li>Quản lý và điều trị bệnh Tăng huyết áp (Cao huyết áp) nguyên phát và thứ phát.</li>
+            <li>Bệnh lý mạch vành: Thiếu máu cơ tim, cơn đau thắt ngực, nhồi máu cơ tim.</li>
+            <li>Các bệnh lý van tim, suy tim, và rối loạn nhịp tim (nhịp nhanh, nhịp chậm, ngoại tâm thu).</li>
         </ul>
-      `
+        <h3>Quy trình thăm khám tiêu chuẩn:</h3>
+        <p>Bệnh nhân sẽ được thực hiện Đo điện tâm đồ (ECG), Siêu âm tim Doppler màu, Đeo máy Holter điện tâm đồ/huyết áp 24h và Nghiệm pháp gắng sức để đánh giá toàn diện chức năng tim mạch.</p>
+    `,
+    "CK-004": `
+        <p>Chuyên khoa <strong>Sản Phụ khoa</strong> cung cấp dịch vụ chăm sóc sức khỏe toàn diện cho phụ nữ ở mọi lứa tuổi, từ tuổi dậy thì, tiền hôn nhân, thai kỳ cho đến giai đoạn tiền mãn kinh và mãn kinh.</p>
+        <h3>Dịch vụ nổi bật:</h3>
+        <ul>
+            <li><strong>Sản khoa:</strong> Khám thai định kỳ, siêu âm thai 4D/5D, sàng lọc dị tật thai nhi (Double Test, NIPT), theo dõi và quản lý thai kỳ nguy cơ cao.</li>
+            <li><strong>Phụ khoa:</strong> Khám và điều trị viêm nhiễm phụ khoa, rối loạn kinh nguyệt, u xơ tử cung, u nang buồng trứng.</li>
+            <li><strong>Tầm soát:</strong> Tầm soát ung thư cổ tử cung (Pap smear, HPV), tầm soát ung thư vú.</li>
+        </ul>
+        <p>Đội ngũ bác sĩ tâm lý, nhẹ nhàng, đảm bảo tính riêng tư tuyệt đối cho khách hàng trong suốt quá trình thăm khám.</p>
+    `,
+    "CK-005": `
+        <p>Chuyên khoa <strong>Nhi khoa</strong> tự hào mang đến môi trường thăm khám thân thiện, không lạm dụng kháng sinh và ưu tiên tăng cường miễn dịch tự nhiên cho trẻ từ sơ sinh đến 16 tuổi.</p>
+        <h3>Danh mục khám chữa bệnh:</h3>
+        <ul>
+            <li><strong>Khám nội nhi tổng quát:</strong> Điều trị các bệnh lý hô hấp (viêm họng, viêm phế quản, hen suyễn), tiêu hóa (tiêu chảy, táo bón), bệnh truyền nhiễm (tay chân miệng, sốt xuất huyết).</li>
+            <li><strong>Khám dinh dưỡng:</strong> Tư vấn chế độ ăn cho trẻ biếng ăn, suy dinh dưỡng, thấp còi hoặc thừa cân béo phì.</li>
+            <li><strong>Khám phát triển:</strong> Đánh giá các mốc phát triển tâm thần, vận động của trẻ nhỏ.</li>
+        </ul>
+        <p><em>* Không gian phòng khám được thiết kế với nhiều màu sắc, đồ chơi giúp trẻ giảm bớt lo âu và sợ hãi khi gặp bác sĩ.</em></p>
+    `
+}
+
+const getFallbackContent = (specialty) => {
+    return `
+        <p>Chào mừng bạn đến với chuyên khoa <strong>${specialty.Name}</strong>.</p>
+        <p>${specialty.Description}</p>
+        <h3>Các dịch vụ chính tại chuyên khoa:</h3>
+        <ul>
+            <li>Khám, chẩn đoán và tư vấn chuyên sâu cùng các bác sĩ, chuyên gia giàu kinh nghiệm.</li>
+            <li>Phác đồ điều trị được cá nhân hóa theo từng tình trạng bệnh và cơ địa của bệnh nhân.</li>
+            <li>Trang thiết bị chẩn đoán đồng bộ, hiện đại, đảm bảo kết quả chính xác, nhanh chóng.</li>
+        </ul>
+        <p><em>* Lưu ý khi đi khám: Vui lòng mang theo các kết quả xét nghiệm, đơn thuốc hoặc phim chụp cũ (trong vòng 6 tháng) nếu có. Nếu có chỉ định xét nghiệm máu, quý khách vui lòng nhịn ăn sáng.</em></p>
+    `
+}
+
+const mockServiceDetail = {
+    Id: "22222222-3333-3333-3333-111111111101",
+    Name: "Tiêm chất nhờn khớp gối (Hyaluronic Acid)",
+    ShortDescription: "Giải pháp hiệu quả cho bệnh nhân thoái hóa khớp gối, giúp bôi trơn sụn khớp, giảm đau và cải thiện khả năng vận động nhanh chóng.",
+    Price: 1500000,
+    DurationInMinutes: 30,
+    ProcessSteps: [
+        "Bác sĩ thăm khám lâm sàng, đánh giá mức độ thoái hóa khớp gối.",
+        "Siêu âm khớp gối để xác định chính xác vị trí tiêm và tình trạng dịch khớp.",
+        "Sát khuẩn vô trùng kỹ lưỡng vùng đầu gối cần tiêm.",
+        "Tiến hành tiêm chất nhờn (Acid Hyaluronic) vào ổ khớp dưới sự hướng dẫn của siêu âm.",
+        "Băng ép vô khuẩn, bệnh nhân nghỉ ngơi tại chỗ 15 phút và nhận hướng dẫn chăm sóc tại nhà."
+    ],
+    FullDescription: `
+        <p><strong>Tiêm chất nhờn khớp gối</strong> là thủ thuật y khoa đưa Acid Hyaluronic (một thành phần tự nhiên có trong dịch khớp khỏe mạnh) trực tiếp vào không gian ổ khớp.</p>
+        <h3>Ưu điểm của dịch vụ:</h3>
+        <ul>
+            <li><strong>Hiệu quả kéo dài:</strong> Tác dụng giảm đau và bôi trơn có thể kéo dài từ 6 tháng đến 1 năm tùy cơ địa.</li>
+            <li><strong>Trì hoãn phẫu thuật:</strong> Là giải pháp cứu cánh giúp bệnh nhân chưa đủ điều kiện sức khỏe hoặc chưa muốn phẫu thuật thay khớp.</li>
+        </ul>
+    `
+}
+
+const relatedDoctors = ref([
+    { Id: "33333333-1111-1111-1111-111111111111", AvatarUrl: "https://storage.googleapis.com/bookingcare-resources/static/doctor/Nam_BacSi_2.jpg", FullName: "Nguyễn Trọng Hưng", Position: "AssociateProfessor", AvailableTimes: ["08:00 - 08:30", "09:30 - 10:00", "14:00 - 14:30"] },
+    { Id: "33333333-2222-2222-2222-222222222222", AvatarUrl: "https://storage.googleapis.com/bookingcare-resources/static/doctor/Nu_BacSi_1.jpg", FullName: "Trần Thị Mai Phương", Position: "Master", AvailableTimes: ["10:00 - 10:30", "15:30 - 16:00"] }
+])
+
+const pageData = ref({})
+
+const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)
+const translatePosition = (pos) => ({ 'Professor': 'Giáo sư', 'AssociateProfessor': 'Phó Giáo sư', 'DoctorOfPhilosophy': 'Tiến sĩ', 'Master': 'Thạc sĩ', 'Doctor': 'Bác sĩ' }[pos] || 'Bác sĩ')
+
+const goToBooking = (doctorId, timeSlot) => {
+    const query = {}
+    if (doctorId) query.doctorId = doctorId
+    if (timeSlot) query.time = timeSlot
+    if (pageType.value === 'service') query.serviceId = detailId.value
+    router.push({ path: '/booking', query })
+}
+
+const loadData = () => {
+    if (pageType.value === 'specialty') {
+        const foundSpecialty = specialtiesList.find(s => s.Id === detailId.value);
+
+        if (foundSpecialty) {
+            const fullDesc = detailedContentMap[foundSpecialty.SpecialtyCode] || getFallbackContent(foundSpecialty);
+
+            pageData.value = {
+                ...foundSpecialty,
+                ShortDescription: foundSpecialty.Description,
+                FullDescription: fullDesc
+            }
+        } else {
+            console.error("Không tìm thấy chuyên khoa!");
+        }
+    } else {
+        pageData.value = mockServiceDetail
     }
-];
-
-const specialtiesData = [
-    { "Id": "11111111-1111-1111-1111-111111111101", "Name": "Cơ Xương Khớp" },
-    { "Id": "11111111-1111-1111-1111-111111111102", "Name": "Tiêu hóa" },
-    { "Id": "11111111-1111-1111-1111-111111111103", "Name": "Tim mạch" }
-];
-
-const servicesData = [
-    { "Id": "22222222-3333-3333-3333-111111111101", "Name": "Tiêm chất nhờn khớp gối (Hyaluronic Acid)", "Price": 1500000 },
-    { "Id": "22222222-3333-3333-3333-111111111102", "Name": "Gói Nội soi kép Dạ dày - Đại tràng Gây mê", "Price": 2800000 },
-    { "Id": "22222222-3333-3333-3333-111111111103", "Name": "Siêu âm tim Doppler màu chuyên sâu", "Price": 600000 }
-];
+}
 
 onMounted(() => {
-    const id = route.params.id;
-    doctor.value = doctorsData.find(d => d.Id === id);
-    if (doctor.value) {
-        relatedService.value = servicesData.find(s => s.Id === doctor.value.ServiceId);
-    }
-});
+    loadData();
+})
 
-const getSpecialtyName = (id) => specialtiesData.find(s => s.Id === id)?.Name || 'Đa khoa';
-const translatePosition = (pos) => ({ 'AssociateProfessor': 'Phó Giáo sư', 'DoctorOfPhilosophy': 'Tiến sĩ', 'Master': 'Thạc sĩ', 'Professor': 'Giáo sư' }[pos] || 'Bác sĩ');
-const formatPrice = (p) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p);
-const goToBooking = () => router.push({ path: '/booking', query: { doctorId: doctor.value.Id } });
+watch(
+    () => route.params.id,
+    (newId) => {
+        if (newId) {
+            detailId.value = newId;
+            pageType.value = route.params.type;
+            loadData();
+        }
+    }
+)
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
+
 .detail-container {
-    background: #f8fafc;
+    --primary-color: #45C3D2;
+    --primary-hover: #3ba3b0;
+    --bg-white: #ffffff;
+    --bg-light: #f3f6f9;
+    --text-dark: #1f2937;
+    --text-gray: #4b5563;
+    --border-color: #e5e7eb;
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--text-dark);
+}
+
+.bg-light {
+    background-color: var(--bg-light);
     min-height: 100vh;
-    padding: 40px 0;
 }
 
 .container {
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
 }
 
-.breadcrumb {
-    margin-bottom: 30px;
-    font-size: 14px;
-    color: #64748b;
+.box-style {
+    background: var(--bg-white);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    border: 1px solid var(--border-color);
 }
 
-.breadcrumb span {
-    cursor: pointer;
-    transition: color 0.2s;
+.mt-30 {
+    margin-top: 30px;
 }
 
-.breadcrumb span:hover {
-    color: #45C3D2;
+.detail-main {
+    padding: 40px 0 80px;
 }
 
-.breadcrumb .active {
-    color: #45C3D2;
-    font-weight: 600;
-    cursor: default;
+.content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    align-items: start;
 }
 
-.doctor-header-card {
-    background: #fff;
-    border-radius: 24px;
-    padding: 40px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-    margin-bottom: 30px;
-}
-
-.doc-main-info {
+.header-card {
     display: flex;
-    gap: 40px;
-    align-items: center;
+    gap: 30px;
+    align-items: flex-start;
 }
 
-.doc-avatar-large {
-    width: 220px;
-    height: 220px;
-    border-radius: 20px;
+.header-image {
+    width: 200px;
+    height: 200px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    background: var(--bg-white);
     flex-shrink: 0;
 }
 
-.doc-avatar-large img {
+.header-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.badge {
+.header-image.is-service {
     background: rgba(69, 195, 210, 0.1);
-    color: #45C3D2;
-    padding: 6px 16px;
-    border-radius: 50px;
-    font-weight: 700;
+    border: none;
+}
+
+.srv-icon-large {
+    width: 80px;
+    height: 80px;
+    color: var(--primary-color);
+}
+
+.header-info {
+    flex-grow: 1;
+}
+
+.header-info .title {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0 0 15px;
+    line-height: 1.3;
+}
+
+.header-info .short-desc {
+    font-size: 16px;
+    color: var(--text-gray);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.service-meta {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.meta-label {
     font-size: 13px;
+    color: var(--text-gray);
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.meta-value {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.meta-value.price {
+    color: #f59e0b;
+}
+
+.meta-value.time {
+    color: var(--primary-color);
+}
+
+.section-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--primary-color);
+    display: inline-block;
+}
+
+.rich-text {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--text-gray);
+}
+
+.rich-text :deep(h3) {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 30px 0 15px;
+}
+
+.rich-text :deep(ul) {
+    padding-left: 20px;
+    margin-bottom: 20px;
+}
+
+.rich-text :deep(li) {
+    margin-bottom: 10px;
+}
+
+.rich-text :deep(p) {
+    margin-bottom: 15px;
+}
+
+.process-section {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid var(--border-color);
+}
+
+.process-section h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.process-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.process-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.step-number {
+    width: 32px;
+    height: 32px;
+    background: rgba(69, 195, 210, 0.1);
+    color: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.step-content {
+    padding-top: 5px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-gray);
+}
+
+.sidebar {
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 5px;
+}
+
+.sidebar-subtitle {
+    font-size: 14px;
+    color: #9ca3af;
+    margin: 0 0 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.doctor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.doctor-item {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 15px;
+    background: #fafafa;
+    transition: border 0.3s;
+}
+
+.doctor-item:hover {
+    border-color: var(--primary-color);
+    background: #fff;
+}
+
+.doc-item-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.doc-avt {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.doc-basic-info {
+    flex: 1;
+}
+
+.doc-pos {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary-color);
     text-transform: uppercase;
 }
 
-.doc-text h1 {
-    font-size: 32px;
-    margin: 15px 0;
-    color: #1e293b;
-}
-
-.doc-intro {
-    color: #475569;
-    line-height: 1.6;
+.doc-name {
     font-size: 16px;
-    margin-bottom: 25px;
+    font-weight: 700;
+    margin: 2px 0 0;
+    color: var(--text-dark);
 }
 
-.doc-stats {
-    display: flex;
-    gap: 40px;
+.doc-schedule {
+    border-top: 1px dashed var(--border-color);
+    padding-top: 12px;
 }
 
-.stat-item strong {
+.schedule-title {
     display: block;
-    font-size: 24px;
-    color: #45C3D2;
-}
-
-.stat-item span {
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--text-dark);
+    font-weight: 600;
+    margin-bottom: 10px;
 }
 
-.detail-grid {
-    display: grid;
-    grid-template-columns: 1fr 350px;
-    gap: 30px;
+.schedule-title i {
+    color: var(--primary-color);
 }
 
-.info-section {
-    background: #fff;
-    padding: 35px;
-    border-radius: 20px;
-    margin-bottom: 25px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
-}
-
-.info-section h2 {
-    font-size: 20px;
-    margin-bottom: 20px;
+.time-slots {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #0f172a;
-    border-bottom: 1px solid #f1f5f9;
-    padding-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
-:deep(.biography-content) {
-    color: #334155;
-    line-height: 1.7;
-    font-size: 15.5px;
-}
-
-:deep(.biography-content p) {
-    margin-bottom: 15px;
-}
-
-:deep(.biography-content ul) {
-    margin-left: 20px;
-    margin-bottom: 15px;
-}
-
-:deep(.biography-content li) {
-    margin-bottom: 8px;
-    position: relative;
-}
-
-:deep(.biography-content li::marker) {
-    color: #45C3D2;
-}
-
-:deep(.biography-content strong) {
-    color: #1e293b;
-}
-
-.history-item {
-    padding: 12px 0;
-    border-bottom: 1px dashed #e2e8f0;
-    color: #334155;
-    position: relative;
-    padding-left: 20px;
-}
-
-.history-item::before {
-    content: "•";
-    position: absolute;
-    left: 0;
-    color: #45C3D2;
-    font-weight: bold;
-}
-
-.history-item:last-child {
-    border-bottom: none;
-}
-
-.specialty-tag {
-    display: inline-block;
-    padding: 10px 24px;
-    background: #f1f5f9;
-    border-radius: 10px;
-    font-weight: 600;
-    color: #475569;
-}
-
-.booking-widget {
+.time-slot {
     background: #fff;
-    padding: 30px;
-    border-radius: 24px;
-    position: sticky;
-    top: 20px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.booking-widget h3 {
-    font-size: 18px;
-    text-align: center;
-    margin-bottom: 10px;
-    color: #0f172a;
+.time-slot:hover {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
 }
 
-.service-info {
-    margin: 20px 0;
-    padding: 25px 20px;
-    background: #f8fafc;
-    border-radius: 15px;
-    text-align: center;
-    border: 1px dashed #cbd5e1;
-}
-
-.service-name {
-    font-weight: 600;
-    margin-bottom: 15px;
-    font-size: 15px;
-    color: #334155;
-    line-height: 1.5;
-}
-
-.service-price {
-    font-size: 26px;
-    font-weight: 800;
-    color: #f59e0b;
-    margin-bottom: 10px;
-}
-
-.service-note {
-    font-size: 12px;
-    color: #94a3b8;
-    font-style: italic;
-}
-
-.btn-book-now {
+.btn-book-large {
     width: 100%;
-    background: #45C3D2;
+    margin-top: 20px;
+    padding: 14px;
+    border-radius: 10px;
+    background: var(--primary-color);
     color: #fff;
     border: none;
-    padding: 18px;
-    border-radius: 15px;
-    font-weight: 800;
     font-size: 16px;
+    font-weight: 700;
     cursor: pointer;
-    transition: 0.3s;
-    box-shadow: 0 10px 20px rgba(69, 195, 210, 0.2);
+    transition: background 0.3s;
+    box-shadow: 0 4px 12px rgba(69, 195, 210, 0.3);
 }
 
-.btn-book-now:hover {
-    background: #3ba3b0;
-    transform: translateY(-3px);
-    box-shadow: 0 15px 25px rgba(69, 195, 210, 0.3);
+.btn-book-large:hover {
+    background: var(--primary-hover);
 }
 
-.booking-tip {
-    margin-top: 20px;
-    font-size: 14px;
-    color: #64748b;
-    text-align: center;
-}
-
-@media (max-width: 900px) {
-    .detail-grid {
+@media (max-width: 992px) {
+    .content-grid {
         grid-template-columns: 1fr;
     }
 
-    .doc-main-info {
+    .header-card {
         flex-direction: column;
-        text-align: center;
+        align-items: flex-start;
     }
 
-    .doc-stats {
-        justify-content: center;
+    .header-image {
+        width: 100%;
+        max-width: 300px;
+        height: auto;
+        aspect-ratio: 1;
     }
 
-    .booking-widget {
+    .sidebar {
         position: static;
     }
 }

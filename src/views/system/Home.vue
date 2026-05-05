@@ -15,7 +15,7 @@
                             <circle cx="11" cy="11" r="8"></circle>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
-                        <input type="text" placeholder="Tìm bác sĩ, chuyên khoa..." v-model="searchQuery" />
+                        <input type="text" placeholder="Tìm bác sĩ, chuyên khoa, cơ sở y tế..." v-model="searchQuery" />
                         <button class="btn-search">Tìm kiếm</button>
                     </div>
 
@@ -27,7 +27,7 @@
                             </div>
                             <div class="search-item-info">
                                 <h4>{{ item.Name || item.FullName }}</h4>
-                                <span>{{ item.type === 'doctor' ? 'Bác sĩ' : 'Chuyên khoa' }}</span>
+                                <span>{{ item.type === 'doctor' ? 'Bác sĩ' : (item.type === 'clinic' ? 'Cơ sở y tế' : 'Chuyên khoa') }}</span>
                             </div>
                         </div>
                     </div>
@@ -35,6 +35,7 @@
             </div>
         </section>
 
+        <!-- Chuyên khoa (Nền xám) -->
         <section class="highlight-section bg-light">
             <div class="container slide-up-2">
                 <div class="section-header">
@@ -59,6 +60,32 @@
             </div>
         </section>
 
+        <!-- MỚI: Cơ sở y tế (Nền trắng) -->
+        <!-- <section class="highlight-section">
+            <div class="container slide-up-3">
+                <div class="section-header">
+                    <h2>Cơ sở y tế nổi bật</h2>
+                    <a href="#" class="view-all">Xem tất cả <span class="arrow">→</span></a>
+                </div>
+
+                <div class="slider-container">
+                    <button class="slider-btn left" @click="scrollList('clinicList', 'left')">‹</button>
+                    <div class="item-list" ref="clinicList">
+                        <div class="clinic-card 3d-hover" v-for="clinic in clinicsData" :key="clinic.Id">
+                            <div class="clinic-img">
+                                <img :src="clinic.ImageUrl" :alt="clinic.Name" />
+                            </div>
+                            <div class="clinic-info">
+                                <h3 class="clinic-title">{{ clinic.Name }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="slider-btn right" @click="scrollList('clinicList', 'right')">›</button>
+                </div>
+            </div>
+        </section> -->
+
+        <!-- Dịch vụ y tế (Nền xám) -->
         <section class="highlight-section bg-light">
             <div class="container slide-up-4">
                 <div class="section-header">
@@ -69,7 +96,7 @@
                 <div class="slider-container">
                     <button class="slider-btn left" @click="scrollList('serviceList', 'left')">‹</button>
                     <div class="item-list" ref="serviceList">
-                        <div class="service-card 3d-hover" v-for="srv in servicesData" :key="srv.Id">
+                        <div class="service-card 3d-hover" v-for="srv in servicesData" :key="srv.Id" @click="goToDetail('service', srv.Id)">
                             <div class="srv-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
@@ -88,7 +115,8 @@
             </div>
         </section>
 
-        <section class="highlight-section">
+        <!-- Bác sĩ nổi bật (Nền trắng) -->
+        <section class="highlight-section bg-light">
             <div class="container slide-up-3">
                 <div class="section-header">
                     <h2>Bác sĩ nổi bật tuần qua</h2>
@@ -99,7 +127,7 @@
                     <button class="slider-btn left" @click="scrollList('doctorList', 'left')">‹</button>
                     <div class="item-list" ref="doctorList">
                         <div class="doctor-card 3d-hover" v-for="doc in doctorsData" :key="doc.Id"
-                            @click="goToDetail('doctor', doc.Id)">
+                            @click="goToDoctorDetail('doctor', doc.Id)">
                             <div class="doc-avatar">
                                 <img :src="doc.AvatarUrl" :alt="doc.FullName" />
                             </div>
@@ -116,6 +144,7 @@
             </div>
         </section>
 
+        <!-- Tin tức (Nền xám) -->
         <section class="highlight-section bg-light">
             <div class="container slide-up-4">
                 <div class="section-header">
@@ -141,6 +170,22 @@
             </div>
         </section>
 
+        <!-- MỚI: Banner tải App -->
+        <section class="app-banner-section">
+            <div class="container">
+                <div class="app-banner-content">
+                    <div class="app-text">
+                        <h2>Tải ứng dụng BookingCare</h2>
+                        <p>Trải nghiệm đặt khám nhanh chóng, tiện lợi và quản lý hồ sơ sức khỏe trọn đời ngay trên điện thoại của bạn.</p>
+                        <div class="app-badges">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store" />
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <footer class="footer">
             <div class="container">
                 <p>&copy; 2026 Nền tảng y tế BookingCare. All rights reserved.</p>
@@ -158,6 +203,7 @@ const router = useRouter()
 
 const searchQuery = ref('')
 const specialtyList = ref(null)
+const clinicList = ref(null)
 const doctorList = ref(null)
 const serviceList = ref(null)
 
@@ -167,6 +213,15 @@ const specialtiesData = [
     { "Id": "11111111-1111-1111-1111-111111111103", "Name": "Tim mạch", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/specialty/TimMach.png", "Description": "Điều trị cao huyết áp, suy tim và các bệnh lý mạch vành." },
     { "Id": "11111111-1111-1111-1111-111111111104", "Name": "Sản Phụ khoa", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/specialty/SanPhuKhoa.png", "Description": "Chăm sóc thai kỳ, sinh sản và các bệnh lý phụ khoa." },
     { "Id": "11111111-1111-1111-1111-111111111105", "Name": "Nhi khoa", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/specialty/NhiKhoa.png", "Description": "Khám và điều trị các bệnh lý thường gặp ở trẻ sơ sinh và trẻ nhỏ." }
+]
+
+// MỚI: Data Cơ sở y tế
+const clinicsData = [
+    { "Id": "clinic-1", "Name": "Bệnh viện Hữu nghị Việt Đức", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/clinic/vietduc.jpg" },
+    { "Id": "clinic-2", "Name": "Bệnh viện Chợ Rẫy", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/clinic/choray.jpg" },
+    { "Id": "clinic-3", "Name": "Phòng khám Đa khoa Medlatec", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/clinic/medlatec.png" },
+    { "Id": "clinic-4", "Name": "Bệnh viện Đại học Y Dược TP.HCM", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/clinic/yduoc.jpg" },
+    { "Id": "clinic-5", "Name": "Hệ thống Y tế Thu Cúc TCI", "ImageUrl": "https://storage.googleapis.com/bookingcare-resources/static/clinic/thucuc.png" }
 ]
 
 const doctorsData = [
@@ -221,8 +276,12 @@ const searchResults = computed(() => {
     const specs = specialtiesData
         .filter(s => s.Name.toLowerCase().includes(q))
         .map(s => ({ ...s, type: 'specialty' }));
+        
+    const clinics = clinicsData
+        .filter(c => c.Name.toLowerCase().includes(q))
+        .map(c => ({ ...c, type: 'clinic' }));
 
-    return [...docs, ...specs].slice(0, 5);
+    return [...docs, ...specs, ...clinics].slice(0, 5);
 })
 
 const scrollList = (listName, direction) => {
@@ -230,6 +289,7 @@ const scrollList = (listName, direction) => {
     if (listName === 'specialtyList') el = specialtyList.value;
     else if (listName === 'doctorList') el = doctorList.value;
     else if (listName === 'serviceList') el = serviceList.value;
+    else if (listName === 'clinicList') el = clinicList.value;
 
     if (el) {
         const scrollAmount = 350;
@@ -239,6 +299,10 @@ const scrollList = (listName, direction) => {
 
 const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)
+}
+
+const goToDoctorDetail = (type, id) => {
+    router.push({ path: `/doctordetail/${type}/${id}` })
 }
 
 const goToDetail = (type, id) => {
@@ -412,8 +476,9 @@ const translatePosition = (pos) => {
     border-radius: 10px;
 }
 
+/* Đã chỉnh sửa Padding từ 80px xuống 50px để khoảng cách thu hẹp lại */
 .highlight-section {
-    padding: 80px 0;
+    padding: 50px 0; 
     isolation: isolate;
 }
 
@@ -497,6 +562,7 @@ const translatePosition = (pos) => {
     display: none;
 }
 
+/* Specialty Card */
 .specialty-card {
     min-width: 280px;
     scroll-snap-align: start;
@@ -516,7 +582,7 @@ const translatePosition = (pos) => {
 }
 
 .specialty-card .card-img {
-    height: 160px;
+    height: 220px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -546,6 +612,47 @@ const translatePosition = (pos) => {
     overflow: hidden;
 }
 
+/* Clinic Card (Mới) */
+.clinic-card {
+    min-width: 280px;
+    scroll-snap-align: start;
+    background: var(--bg-white);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.clinic-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(69, 195, 210, 0.1);
+    border-color: var(--primary-color);
+}
+
+.clinic-img {
+    height: 160px;
+    background: #f3f4f6;
+}
+
+.clinic-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.clinic-info {
+    padding: 15px;
+}
+
+.clinic-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-dark);
+}
+
+/* Doctor Card */
 .doctor-card {
     min-width: 280px;
     scroll-snap-align: start;
@@ -618,13 +725,84 @@ const translatePosition = (pos) => {
     color: #fff;
 }
 
-.footer {
-    text-align: center;
-    padding: 30px 0;
-    font-size: 14px;
-    color: var(--text-gray);
+/* Service Card */
+.service-card {
+    min-width: 300px;
+    scroll-snap-align: start;
+    background: var(--bg-white);
+    border-radius: 16px;
+    padding: 25px;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
 }
 
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(69, 195, 210, 0.1);
+    border-color: var(--primary-color);
+}
+
+.srv-icon {
+    width: 45px;
+    height: 45px;
+    background: rgba(69, 195, 210, 0.1);
+    color: var(--primary-color);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.srv-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.srv-name {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0 0 10px;
+    line-height: 1.4;
+    color: #1f2937;
+}
+
+.srv-desc {
+    font-size: 14px;
+    color: var(--text-gray);
+    flex-grow: 1;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.srv-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.srv-price {
+    font-weight: 800;
+    color: #f59e0b;
+    font-size: 18px;
+}
+
+.srv-time {
+    font-size: 13px;
+    color: var(--text-gray);
+    background: #f3f4f6;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+/* News Section */
 .news-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -708,6 +886,50 @@ const translatePosition = (pos) => {
     font-size: 14px;
 }
 
+/* App Banner Section (Mới) */
+.app-banner-section {
+    background: var(--primary-color);
+    padding: 50px 0;
+    color: #fff;
+}
+
+.app-banner-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.app-text h2 {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0 0 15px;
+}
+
+.app-text p {
+    font-size: 16px;
+    opacity: 0.9;
+    margin-bottom: 30px;
+}
+
+.app-badges img {
+    height: 45px;
+    margin: 0 10px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.app-badges img:hover {
+    transform: scale(1.05);
+}
+
+.footer {
+    text-align: center;
+    padding: 30px 0;
+    font-size: 14px;
+    color: var(--text-gray);
+}
+
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -735,79 +957,8 @@ const translatePosition = (pos) => {
     opacity: 0;
 }
 
-.service-card {
-    min-width: 300px;
-    scroll-snap-align: start;
-    background: var(--bg-white);
-    border-radius: 16px;
-    padding: 25px;
-    border: 1px solid var(--border-color);
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-}
-
-.service-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(69, 195, 210, 0.1);
-    border-color: var(--primary-color);
-}
-
-.srv-icon {
-    width: 45px;
-    height: 45px;
-    background: rgba(69, 195, 210, 0.1);
-    color: var(--primary-color);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
-.srv-icon svg {
-    width: 24px;
-    height: 24px;
-}
-
-.srv-name {
-    font-size: 17px;
-    font-weight: 700;
-    margin: 0 0 10px;
-    line-height: 1.4;
-    color: #1f2937;
-}
-
-.srv-desc {
-    font-size: 14px;
-    color: var(--text-gray);
-    flex-grow: 1;
-    margin-bottom: 20px;
-    line-height: 1.5;
-}
-
-.srv-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 15px;
-    border-top: 1px dashed var(--border-color);
-}
-
-.srv-price {
-    font-weight: 800;
-    color: #f59e0b;
-    font-size: 18px;
-}
-
-.srv-time {
-    font-size: 13px;
-    color: var(--text-gray);
-    background: #f3f4f6;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-weight: 500;
+.slide-up-4 {
+    animation: fadeInUp 0.6s ease forwards 0.4s;
+    opacity: 0;
 }
 </style>
