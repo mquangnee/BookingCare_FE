@@ -94,18 +94,49 @@
 
                         <div v-else-if="bookingMode === 'service'" class="flow-container fade-in">
                             <h3 class="section-title">1. Chọn Dịch vụ</h3>
-                            <div v-if="services.length === 0" class="empty-state">
-                                <p>Hiện tại chưa có dịch vụ nào trên hệ thống.</p>
+                            <div class="search-wrapper mb-20">
+                                <div class="search-input-group">
+                                    <svg viewBox="0 0 24 24" class="search-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                    <input type="text" v-model="searchServiceQuery" class="form-control search-input" placeholder="Tìm kiếm dịch vụ..." @input="currentServicePage = 1" />
+                                </div>
                             </div>
-                            <div v-else class="grid-list">
-                                <div v-for="svc in services" :key="svc.id"
-                                    :class="['selection-card', { selected: selectedService?.id === svc.id }]"
-                                    @click="selectedService = svc">
-                                    <div class="card-info">
-                                        <h4>{{ svc.name }}</h4>
-                                        <p class="price-text">{{ formatPrice(svc.price) }}</p>
+
+                            <div v-if="paginatedServices.length === 0" class="empty-state">
+                                <p>Không tìm thấy dịch vụ nào phù hợp.</p>
+                            </div>
+                            <div v-else>
+                                <div class="grid-list">
+                                    <div v-for="svc in paginatedServices" :key="svc.id"
+                                        :class="['selection-card', { selected: selectedService?.id === svc.id }]"
+                                        @click="selectedService = svc">
+                                        <div class="card-info">
+                                            <h4>{{ svc.name }}</h4>
+                                            <p class="price-text">{{ formatPrice(svc.price) }}</p>
+                                        </div>
+                                        <div class="radio-circle"></div>
                                     </div>
-                                    <div class="radio-circle"></div>
+                                </div>
+                                <div class="pagination-container mt-24" v-if="totalServicePages > 1">
+                                    <button class="btn-pagination" :disabled="currentServicePage === 1" @click="currentServicePage--">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="15 18 9 12 15 6"></polyline>
+                                        </svg>
+                                    </button>
+                                    <div class="page-numbers">
+                                        <button v-for="page in totalServicePages" :key="page" 
+                                            :class="['btn-page-number', { active: currentServicePage === page }]"
+                                            @click="currentServicePage = page">
+                                            {{ page }}
+                                        </button>
+                                    </div>
+                                    <button class="btn-pagination" :disabled="currentServicePage === totalServicePages" @click="currentServicePage++">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6"></polyline>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -340,6 +371,26 @@ const bookingMode = ref('doctor')
 const isSubmitting = ref(false)
 const isLoadingSlots = ref(false)
 const isSuccess = ref(false)
+
+const searchServiceQuery = ref('')
+const currentServicePage = ref(1)
+const servicesPerPage = 8
+
+const filteredServices = computed(() => {
+    let result = services.value;
+    if (searchServiceQuery.value) {
+        const query = searchServiceQuery.value.toLowerCase();
+        result = result.filter(s => s.name.toLowerCase().includes(query));
+    }
+    return result;
+});
+
+const totalServicePages = computed(() => Math.ceil(filteredServices.value.length / servicesPerPage));
+
+const paginatedServices = computed(() => {
+    const start = (currentServicePage.value - 1) * servicesPerPage;
+    return filteredServices.value.slice(start, start + servicesPerPage);
+});
 
 const selectedDoctorInStep2 = ref(null);
 const selectedSpecialty = ref(null)
@@ -1325,6 +1376,105 @@ const next7Days = computed(() => {
     background-color: #ffffff;
     color: #4b5563;
     border: 1.5px solid #d1d5db;
+}
+
+.search-wrapper {
+    margin-bottom: 20px;
+}
+
+.search-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    width: 18px;
+    height: 18px;
+    color: #9ca3af;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 12px 10px 38px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: #45C3D2;
+    box-shadow: 0 0 0 3px rgba(69, 195, 210, 0.1);
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    color: #4b5563;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-pagination:hover:not(:disabled) {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.btn-pagination:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f3f4f6;
+}
+
+.page-numbers {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-page-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    color: #4b5563;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-page-number:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.btn-page-number.active {
+    background: #45C3D2;
+    color: white;
+    border-color: #45C3D2;
 }
 
 .btn-secondary:hover:not(:disabled) {
