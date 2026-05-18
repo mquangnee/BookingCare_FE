@@ -27,8 +27,8 @@
                         <th class="text-center">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr v-for="service in services" :key="service.id">
+                <transition-group name="list" tag="tbody">
+                    <tr v-for="service in paginatedServices" :key="service.id">
                         <td><span class="code-badge">{{ service.serviceCode }}</span></td>
                         <td class="font-medium">{{ service.name }}</td>
                         <td class="price-cell">{{ formatCurrency(service.price) }}</td>
@@ -76,7 +76,7 @@
                             </div>
                         </td>
                     </tr>
-                    <tr v-if="services.length === 0">
+                    <tr v-if="paginatedServices.length === 0">
                         <td colspan="6" class="empty-state-row">
                             <div class="empty-state-content">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -88,8 +88,30 @@
                             </div>
                         </td>
                     </tr>
-                </tbody>
+                </transition-group>
             </table>
+        </div>
+
+        <div class="pagination-container" v-if="totalPages > 1">
+            <button class="btn-pagination" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                Trước
+            </button>
+            <div class="page-numbers">
+                <button v-for="page in totalPages" :key="page" 
+                    :class="['btn-page-number', { active: currentPage === page }]"
+                    @click="changePage(page)">
+                    {{ page }}
+                </button>
+            </div>
+            <button class="btn-pagination" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">
+                Sau
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
         </div>
 
         <transition name="modal-fade">
@@ -254,7 +276,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useServiceStore } from '../../../../stores/serviceStore'
 import { useDoctorStore } from '../../../../stores/doctorStore'
 import { useSpecialtyStore } from '../../../../stores/specialtyStore'
@@ -284,6 +306,23 @@ const addFormData = ref<any>({
 
 const isEditModalOpen = ref(false);
 const editFormData = ref<any>({});
+
+const currentPage = ref(1);
+const itemsPerPage = 10;
+
+const totalPages = computed(() => Math.ceil(services.value.length / itemsPerPage));
+
+const paginatedServices = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return services.value.slice(start, end);
+});
+
+const changePage = (page: number) => {
+    if (page >= 1 && page <= totalPages.value) {
+        currentPage.value = page;
+    }
+};
 
 const fetchServices = async () => {
     try {
@@ -591,7 +630,7 @@ h2 {
     background-color: #f3f4f6;
     padding: 4px 8px;
     border-radius: 6px;
-    font-family: monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 0.75rem;
 }
 
@@ -823,5 +862,93 @@ h2 {
 .modal-fade-enter-from,
 .modal-fade-leave-to {
     opacity: 0;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.btn-pagination {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    color: #374151;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-pagination:hover:not(:disabled) {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.btn-pagination:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f3f4f6;
+}
+
+.page-numbers {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-page-number {
+    min-width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    color: #374151;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-page-number:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.btn-page-number.active {
+    background: #45c3d2;
+    color: white;
+    border-color: #45c3d2;
+}
+
+.list-enter-active,
+.list-leave-active {
+    transition: all 0.4s ease;
+}
+
+.list-enter-from {
+    opacity: 0;
+    transform: translateX(30px);
+}
+
+.list-leave-to {
+    opacity: 0;
+    transform: translateX(-30px);
+}
+
+.list-move {
+    transition: transform 0.4s ease;
 }
 </style>

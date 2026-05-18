@@ -71,7 +71,7 @@
         <div class="table-section">
             <div class="card-header">
                 <h3>Lịch khám mới nhất</h3>
-                <router-link to="/admin/appointments" class="view-all">Xem tất cả</router-link>
+                <router-link to="#" class="view-all">Xem tất cả</router-link>
             </div>
             <div class="table-responsive">
                 <table class="admin-table">
@@ -108,7 +108,8 @@ const dashboardStore = useDashboardStore()
 
 const CHART_COLORS = [
     '#45C3D2', '#f59e0b', '#6366f1', '#10b981',
-    '#a855f7', '#ec4899', '#06b6d4', '#f43f5e'
+    '#a855f7', '#ec4899', '#06b6d4', '#f43f5e',
+    '#8b5cf6', '#ef4444'
 ];
 
 const currentWeekRange = ref('');
@@ -197,7 +198,8 @@ onMounted(async () => {
         }
 
         if (specialtyData && specialtyData.length > 0) {
-            specialtyStats.value = specialtyData;
+            const sortedData = [...specialtyData].sort((a, b) => b.value - a.value);
+            specialtyStats.value = sortedData.slice(0, 5);
         }
 
     } catch (error) {
